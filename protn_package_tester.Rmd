@@ -1,0 +1,18 @@
+# Tester ProTN package
+
+```{r load functions, warning=F, message=FALSE}
+setwd("/home/gabriele/Desktop/UNITN/proTN_package/")
+lapply(list.files("./R", pattern = ".R", full.names = T), function(x){if(!file.info(x)$isdir){source(x)}})
+
+# Package requided
+library(data.table)
+library(readxl)
+```
+
+
+## Test proteomics pipeline
+
+```{r read_proteomics}
+proteome_data <- read_proteomics(software = "MQ", folder = "./data/case_study_proteomics/case_study_1/", peptide_filename = "evidence")
+```
+

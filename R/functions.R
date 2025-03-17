@@ -15,6 +15,15 @@ require(doParallel)
 require(foreach)
 loadfonts()
 
+### Sahred variables to load ----
+colour_vec<-c("dodgerblue2", "#E31A1C", "green4", "#6A3D9A","#FF7F00",
+              "black", "gold1", "skyblue2", "#FB9A99", "palegreen2","#CAB2D6", "#FDBF6F",
+              "#9af7c9","#c0a0e6","#f5939a","#5fefee","#e8d388","#8abdff","#e3bf7a","#48c0f6","#ccb86f","#fafeaf",
+              "#04bfe4","#ea92a8","#25cfe9","#ffbb97","#62e8ff","#ffd29b","#8fcbff","#aec87f","#b2c6ff","#aedf9b",
+              "#ffb3c8","#81b97c","#ffcef0","#54bcae","#ffcab3","#7dd7ff","#ffe4ad","#81b0da","#ebffc5","#a7a8d5",
+              "#bdffd0","#d6d2ff","#9fb282","#a5d8ff","#c9a395","#9bfff7","#ffcbce","#70b6ca","#faffdd","#88b3bc",
+              "#d6ffdf","#a3e5ff","#b1ac8f","#ccffff","#b4bb9f","#7eb7a5","#c5dbc3","#a8b9ff","#74dfbc","#f2ace7")
+
 ### The function enrichment_test performs enrichment analysis starting from 3 vectors of gene names: input, annotation and background (the background is intended as the universe and, by default, is also used to filter gene names in the input and annotation) ----  
 
 
