@@ -110,3 +110,162 @@ plot_abundance_distribution <- function(proteome_data, type) {
   return(list("dt" = pg_long_df, "plot" = hs))
 }
 
+
+#' Function to perform MDS analysis
+#'
+#' @param proteome_data Object proTN
+#' @param type \strong{protein} or \strong{peptide}
+#' @return A list of data tables.
+#' @details \strong{ProTN}
+#' @examples 
+#' ## ## Example:
+#' ## example
+#' ## example2
+#' @import data.table
+#' @export
+mds_plot <- function(proteome_data, type) {
+  if(type == "protein"){
+    data_matrix <- copy(proteome_data$dat_gene)
+    data_matrix <- as.matrix(data_matrix[,-1])
+    c_anno <- copy(proteome_data$c_anno)
+  } else if(type == "peptide"){
+    data_matrix <- copy(proteome_data$dat_pep)
+    data_matrix <- as.matrix(data_matrix[,-1])
+    c_anno <- copy(proteome_data$c_anno)
+  } else{
+    stop("Invalid type parameter. Must be \"protein\" or \"peptide\"")
+  }
+  
+  sample_distances <- dist(t(data_matrix), method = "euclidean")
+  mds_cmdscale <- as.data.table(cmdscale(as.matrix(sample_distances)), keep.rownames = "sample")
+  setnames(mds_cmdscale, c("V1", "V2"), c("MDS_1", "MDS_2"))
+  mds_cmdscale <- merge(mds_cmdscale, c_anno, by = "sample", all.x = TRUE)
+  
+  cc <- unique(mds_cmdscale$color)
+  names(cc) <- unique(mds_cmdscale$condition)
+  
+  cmd <- ggplot(mds_cmdscale, aes(MDS_1, MDS_2, colour = condition)) +
+    geom_point(size = 2, alpha = .9) +
+    geom_text_repel(aes(label = sample), size = 5, fontface = "bold", show.legend = FALSE) +
+    scale_colour_manual(values = cc) +
+    theme_bw() +
+    theme(legend.position = "right", panel.grid.minor = element_blank())
+  
+  return(list("mds_dt" = mds_cmdscale, "plot" = cmd))
+}
+
+
+#' Function to perform PCA analysis
+#'
+#' @param proteome_data Object proTN
+#' @param type \strong{protein} or \strong{peptide}
+#' @return A list of data tables.
+#' @details \strong{ProTN}
+#' @examples 
+#' ## ## Example:
+#' ## example
+#' ## example2
+#' @import data.table
+#' @export
+pca_plot <- function(proteome_data, type) {
+  if(type == "protein"){
+    data_matrix <- copy(proteome_data$dat_gene)
+    data_matrix <- as.matrix(data_matrix[,-1])
+    c_anno <- copy(proteome_data$c_anno)
+  } else if(type == "peptide"){
+    data_matrix <- copy(proteome_data$dat_pep)
+    data_matrix <- as.matrix(data_matrix[,-1])
+    c_anno <- copy(proteome_data$c_anno)
+  } else{
+    stop("Invalid type parameter. Must be \"protein\" or \"peptide\"")
+  }
+  
+  apca_prot <- prcomp(t(data_matrix), scale. = TRUE, center = TRUE)
+  pc <- as.data.table(apca_prot$x[, 1:2], keep.rownames = "sample")
+  pc <- merge(pc, c_anno, by = "sample", all.x = TRUE)
+  
+  ve <- (apca_prot$sdev^2) / sum(apca_prot$sdev^2)
+  labs <- paste0(names(pc)[2:3], " (", round(ve[1:2] * 100, 2), "%)")
+  
+  cc <- unique(pc$color)
+  names(cc) <- unique(pc$condition)
+  
+  cmd <- ggplot(pc, aes(PC1, PC2, colour = condition)) +
+    geom_point(size = 1.5, alpha = .9) +
+    geom_text_repel(aes(label = sample), size = 3, fontface = "bold", show.legend = FALSE) +
+    scale_colour_manual(values = cc) +
+    theme_bw() +
+    theme(legend.position = "right", panel.grid.minor = element_blank()) +
+    xlab(labs[1]) +
+    ylab(labs[2])
+  
+  return(list("pca_dt" = pc, "plot" = cmd))
+}
+
+
+#' Function to find and plot selected protein abundances
+#'
+#' @param proteome_data Object proTN
+#' @param list_protein list protein
+#' @return A list of data tables.
+#' @details \strong{ProTN}
+#' @examples 
+#' ## ## Example:
+#' ## example
+#' ## example2
+#' @import data.table
+#' @export
+plot_selected_proteins <- function(proteome_data, list_protein) {
+  dat_gene <- copy(proteome_data$dat_gene)
+  prot_find <- unique(c(
+    intersect(list_protein, dat_gene$GeneName),
+    intersect(str_to_title(list_protein), dat_gene$GeneName),
+    intersect(str_to_upper(list_protein), dat_gene$GeneName),
+    intersect(str_to_lower(list_protein), dat_gene$GeneName)
+  ))
+  
+  if (length(prot_find) > 0) {
+    message("Selected proteins with available abundances: \n")
+    message(paste(prot_find, collapse = ", "))
+
+    prot_intensity_long <- melt(dat_gene[GeneName %in% prot_find,], id.vars = "GeneName", variable.name = "sample", value.name = "Intensity")
+    prot_intensity_long <- merge.data.table(prot_intensity_long, 
+                                            proteome_data$c_anno,
+                                            by = "sample")
+    
+    prot_avg_se_long <- prot_intensity_long[, .(avg = mean(Intensity),
+                                                se = sd(Intensity)/sqrt(.N)), by = c("GeneName", "condition")]
+    
+    cc <- unique(prot_intensity_long$color)
+    names(cc) <- unique(prot_intensity_long$condition)
+    
+    bs = 23
+    g<-ggplot(prot_avg_se_long,aes(condition,avg,fill=condition,colour=condition))+
+      geom_crossbar(aes(ymin=avg,ymax=avg),position = "dodge",width=.8,alpha=.9,fatten=1.5)+
+      geom_errorbar(aes(ymin=(avg-se), ymax=(avg+se)), width=.4,position=position_dodge(),show.legend=F,alpha=.8)+
+      geom_quasirandom(data=prot_intensity_long, aes(condition,Intensity), alpha=.7,width=.1,shape=16,size=0.2*bs)+
+      scale_fill_manual(name="condition",values=cc[sort(unique(prot_intensity_long$condition))]) +
+      scale_colour_manual(name="condition",values=cc[sort(unique(prot_intensity_long$condition))])+
+      theme_bw(base_size = bs) +
+      theme(axis.title.x=element_blank(),
+            axis.text.x = element_text(angle = 30, hjust = 1, colour=cc[sort(unique(prot_intensity_long$condition))]),
+            panel.grid.major.x=element_blank(),
+            panel.grid.minor.y=element_blank(),
+            legend.text = element_text(size = 0.7*bs),
+            legend.key.size = unit((0.015*bs),"in"),
+            legend.position="none",
+            legend.title=element_blank(),
+            legend.background = element_rect(fill = NA),
+            strip.text=element_text(colour="white",face="bold"),
+            panel.border=element_rect(colour=c("grey40"),size=0.03*bs),
+            strip.background=element_rect(fill="grey40",colour="grey40",size=0.03*bs),
+            plot.title = element_text(hjust = 0.5))+
+      facet_wrap(~GeneName, scales = "free",ncol = if(length(prot_find)>4){round(length(prot_find)/1.9)}else{4})+
+      labs(y="Abundance")
+
+    return(list("dt" = prot_intensity_long, "plot" = g))
+  } else {
+    warning("Selected proteins not found in the normalized matrix. Check the spell of the proteins.")
+    return(NULL)
+  }
+}

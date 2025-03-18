@@ -128,8 +128,8 @@ read_MQ_files <- function(anno_filename, pep_filename,
   input_files[["PEP"]] <- input_files[["PEP"]][!is.na(`Protein names`)]
   message(paste0("\tPeptide removed due to missing Protein Names: ",to_remove))
   
-  to_remove <- nrow(input_files[["PEP"]][is.na(`Gene names`) | stri_isempty(`Gene names`)])
-  input_files[["PEP"]] <- input_files[["PEP"]][!is.na(`Gene names`)]
+  to_remove <- nrow(input_files[["PEP"]][is.na(`Gene names`) | stri_isempty(`Gene names`) | `Gene names` == ""])
+  input_files[["PEP"]] <- input_files[["PEP"]][!(is.na(`Gene names`) | stri_isempty(`Gene names`) | `Gene names` == "")]
   message(paste0("\tPeptide removed due to missing Gene Names: ",to_remove))
   
   to_remove <- nrow(input_files[["PEP"]][!(`Raw file` %in% input_files[["annotation"]]$Sample)])

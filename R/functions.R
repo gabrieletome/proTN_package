@@ -1260,3 +1260,92 @@ resize_plot <- function(resizePlot, resizeHeight) {
   res <- rmarkdown::render("enrich_plot.Rmd", quiet = T)
   htmltools::includeHTML(res)
 }
+
+### Update limma function with data.table ----
+limmafnc_dt <- function(type = "PROT", c_anno, dat_gene, psm_count_table, formule_contrast, expr_avgse_df, signal_thr, fc_thr, pval_thr, pval_fdr) {
+  # make design table
+  design <- model.matrix(~0 + c_anno$condition)
+  colnames(design) <- levels(as.factor(c_anno$condition))
+  rownames(design) <- c_anno$sample
+  
+  gene_matrix <- as.data.frame(dat_gene[, rownames(design), with = FALSE], row.names = as.character(unlist(dat_gene[,1])))
+  gene_matrix <- as.matrix(gene_matrix)
+  
+  # DEqMS part analysis
+  setnames(psm_count_table, c("gene", "count"))
+  setkey(psm_count_table, gene)
+  
+  filt_contro_list <- Filter(function(i) {
+    all(str_extract_all(formule_contrast[i], "\\w+")[[1]] %in% colnames(design))
+  }, seq_along(formule_contrast))
+  
+  formule_contrast <- formule_contrast[unlist(filt_contro_list)]
+  if (length(formule_contrast) == 0) stop("Error: No valid contrast design given.")
+  
+  contrast <- makeContrasts(contrasts = formule_contrast, levels = design)
+  colnames(contrast) <- names(formule_contrast)
+  
+  # limma part analysis
+  fit1 <- lmFit(gene_matrix, design)
+  fit2 <- eBayes(contrasts.fit(fit1, contrasts = contrast))
+  
+  if (type == "PROT") {
+    fit2$count <- psm_count_table[match(gene, rownames(fit2$coefficients)), count]
+    fit3 <- spectraCounteBayes(fit2)
+  } else {
+    fit3 <- fit2
+  }
+  
+  # extract results
+  degs_w_df <- data.table()
+  degs_l_df <- data.table()
+  
+  signal_col <- "log2_expr"
+  fc_col <- "log2_FC"
+  pval_col <- pval_fdr
+  
+  for (comp in (colnames(fit3$coefficients))) {
+    if(type == "PROT"){
+      degs_u<-tryCatch({
+        DEqMS::outputResult(fit3,coef_col = comp) %>% 
+          dplyr::rename("log2_FC"="logFC",
+                        "log2_expr"="AveExpr",
+                        "p_val"="sca.P.Value",
+                        "p_adj"="sca.adj.pval",
+                        "id"="gene") %>% dplyr::arrange(id)
+      }, 
+      error=function(cond){
+        colnames(fit3$sca.t) <- colnames(fit3$coefficients)
+        colnames(fit3$sca.p) <- colnames(fit3$coefficients)
+        DEqMS::outputResult(fit3,coef_col = comp) %>% 
+          dplyr::rename("log2_FC"="logFC",
+                        "log2_expr"="AveExpr",
+                        "p_val"="sca.P.Value",
+                        "p_adj"="sca.adj.pval",
+                        "id"="gene") %>% dplyr::arrange(id)
+      })
+    }else if(type == "PEP"){
+      degs_u<-topTable(fit3, coef = comp, number = Inf) %>% 
+        dplyr::rename("log2_FC"="logFC",
+                      "log2_expr"="AveExpr",
+                      "p_val"="P.Value",
+                      "p_adj"="adj.P.Val") %>% dplyr::mutate("id"=rownames(topTable(fit3, coef = comp, number = Inf))) %>% dplyr::select(-c(t,B))
+    }
+    
+    degs_u <- as.data.table(degs_u)
+    degs_u[, `:=`(log2_expr = 2^log2_FC, FC = 2^log2_FC, comp = comp, class = "=")]
+    degs_u[log2_FC >= fc_thr & get(pval_col) <= pval_thr, class := "+"]
+    degs_u[log2_FC <= -fc_thr & get(pval_col) <= pval_thr, class := "-"]
+    
+    degs_l_df <- rbindlist(list(degs_l_df, degs_u[, .(id, comp, class, log2_FC, FC, p_val, p_adj)]))
+    degs_add <- degs_u[, .(id, class, log2_FC, FC, p_val, p_adj)]
+    setnames(degs_add, names(degs_add)[-1], paste(comp, names(degs_add)[-1], sep = "_"))
+    if(nrow(degs_w_df)==0){
+      degs_w_df <- degs_add
+    } else{
+      degs_w_df <- merge(degs_w_df, degs_add, by = "id", all = TRUE)
+    }
+  }
+  
+  return(list(degs_l_df = degs_l_df, degs_w_df = degs_w_df))
+}

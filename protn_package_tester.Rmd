@@ -12,6 +12,9 @@ library(ggplot2)
 library(DEqMS)
 library(proBatch)
 library(writexl)
+library(ggrepel)
+library(ggbeeswarm)
+library(limma)
 ```
 
 
@@ -20,6 +23,8 @@ library(writexl)
 ```{r read_proteomics}
 proteome_data <- read_proteomics(software = "MQ", folder = "./data/case_study_proteomics/case_study_1/", peptide_filename = "evidence")
 ```
+
+
 ```{r preprocess_figure}
 generate_abundance <- generate_abundance_plot(proteome_data = proteome_data)
 generate_abundance
@@ -59,12 +64,39 @@ pep_plot <- plot_abundance_distribution(proteome_data = normalized_data, type = 
 pep_plot
 ```
 
-# TODO: MDS AND PCA
+# MDS AND PCA
+```{r mds_normalized}
+prot_mds <- mds_plot(proteome_data = normalized_data, type = "protein")
+prot_mds
+pep_mds <- mds_plot(proteome_data = normalized_data, type = "peptide")
+pep_mds
+```
+
+```{r pca_normalized}
+prot_mds <- pca_plot(proteome_data = normalized_data, type = "protein")
+prot_mds
+pep_mds <- pca_plot(proteome_data = normalized_data, type = "peptide")
+pep_mds
+```
+
+# List protein boxplot
+```{r boxplot_protein}
+prot_boxplot <- plot_selected_proteins(proteome_data = normalized_data, list_protein = c("Aaas","Aacs"))
+prot_boxplot
+```
 
 
-# chunk check_number_sample
-```{r check_number_sample}
+# Differential analysis
+```{r differential_analysis}
+formule_contrast <- list("A2016vsWT"="A2016T-wt")
 
+differential_results <- differential_analysis(proteome_data = normalized_data, formule_contrast = formule_contrast, 
+                                              fc_thr=0.75, pval_fdr = "p_val", pval_thr=0.05, signal_thr=0)
+
+differential_results
+
+# TODO: prepare exporter differential analysis
+# chunk: diff_analysis
 ```
 
 
