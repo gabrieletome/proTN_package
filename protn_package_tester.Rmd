@@ -7,6 +7,11 @@ lapply(list.files("./R", pattern = ".R", full.names = T), function(x){if(!file.i
 # Package requided
 library(data.table)
 library(readxl)
+library(stringi)
+library(ggplot2)
+library(DEqMS)
+library(proBatch)
+library(writexl)
 ```
 
 
@@ -15,4 +20,53 @@ library(readxl)
 ```{r read_proteomics}
 proteome_data <- read_proteomics(software = "MQ", folder = "./data/case_study_proteomics/case_study_1/", peptide_filename = "evidence")
 ```
+```{r preprocess_figure}
+generate_abundance <- generate_abundance_plot(proteome_data = proteome_data)
+generate_abundance
+
+generate_peptide_distribution <- generate_peptide_distribution_plot(proteome_data = proteome_data)
+generate_peptide_distribution
+```
+# Test impute function
+```{r impute_function}
+imputed_data <- impute_intensity(proteome_data = proteome_data)
+imputed_data
+```
+
+# Test normalization
+```{r normalization_function}
+normalized_data <- normalization_ProTN(proteome_data = imputed_data)
+normalized_data
+```
+
+# Test Batch Correction -- NOT TESTED YET
+```{r batch_function, eval=FALSE}
+# TODO: NEED TO TEST
+batch_coor_data <- normalization_ProTN(proteome_data = normalized_data, batch_col = "batch")
+batch_coor_data
+```
+
+# Test Exporter
+```{r batch_function, eval=FALSE}
+save_abundance_tables(proteome_data = normalized_data)
+```
+
+# Test figure distribution normalized
+```{r normalized_plot}
+prot_plot <- plot_abundance_distribution(proteome_data = normalized_data, type = "protein")
+prot_plot
+pep_plot <- plot_abundance_distribution(proteome_data = normalized_data, type = "peptide")
+pep_plot
+```
+
+# TODO: MDS AND PCA
+
+
+# chunk check_number_sample
+```{r check_number_sample}
+
+```
+
+
+
 
