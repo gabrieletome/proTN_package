@@ -86,3 +86,69 @@ save_abundance_tables <- function(proteome_data, dirOutput="results_ProTN", subf
   
   message("Abundance tables saved successfully.")
 }
+
+#'  Function to save differential results tables
+#'
+#' @param proteome_data Object proTN
+#' @details \strong{ProTN}
+#' @examples 
+#' ## ## Example:
+#' ## example
+#' ## example2
+#' @import data.table
+#' @export
+save_differential_analysis_table <- function(proteome_data, differential_results, dirOutput="results_ProTN", subfolder="table"){
+  psm_peptide_table <- copy(proteome_data$psm_peptide_table)
+  toPrint<-copy(differential_results$protein_results_wide)
+  colnames(toPrint)[1]<-"GeneSymbol"
+  toPrint_pep<-copy(differential_results$peptide_results_wide)
+  
+  readme_sheet <- data.frame("INFO"=c(NA,
+                                      "Excel file containing the results of differential analysis, according to the contrasts defined in the Design file. The file is organized in the following sheets:",
+                                      "protein_DE: protein differential expression results protein abundances per sample.",
+                                      "peptide_DE: peptide differential expression results. ",
+                                      NA,
+                                      "Annotation columns:",
+                                      "1. *Accession*: protein UniprotID,",
+                                      "2. *Description*: protein description,",
+                                      "3. *GeneName*: Gene Symbol,",
+                                      "4. *Peptide_Sequence*: peptide sequence,",
+                                      "5. *Peptide_Modifications*: peptide modifications,",
+                                      "6. *Peptide_Position*: start and end position of the peptide within the protein sequence, defined UniprotID,",
+                                      "7. *Peptide_Tryptic*: peptide tryptic digestion status (fully tryptic, N-semi tryptic, C-semi tryptic, non tryptic)",
+                                      NA,
+                                      "And for each comparison:",
+                                      "8. *class*: defined according to the fold change, p-value and abundance thresholds specified in the input: \"+\" up-regulated protein/peptide, \"-\" down-regulated protein/peptide, \"=\" invariant protein/peptide",
+                                      "9. *log2_FC*: protein/peptide log2 transformed fold change",
+                                      "10. *FC*: protein/peptide fold change",
+                                      "11. *p_val*: protein/peptide contrast p-value",
+                                      "12. *p_adj*: protein/peptide adjusted p-value (FDR after BH correction)"
+  ))
+  
+  #Export table with SE e MEAN
+  prot_id <- unique(psm_peptide_table[,c("Accession","GeneName")]) %>% group_by(GeneName) %>% summarize_all(toString) %>% left_join(unique(psm_peptide_table[,c("Accession","Description","GeneName")]), 
+                                                                                                                                    by = "GeneName", 
+                                                                                                                                    multiple = "first",
+                                                                                                                                    suffix = c(".id", ".old"))
+  protein_DE <- unique(left_join(prot_id[,c("Accession.id","Description","GeneName")], toPrint, by=c("GeneName" = "GeneSymbol")))
+  colnames(protein_DE)[1:3] <- c("Accession","Description","GeneName")
+  peptide_DE <- left_join(psm_peptide_table, toPrint_pep, by=c("ID_peptide" = "id"))[,-c(1)]
+  colnames(peptide_DE)[1:7] <- c("Accession","Description","GeneName","Peptide_Sequence","Peptide_Modifications","ID_Peptide","Peptide_Tryptic")
+  df_to_save<-list("README"=readme_sheet,
+                   "protein_DE"=protein_DE,
+                   "peptide_DE"=peptide_DE)
+  if(!dir.exists(dirOutput)){
+    message(paste0("Creating dir: ",dirOutput))
+    dir.create(dirOutput)
+  }
+  if(!is_null(subfolder)){
+    if(!dir.exists(paste0(dirOutput, "/", subfolder))){
+      message(paste0("Creating dir: ",dirOutput, "/", subfolder))
+      dir.create(paste0(dirOutput, "/", subfolder))
+    }
+    writexl::write_xlsx(df_to_save, paste0(dirOutput,"/", subfolder, "/differential_expression.xlsx"))
+  } else{
+    writexl::write_xlsx(df_to_save, paste0(dirOutput, "/differential_expression.xlsx"))
+  }
+  
+}

@@ -11,9 +11,8 @@
 #' @export
 impute_intensity <- function(proteome_data) {
   message("Imputation of intensity matrix in progress...")
-  
   # Load PhosR functions
-  suppressWarnings(lapply(list.files("./R/PhosR/", pattern = ".R", full.names = T), function(x){if(!file.info(x)$isdir){source(x)}}))
+  suppressWarnings(lapply(list.files("R/PhosR", pattern = ".R", full.names = T), function(x){if(!file.info(x)$isdir){source(x)}}))
   
   
   proteome_data$psm_log_prot_df <- impute_matrix(mat = proteome_data$psm_log_prot_df, c_anno = proteome_data$c_anno)

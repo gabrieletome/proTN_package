@@ -96,7 +96,7 @@ enrichment_enrichr <- function(input_vec, # vector with gene names
     unique() # clean input vector
   input_vec <- input_vec[!duplicated(stringr::str_to_upper(input_vec))] # remove case duplicates
   
-  dbs_default <- as.vector(read_tsv("dbs_enrichR.txt", col_names = FALSE)[,1]) %>% unlist()
+  dbs_default <- as.vector(read_tsv("R/enrichR/dbs_enrichR.txt", col_names = FALSE)[,1]) %>% unlist()
   dbs <- listEnrichrDbs()
   if(!is.null(dbs_vec)){dbs_used<-intersect(dbs_vec,dbs$libraryName)
   } else {dbs_used<-intersect(dbs_default,dbs$libraryName)}
@@ -962,7 +962,7 @@ enrichRfnc<-function(in_df, pval_fdr_enrich, pval_enrich_thr, overlap_size_enric
   
   if(.Platform$OS.type == "unix") {
     enrfcn <- function(a) {
-      source("functions_2021.R")
+      source("R/functions.R")
       frg<-DEGs_lists[[a]]
       if(length(frg)>0){
         enrichment_enrichr(frg, input_name=a, dbs_vec = dbs)
@@ -974,7 +974,7 @@ enrichRfnc<-function(in_df, pval_fdr_enrich, pval_enrich_thr, overlap_size_enric
     registerDoParallel(cl = cluster_ext)
     
     enr_df<-foreach(a = names(DEGs_lists),.combine='rbind',.packages = c("dplyr","enrichR","tidyr","stringr")) %dopar% {
-      source("functions_2021.R")
+      source("R/functions.R")
       frg<-DEGs_lists[[a]]
       if(length(frg)>0){
         enrichment_enrichr(frg, input_name=a, dbs_vec = dbs)
@@ -1005,7 +1005,11 @@ enrichRfnc<-function(in_df, pval_fdr_enrich, pval_enrich_thr, overlap_size_enric
               anno_size = as.numeric(anno_size), 
               overlap_input_ratio = as.numeric(overlap_input_ratio),
               overlap_anno_ratio = as.numeric(overlap_anno_ratio))
-  enr_df$"Significant"<-ifelse(if(pval_fdr_enrich){(enr_df$fdr<pval_enrich_thr) & (enr_df$overlap_size>=overlap_size_enrich_thr)}else{(enr_df$p_value<pval_enrich_thr) & (enr_df$overlap_size>=overlap_size_enrich_thr)},"TRUE","FALSE") %>% factor(levels=c("TRUE","FALSE"))
+  enr_df$"Significant"<-ifelse(if(pval_fdr_enrich=="p_adj"){
+    (enr_df$fdr<pval_enrich_thr) & (enr_df$overlap_size>=overlap_size_enrich_thr)
+    }else if(pval_fdr_enrich=="p_val"){
+      (enr_df$p_value<pval_enrich_thr) & (enr_df$overlap_size>=overlap_size_enrich_thr)
+      },"TRUE","FALSE") %>% factor(levels=c("TRUE","FALSE"))
   enr_df$log2_OR<-log2(enr_df$odds_ratio)
   return(enr_df)
 }

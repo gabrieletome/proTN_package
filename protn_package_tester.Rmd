@@ -1,6 +1,6 @@
 # Tester ProTN package
 
-```{r load functions, warning=F, message=FALSE}
+```{r load functions, warning=F, message=FALSE, results='hide'}
 setwd("/home/gabriele/Desktop/UNITN/proTN_package/")
 lapply(list.files("./R", pattern = ".R", full.names = T), function(x){if(!file.info(x)$isdir){source(x)}})
 
@@ -15,15 +15,23 @@ library(writexl)
 library(ggrepel)
 library(ggbeeswarm)
 library(limma)
+library(plotly)
+library(enrichR)
+library(qpdf)
+library(STRINGdb)
+library(PhosR)
 ```
 
 
 ## Test proteomics pipeline
 
-```{r read_proteomics}
+```{r read_proteomics_MQ}
 proteome_data <- read_proteomics(software = "MQ", folder = "./data/case_study_proteomics/case_study_1/", peptide_filename = "evidence")
 ```
 
+```{r read_proteomics_PD, eval=FALSE}
+proteome_data <- read_proteomics(software = "PD", folder = "data/PD", annotation_filename = "INPUT", proteinGroup_filename = "PROT.xlsx")
+```
 
 ```{r preprocess_figure}
 generate_abundance <- generate_abundance_plot(proteome_data = proteome_data)
@@ -52,7 +60,7 @@ batch_coor_data
 ```
 
 # Test Exporter
-```{r batch_function, eval=FALSE}
+```{r exporter, eval=FALSE}
 save_abundance_tables(proteome_data = normalized_data)
 ```
 
@@ -88,17 +96,78 @@ prot_boxplot
 
 # Differential analysis
 ```{r differential_analysis}
-formule_contrast <- list("A2016vsWT"="A2016T-wt")
+formule_contrast <- list("A2016vsWT"="A2016T-WT")
 
 differential_results <- differential_analysis(proteome_data = normalized_data, formule_contrast = formule_contrast, 
                                               fc_thr=0.75, pval_fdr = "p_val", pval_thr=0.05, signal_thr=0)
 
 differential_results
 
-# TODO: prepare exporter differential analysis
+save_differential_analysis_table(proteome_data = normalized_data, differential_results = differential_results, 
+                                 dirOutput="results_ProTN", subfolder="table")
+
+ploft_diff_number <- generate_differential_barplots(differential_results, data_type="protein")
+ploft_diff_number
+
+ploft_diff_number <- generate_differential_barplots(differential_results, data_type="peptide")
+ploft_diff_number
 # chunk: diff_analysis
 ```
 
+# Test vulcano plot
+```{r vulcano_plot}
+generate_volcano_plots_protein<-generate_volcano_plots(differential_results, data_type="protein", comparison="A2016vsWT")
+generate_volcano_plots_protein
+
+generate_volcano_plots_peptide<-generate_volcano_plots(differential_results, data_type="peptide", comparison="A2016vsWT")
+generate_volcano_plots_peptide
+```
 
 
+# MDS differential analysis
+```{r mds_differential}
+mds_diff <- mds_differential_analysis_plot(differential_analysis = differential_results, proteome_data = normalized_data, type = "protein")
+mds_diff
+
+mds_diff_pep <- mds_differential_analysis_plot(differential_analysis = differential_results, proteome_data = normalized_data, type = "peptide")
+mds_diff_pep
+```
+
+# pca differential analysis
+```{r pca_differential}
+pca_diff <- pca_differential_analysis_plot(differential_analysis = differential_results, proteome_data = normalized_data, type = "protein")
+pca_diff
+
+pca_diff_pep <- pca_differential_analysis_plot(differential_analysis = differential_results, proteome_data = normalized_data, type = "peptide")
+pca_diff_pep
+```
+
+# TEST enrichement
+```{r enrichment}
+enrichemnt_results <- perform_enrichment_analysis(differential_results = differential_results, enrichR_custom_DB = T,
+                                                  enrich_filter_DBs=c("Human_Gene_Atlas","BioPlanet_2019","KEGG_2021_Human",
+                                                                      "Reactome_2022","ChEA_2022"))
+
+plots_all <- enrichment_figure(enr_df = enrichemnt_results, category = c("all"), save=T)
+plots_all
+
+plots_down <- enrichment_figure(enr_df = enrichemnt_results, category = c("down","up"), save=F)
+plots_down
+
+plots_terms <- enrichment_figure(enr_df = enrichemnt_results, category = c("down","up"), save=F, enrich_filter_term = c("cell","pathways"))
+plots_terms
+```
+
+# TEST UNIVERSE ENRICHMENT
+```{r universe_enrichment}
+# TODO: add universe enrichment
+```
+
+# TEST network string
+```{r string network}
+
+strindb_res <- STRINGdb_network(differential_results = differential_results, species="Homo sapiens")
+strindb_res  
+  
+```
 
