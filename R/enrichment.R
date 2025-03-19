@@ -29,7 +29,7 @@ perform_enrichment_analysis <- function(differential_results, dirOutput="results
     enr_df <- as.data.table(enr_df)
     # Save in RData for possible further analysis
     enrich_df <- enr_df[overlap_size >= overlap_size_enrich_thr, .SD, .SDcols = 1:13]
-    save(enrich_df, file = paste0(dirOutput, subfold_Dat, "enrichment.RData"))
+    save(enrich_df, file = paste0(dirOutput, "/", subfold_Dat, "/", "enrichment.RData"))
     
     # Prepare the README
     readme_sheet <- data.table(INFO = c(
