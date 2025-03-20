@@ -1,3 +1,15 @@
+---
+author: "Gabriele Tomè"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output:
+  rmdformats::readthedown:
+    df_print: paged
+    self_contained: true
+    thumbnails: true
+    lightbox: true
+    gallery: true
+---
+
 # Tester ProTN package
 
 ```{r load functions, warning=F, message=FALSE, results='hide'}
@@ -23,7 +35,7 @@ library(PhosR)
 ```
 
 
-## Test proteomics pipeline
+# Test proteomics pipeline
 
 ```{r read_proteomics_MQ}
 proteome_data <- read_proteomics(software = "MQ", folder = "./data/case_study_proteomics/case_study_1/", peptide_filename = "evidence")
@@ -33,6 +45,7 @@ proteome_data <- read_proteomics(software = "MQ", folder = "./data/case_study_pr
 proteome_data <- read_proteomics(software = "PD", folder = "data/PD", annotation_filename = "INPUT", proteinGroup_filename = "PROT.xlsx")
 ```
 
+
 ```{r preprocess_figure}
 generate_abundance <- generate_abundance_plot(proteome_data = proteome_data)
 generate_abundance
@@ -40,19 +53,23 @@ generate_abundance
 generate_peptide_distribution <- generate_peptide_distribution_plot(proteome_data = proteome_data)
 generate_peptide_distribution
 ```
+
 # Test impute function
+
 ```{r impute_function}
 imputed_data <- impute_intensity(proteome_data = proteome_data)
 imputed_data
 ```
 
 # Test normalization
+
 ```{r normalization_function}
 normalized_data <- normalization_ProTN(proteome_data = imputed_data)
 normalized_data
 ```
 
 # Test Batch Correction -- NOT TESTED YET
+
 ```{r batch_function, eval=FALSE}
 # TODO: NEED TO TEST
 batch_coor_data <- normalization_ProTN(proteome_data = normalized_data, batch_col = "batch")
@@ -60,11 +77,13 @@ batch_coor_data
 ```
 
 # Test Exporter
+
 ```{r exporter, eval=FALSE}
 save_abundance_tables(proteome_data = normalized_data)
 ```
 
 # Test figure distribution normalized
+
 ```{r normalized_plot}
 prot_plot <- plot_abundance_distribution(proteome_data = normalized_data, type = "protein")
 prot_plot
@@ -73,6 +92,7 @@ pep_plot
 ```
 
 # MDS AND PCA
+
 ```{r mds_normalized}
 prot_mds <- mds_plot(proteome_data = normalized_data, type = "protein")
 prot_mds
@@ -88,6 +108,7 @@ pep_mds
 ```
 
 # List protein boxplot
+
 ```{r boxplot_protein}
 prot_boxplot <- plot_selected_proteins(proteome_data = normalized_data, list_protein = c("Aaas","Aacs"))
 prot_boxplot
@@ -95,8 +116,9 @@ prot_boxplot
 
 
 # Differential analysis
+
 ```{r differential_analysis}
-formule_contrast <- list("A2016vsWT"="A2016T-WT")
+formule_contrast <- list("A2016vsWT"="A2016T-wt")
 
 differential_results <- differential_analysis(proteome_data = normalized_data, formule_contrast = formule_contrast, 
                                               fc_thr=0.75, pval_fdr = "p_val", pval_thr=0.05, signal_thr=0)
@@ -115,6 +137,7 @@ ploft_diff_number
 ```
 
 # Test vulcano plot
+
 ```{r vulcano_plot}
 generate_volcano_plots_protein<-generate_volcano_plots(differential_results, data_type="protein", comparison="A2016vsWT")
 generate_volcano_plots_protein
@@ -125,6 +148,7 @@ generate_volcano_plots_peptide
 
 
 # MDS differential analysis
+
 ```{r mds_differential}
 mds_diff <- mds_differential_analysis_plot(differential_analysis = differential_results, proteome_data = normalized_data, type = "protein")
 mds_diff
@@ -134,6 +158,7 @@ mds_diff_pep
 ```
 
 # pca differential analysis
+
 ```{r pca_differential}
 pca_diff <- pca_differential_analysis_plot(differential_analysis = differential_results, proteome_data = normalized_data, type = "protein")
 pca_diff
@@ -143,6 +168,7 @@ pca_diff_pep
 ```
 
 # TEST enrichement
+
 ```{r enrichment}
 enrichemnt_results <- perform_enrichment_analysis(differential_results = differential_results, enrichR_custom_DB = T,
                                                   enrich_filter_DBs=c("Human_Gene_Atlas","BioPlanet_2019","KEGG_2021_Human",
@@ -159,11 +185,13 @@ plots_terms
 ```
 
 # TEST UNIVERSE ENRICHMENT
+
 ```{r universe_enrichment}
 # TODO: add universe enrichment
 ```
 
 # TEST network string
+
 ```{r string network}
 
 strindb_res <- STRINGdb_network(differential_results = differential_results, species="Homo sapiens")
