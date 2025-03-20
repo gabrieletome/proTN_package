@@ -1,4 +1,4 @@
-setwd(paste0(getwd(),"/CORAL"))
+# setwd(paste0(getwd(),"/R/CORAL"))
 #---------------------- LOAD LIBRARIES ----------------------#
 
 # load basic libraries
@@ -23,23 +23,23 @@ library(jsonlite)
 
 #---------------------- SOURCE R FILES ----------------------#
 
-source("R/colorby.R")
-source("R/readinput.R")
-source("R/writekinasetree.R")
-source("R/legendfunctions.R")
-source("R/map2color.R")
-source("R/convertID.R")
-source("R/makejson.R")
-source("R/colors.R")
-source("R/radiobuttonswithimages.R")
+source("R/CORAL/R/colorby.R")
+source("R/CORAL/R/readinput.R")
+source("R/CORAL/R/writekinasetree.R")
+source("R/CORAL/R/legendfunctions.R")
+source("R/CORAL/R/map2color.R")
+source("R/CORAL/R/convertID.R")
+source("R/CORAL/R/makejson.R")
+source("R/CORAL/R/colors.R")
+source("R/CORAL/R/radiobuttonswithimages.R")
 
 #---------------------- READ IN AND ORGANIZE DATA ----------------------#
 
 # read RDS
-orig_svginfo = readRDS("Data/kintree.RDS")
+orig_svginfo = readRDS("R/CORAL/Data/kintree.RDS")
 
 # if you need to up date the data frame read in the new info here
-orig_svginfo$dataframe = data.frame(read_tsv("Data/coral_dataframe.tsv"))
+orig_svginfo$dataframe = data.frame(read_tsv("R/CORAL/Data/coral_dataframe.tsv"))
 
 # remove NAs from subfamilies
 NAs = which(is.na(orig_svginfo$dataframe$kinase.subfamily))
@@ -81,8 +81,8 @@ svginfo$dataframe$nodeorder = 1:nrow(svginfo$dataframe)
 svginfo$dataframe$branchorder = 1:nrow(svginfo$dataframe)
 
 # get example RNA data
-rna_data     = paste(readLines("Data/RNAdata.txt"),collapse="\n")
-rna_abs_data = paste(readLines("Data/RNAdata_pluripotent.txt"),collapse="\n")
+rna_data     = paste(readLines("R/CORAL/Data/RNAdata.txt"),collapse="\n")
+rna_abs_data = paste(readLines("R/CORAL/Data/RNAdata_pluripotent.txt"),collapse="\n")
 
 #---------------------- DEFAULT COLORS ----------------------#
 
@@ -134,15 +134,15 @@ if (! dir.exists('www/images')) {
  dir.create('www/images', showWarnings = F) 
 }
 
-drawmypalettes("Erika",Erika,"www/images",boxes =5)
-drawmypalettes("Accent",Accent,"www/images",boxes =5)
-drawmypalettes("Dark2",Dark2,"www/images",boxes =5)
-drawmypalettes("Paired",Paired,"www/images",boxes =5)
-drawmypalettes("Pastel1",Pastel1,"www/images",boxes =5)
-drawmypalettes("Pastel2",Pastel2,"www/images",boxes =5)
-drawmypalettes("Set1",Set1,"www/images",boxes =5)
-drawmypalettes("Set2",Set2,"www/images",boxes =5)
-drawmypalettes("Set3",Set3,"www/images",boxes =5)
+# drawmypalettes("Erika",Erika,"www/images",boxes =5)
+# drawmypalettes("Accent",Accent,"www/images",boxes =5)
+# drawmypalettes("Dark2",Dark2,"www/images",boxes =5)
+# drawmypalettes("Paired",Paired,"www/images",boxes =5)
+# drawmypalettes("Pastel1",Pastel1,"www/images",boxes =5)
+# drawmypalettes("Pastel2",Pastel2,"www/images",boxes =5)
+# drawmypalettes("Set1",Set1,"www/images",boxes =5)
+# drawmypalettes("Set2",Set2,"www/images",boxes =5)
+# drawmypalettes("Set3",Set3,"www/images",boxes =5)
 
 ### Sequential Palettes ###
 
@@ -166,12 +166,12 @@ Purples = brewer.pal(3,"Purples")
 seqpalettes = list(Greys,Reds,Oranges,Greens,Blues,Purples)
 names(seqpalettes) = c("Greys","Reds","Oranges","Greens","Blues","Purples")
 
-drawmypalettes("Greys",Greys,"www/images")
-drawmypalettes("Reds",Reds,"www/images")
-drawmypalettes("Oranges",Oranges,"www/images")
-drawmypalettes("Greens",Greens,"www/images")
-drawmypalettes("Blues",Blues,"www/images")
-drawmypalettes("Purples",Purples,"www/images")
+# drawmypalettes("Greys",Greys,"www/images")
+# drawmypalettes("Reds",Reds,"www/images")
+# drawmypalettes("Oranges",Oranges,"www/images")
+# drawmypalettes("Greens",Greens,"www/images")
+# drawmypalettes("Blues",Blues,"www/images")
+# drawmypalettes("Purples",Purples,"www/images")
 
 ### Divergent Palettes ###
 
@@ -193,13 +193,12 @@ Red_Grey_Gre = c("#CA0020","#e5e5e5", "#404040")
 divpalettes = list(Blue_Grey_Coral,Bro_Grey_Tur,Pink_Grey_Gre,Pur_Grey_Gre,Pur_Grey_Or,Red_Grey_Gre)
 names(divpalettes) = c("Blue_Grey_Coral","Bro_Grey_Tur","Pink_Grey_Gre","Pur_Grey_Gre","Pur_Grey_Or","Red_Grey_Gre")
 
-drawmypalettes("Blue_Grey_Coral",Blue_Grey_Coral,"www/images")
-drawmypalettes("Bro_Grey_Tur",Bro_Grey_Tur,"www/images")
-drawmypalettes("Pink_Grey_Gre",Pink_Grey_Gre,"www/images")
-drawmypalettes("Pur_Grey_Gre",Pur_Grey_Gre,"www/images")
-drawmypalettes("Pur_Grey_Or",Pur_Grey_Or,"www/images")
-drawmypalettes("Red_Grey_Gre",Red_Grey_Gre,"www/images")
-
+# drawmypalettes("Blue_Grey_Coral",Blue_Grey_Coral,"www/images")
+# drawmypalettes("Bro_Grey_Tur",Bro_Grey_Tur,"www/images")
+# drawmypalettes("Pink_Grey_Gre",Pink_Grey_Gre,"www/images")
+# drawmypalettes("Pur_Grey_Gre",Pur_Grey_Gre,"www/images")
+# drawmypalettes("Pur_Grey_Or",Pur_Grey_Or,"www/images")
+# drawmypalettes("Red_Grey_Gre",Red_Grey_Gre,"www/images")
 
 
 # Default group color palette

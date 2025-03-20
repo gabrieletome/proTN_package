@@ -1,7 +1,7 @@
 # Tester ProTN package
 
 ```{r load functions, warning=F, message=FALSE, results='hide'}
-setwd("/home/gabriele/Desktop/UNITN/proTN_package/")
+# setwd("/home/gabriele/Desktop/UNITN/proTN_package/")
 suppressPackageStartupMessages(suppressMessages(suppressWarnings({
   lapply(list.files("./R", pattern = ".R", full.names = T), function(x){if(!file.info(x)$isdir){source(x)}})
   
@@ -22,6 +22,10 @@ suppressPackageStartupMessages(suppressMessages(suppressWarnings({
   library(STRINGdb)
   library(PhosR)
   
+  library(pheatmap)
+  library(svgPanZoom)
+  library(SummarizedExperiment)
+  library(parallel)
 })))
 ```
 
@@ -118,7 +122,6 @@ ploft_diff_number
 
 ploft_diff_number <- generate_differential_barplots(differential_results, data_type="peptide")
 ploft_diff_number
-# chunk: diff_analysis
 ```
 
 # Test vulcano plot
@@ -176,5 +179,11 @@ plots_terms
 strindb_res <- STRINGdb_network(differential_results = differential_results, species="Homo sapiens")
 strindb_res  
 
+```
+
+# TEST KINASE TREE
+```{r kinase_tree}
+kinase_res <- kinase_tree(proteome_data = normalized_data, differential_results = differential_results, formule_CORAL = formule_contrast)
+kinase_res
 ```
 
