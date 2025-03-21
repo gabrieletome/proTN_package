@@ -42,7 +42,7 @@ proteome_data <- read_proteomics(software = "MQ", folder = "./data/case_study_pr
 ```
 
 ```{r read_proteomics_PD, eval=FALSE}
-proteome_data <- read_proteomics(software = "PD", folder = "data/PD", annotation_filename = "INPUT", proteinGroup_filename = "PROT.xlsx")
+proteome_data <- read_proteomics(software = "PD", folder = "data/PD/proteome", annotation_filename = "INPUT", proteinGroup_filename = "PROT.xlsx")
 ```
 
 
