@@ -1201,3 +1201,129 @@ read_phospho_PD_files <- function(anno_filename, pep_filename, prot_filename, ps
               "psm_log_pet_df" = psm_log_pet_df,
               "colour_vec" = colour_vec))
 }
+
+
+#' From Proteome Discoverer or MaxQuant files to lists of data tables.
+#'
+#' This function reads phosphoproteomic data with proteome control.
+#'
+#' @param software Must be \strong{PD} for Proteome Discoverer or \strong{MQ} for MaxQuant
+#' @param folder Path with files
+#' @param annotation_filename Must 
+#' @param peptide_filename Must 
+#' @param proteinGroup_filename Must
+#' @param condition_col Must b
+#' @param sample_col Must 
+#' @param color_col Must
+#' @param batch_corr_exe description
+#' @param batch_col description
+#' @param filt_absent_value description
+#' @return A list of data tables.
+#' @details \strong{ProTN}
+#' @examples 
+#' ## ## Example:
+#' ## example
+#' ## example2
+#' @import data.table
+#' @export
+read_phospho_proteome_proteomics <- function(software, 
+                                             folder_proteome, folder_phospho, 
+                                             keep_only_phosphomodification = T, phospho_thr = 0.75, 
+                                             annotation_proteome_filename = "annotation",peptide_proteome_filename = "pep", 
+                                             proteinGroup_proteome_filename = "prot",
+                                             condition_proteome_col="Condition", sample_proteome_col="Sample", color_proteome_col="Color", 
+                                             annotation_phospho_filename = "annotation",peptide_phospho_filename = "pep", 
+                                             proteinGroup_phospho_filename = "prot", psm_phospho_filename = "psm",
+                                             condition_phospho_col="Condition", sample_phospho_col="Sample", color_phospho_col="Color", 
+                                             batch_corr_exe = FALSE, batch_col="batch",
+                                             filt_absent_value = 0){
+  source("./R/functions.R")
+  
+  if(!(software %in% c("PD","MQ"))){
+    stop("Valid software is required. Write PD or MQ.",
+         "\tPD: Proteome Discoverer",
+         "\tMQ: MaxQuant")
+  }
+  
+  # TODO: controllo che ci siano i file
+  # TODO: batch correction verificare input
+  
+  # Verify file proteome
+  anno_proteome_filename = list.files(folder_proteome, pattern = annotation_proteome_filename, full.names = T, ignore.case = T)
+  if(is.null(anno_proteome_filename) | length(anno_proteome_filename) > 1){
+    stop("Missing file proteome annotation or wrong annotation filename parameter or multiple files with same pattern")
+  }
+  pep_proteome_filename = list.files(folder_proteome, pattern = peptide_proteome_filename, full.names = T, ignore.case = T)
+  if(is.null(pep_proteome_filename) | length(pep_proteome_filename) > 1){
+    stop("Missing file proteome peptide or wrong proteome peptide filename parameter or multiple files with same pattern")
+  }
+  if(software == "PD"){
+    prot_proteome_filename = list.files(folder_proteome, pattern = proteinGroup_proteome_filename, full.names = T, ignore.case = T)
+    if(is.null(prot_proteome_filename) | length(prot_proteome_filename) > 1){
+      stop("Missing file proteome proteinGroup or wrong proteome proteinGroup filename parameter or multiple files with same pattern")
+    }
+  } else{
+    prot_proteome_filename = NULL
+  }
+  
+  # Verify file phospho
+  anno_phospho_filename = list.files(folder_phospho, pattern = annotation_phospho_filename, full.names = T, ignore.case = T)
+  if(is.null(anno_phospho_filename) | length(anno_phospho_filename) > 1){
+    stop("Missing file phospho annotation or wrong annotation filename parameter or multiple files with same pattern")
+  }
+  pep_phospho_filename = list.files(folder_phospho, pattern = peptide_phospho_filename, full.names = T, ignore.case = T)
+  if(is.null(pep_phospho_filename) | length(pep_phospho_filename) > 1){
+    stop("Missing file phospho peptide or wrong phospho peptide filename parameter or multiple files with same pattern")
+  }
+  if(software == "PD"){
+    prot_phospho_filename = list.files(folder_phospho, pattern = proteinGroup_phospho_filename, full.names = T, ignore.case = T)
+    if(is.null(prot_phospho_filename) | length(prot_phospho_filename) > 1){
+      stop("Missing file phospho proteinGroup or wrong phospho proteinGroup filename parameter or multiple files with same pattern")
+    }
+  } else{
+    prot_phospho_filename = NULL
+  }
+  if(software == "PD"){
+    psm_phospho_file_filename = list.files(folder_phospho, pattern = psm_phospho_filename, full.names = T, ignore.case = T)
+    if(is.null(psm_phospho_file_filename) | length(psm_phospho_file_filename) > 1){
+      stop("Missing file PSM or wrong PSM filename parameter or multiple files with same pattern")
+    }
+  } else{
+    psm_phospho_file_filename = NULL
+  }
+  
+  # Read proteome data
+  proteome_data = NULL
+  message("Reading Proteome data...")
+  if(software == "PD"){
+    proteome_data = read_PD_files(anno_proteome_filename, pep_proteome_filename, prot_proteome_filename, 
+                                  batch_corr_exe= batch_corr_exe, filt_absent_value = filt_absent_value)
+  } else if(software == "MQ"){
+    proteome_data = read_MQ_files(anno_proteome_filename, pep_proteome_filename, 
+                                  batch_corr_exe = batch_corr_exe, filt_absent_value = filt_absent_value)
+  }
+  message("Read Proteome data!")
+  
+  # Read phospho data
+  phospho_data = NULL
+  message("Reading Phosphoproteomic data...")
+  if(software == "PD"){
+    phospho_data = read_phospho_PD_files(anno_phospho_filename, pep_phospho_filename, prot_phospho_filename, psm_phospho_file_filename, 
+                                          keep_only_phosphomodification = keep_only_phosphomodification,
+                                          batch_corr_exe= batch_corr_exe, filt_absent_value = filt_absent_value, phospho_thr = phospho_thr)
+  } else if(software == "MQ"){
+    phospho_data = read_phospho_MQ_files(anno_phospho_filename, pep_phospho_filename, keep_only_phosphomodification = keep_only_phosphomodification,
+                                          batch_corr_exe = batch_corr_exe, filt_absent_value = filt_absent_value)
+  }
+  message("Reading Phosphoproteomic data!")
+  
+  phospho_proteome_data <- list("c_anno_proteome" = proteome_data$c_anno,
+                                "c_anno_phospho" = phospho_data$c_anno,
+                                "psm_anno_df" = proteome_data$psm_anno_df,
+                                "psm_log_prot_df" = proteome_data$psm_log_prot_df,
+                                "psm_peptide_table" = phospho_data$psm_peptide_table,
+                                "psm_log_pet_df" = phospho_data$psm_log_pet_df,
+                                "colour_vec_proteome" = proteome_data$colour_vec,
+                                "colour_vec_phospho" = phospho_data$colour_vec)
+  return(phospho_proteome_data)
+}

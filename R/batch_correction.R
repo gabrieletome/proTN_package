@@ -16,6 +16,15 @@ batch_correction <- function(proteome_data, batch_col="batch") {
   batch_annotation[, order := .I]
   
   # Batch correction of peptides
+  if(("c_anno" %in% names(proteome_data))){
+    batch_annotation <- copy(proteome_data$c_anno)
+    batch_annotation[, order := .I]
+  } else if(("c_anno_proteome" %in% names(proteome_data)) & ("c_anno_phospho" %in% names(proteome_data))){
+    batch_annotation <- copy(proteome_data$c_anno_phospho)
+    batch_annotation[, order := .I]
+  } else{
+    stop("Missing sample annotation!")
+  }
   dat_pep <- copy(proteome_data$dat_pep)
   dat_pep <- as.data.frame(dat_pep[,-1], row.names = as.character(dat_pep$ID_peptide))
   dat_pep_long <- matrix_to_long(dat_pep)
@@ -24,6 +33,15 @@ batch_correction <- function(proteome_data, batch_col="batch") {
   proteome_data$dat_pep <- as.data.table(as.data.frame(long_to_matrix(comBat_df_pep, sample_id_col = "sample")), keep.rownames = "ID_peptide")
   
   # Batch correction of genes
+  if(("c_anno" %in% names(proteome_data))){
+    batch_annotation <- copy(proteome_data$c_anno)
+    batch_annotation[, order := .I]
+  } else if(("c_anno_proteome" %in% names(proteome_data)) & ("c_anno_phospho" %in% names(proteome_data))){
+    batch_annotation <- copy(proteome_data$c_anno_proteome)
+    batch_annotation[, order := .I]
+  } else{
+    stop("Missing sample annotation!")
+  }
   dat_gene <- copy(proteome_data$dat_gene)
   dat_gene <- as.data.frame(dat_gene[,-1], row.names = as.character(dat_gene$ID_peptide))
   dat_gene_long <- matrix_to_long(dat_gene)

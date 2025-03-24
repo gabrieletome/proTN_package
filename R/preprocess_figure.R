@@ -9,7 +9,38 @@
 #' ## example2
 #' @import data.table
 #' @export
-generate_abundance_plot <- function(proteome_data) {
+generate_abundance_plot <- function(proteome_data, phospho_with_proteome=FALSE) {
+  if(("c_anno" %in% names(proteome_data)) & !phospho_with_proteome){
+    if("c_anno_proteome" %in% names(proteome_data)){
+      warning("Data seems from phosphoproteomic with proteome control. Next time change: `phospho_with_proteome=TRUE`")
+      phospho_with_proteome = TRUE
+    } else{
+      stop("c_anno not present!")
+    }
+  }
+  
+  if(("c_anno" %in% names(proteome_data)) & phospho_with_proteome){
+    warning("Data are not phosphoproteomic with proteome control. Next time change: `phospho_with_proteome=FALSE`")
+    phospho_with_proteome = FALSE
+  }
+  
+  result <- list()
+  if(phospho_with_proteome){
+    prot_list <- list("c_anno" = proteome_data$c_anno_proteome, "psm_log_prot_df" = proteome_data$psm_log_prot_df)
+    res_prot <- generate_abundance_subplot(proteome_data = prot_list)
+    phospho_list <- list("c_anno" = proteome_data$c_anno_phospho, "psm_log_prot_df" = proteome_data$psm_log_pet_df)
+    res_phospho <- generate_abundance_subplot(proteome_data = phospho_list)
+    result <- list("proteome_dt" = res_prot$dt, "proteome_plot" = res_prot$plot,
+                   "phospho_dt" = res_phospho$dt, "phospho_plot" = res_phospho$plot)
+  } else{
+    result <- generate_abundance_subplot(proteome_data)
+  }
+
+  return(result)
+}
+
+
+generate_abundance_subplot <- function(proteome_data) {
   c_anno <- copy(proteome_data$c_anno)
   psm_sig_prot_df <- copy(proteome_data$psm_log_prot_df)
   psm_sig_prot_df[, ID_peptide := NULL]
@@ -21,8 +52,8 @@ generate_abundance_plot <- function(proteome_data) {
   numeric_df[, `% of available abundances` := 100 - (numeric_values / nrow(psm_sig_prot_df) * 100)]
   
   plot <- ggplot(data = numeric_df, aes(x = factor(sample, levels = unique(sample)), 
-                                      y = `% of available abundances`, 
-                                      fill = sample, colour = sample)) +
+                                        y = `% of available abundances`, 
+                                        fill = sample, colour = sample)) +
     coord_flip() +
     geom_bar(stat = "identity", width = 0.7, alpha = 0.8) +
     theme_bw() +
@@ -33,6 +64,7 @@ generate_abundance_plot <- function(proteome_data) {
   
   return(list("dt" = numeric_df, "plot" = plot))
 }
+
 
 #' generate_peptide_distribution_plot
 #'
@@ -45,7 +77,40 @@ generate_abundance_plot <- function(proteome_data) {
 #' ## example2
 #' @import data.table
 #' @export
-generate_peptide_distribution_plot <- function(proteome_data) {
+generate_peptide_distribution_plot <- function(proteome_data, phospho_with_proteome=FALSE) {
+  if(("c_anno" %in% names(proteome_data)) & !phospho_with_proteome){
+    if("c_anno_proteome" %in% names(proteome_data)){
+      warning("Data seems from phosphoproteomic with proteome control. Next time change: `phospho_with_proteome=TRUE`")
+      phospho_with_proteome = TRUE
+    } else{
+      stop("c_anno not present!")
+    }
+  }
+  
+  if(("c_anno" %in% names(proteome_data)) & phospho_with_proteome){
+    warning("Data are not phosphoproteomic with proteome control. Next time change: `phospho_with_proteome=FALSE`")
+    phospho_with_proteome = FALSE
+  }
+  
+  result <- list()
+  if(phospho_with_proteome){
+    prot_list <- list("psm_anno_df" = proteome_data$psm_anno_df)
+    res_prot <- generate_peptide_distribution_subplot(proteome_data = prot_list)
+    phospho_list <- list("psm_anno_df" = proteome_data$psm_peptide_table)
+    setnames(phospho_list$psm_anno_df, "GeneName", "symbol")
+    res_phospho <- generate_peptide_distribution_subplot(proteome_data = phospho_list)
+    setnames(proteome_data$psm_peptide_table, "symbol", "GeneName", skip_absent = T)
+    result <- list("proteome_dt" = res_prot$dt, "proteome_plot" = res_prot$plot,
+                   "phospho_dt" = res_phospho$dt, "phospho_plot" = res_phospho$plot)
+  } else{
+    result <- generate_peptide_distribution_subplot(proteome_data)
+  }
+  
+  return(result)
+}
+
+
+generate_peptide_distribution_subplot <- function(proteome_data) {
   psm_anno_df <- copy(proteome_data$psm_anno_df)
   numeric_df <- as.data.table(table(psm_anno_df$symbol))
   numeric_df[N > 20, N := 20]
@@ -79,12 +144,28 @@ generate_peptide_distribution_plot <- function(proteome_data) {
 #' @import data.table
 #' @export
 plot_abundance_distribution <- function(proteome_data, type) {
+  if(("c_anno" %in% names(proteome_data))){
+    phospho_with_proteome = FALSE
+  } else if(("c_anno_proteome" %in% names(proteome_data)) & ("c_anno_phospho" %in% names(proteome_data))){
+    phospho_with_proteome = TRUE
+  } else{
+    stop("Missing sample annotation!")
+  }
+  
   if(type == "protein"){
     dat <- copy(proteome_data$dat_gene)
-    c_anno <- copy(proteome_data$c_anno)
+    if(phospho_with_proteome){
+      c_anno <- copy(proteome_data$c_anno_proteome)
+    } else{
+      c_anno <- copy(proteome_data$c_anno)
+    }
   } else if(type == "peptide"){
     dat <- copy(proteome_data$dat_pep)
-    c_anno <- copy(proteome_data$c_anno)
+    if(phospho_with_proteome){
+      c_anno <- copy(proteome_data$c_anno_phospho)
+    } else{
+      c_anno <- copy(proteome_data$c_anno)
+    }
   } else{
     stop("Invalid type parameter. Must be \"protein\" or \"peptide\"")
   }
@@ -124,14 +205,30 @@ plot_abundance_distribution <- function(proteome_data, type) {
 #' @import data.table
 #' @export
 mds_plot <- function(proteome_data, type) {
+  if(("c_anno" %in% names(proteome_data))){
+    phospho_with_proteome = FALSE
+  } else if(("c_anno_proteome" %in% names(proteome_data)) & ("c_anno_phospho" %in% names(proteome_data))){
+    phospho_with_proteome = TRUE
+  } else{
+    stop("Missing sample annotation!")
+  }
+  
   if(type == "protein"){
     data_matrix <- copy(proteome_data$dat_gene)
     data_matrix <- as.matrix(data_matrix[,-1])
-    c_anno <- copy(proteome_data$c_anno)
+    if(phospho_with_proteome){
+      c_anno <- copy(proteome_data$c_anno_proteome)
+    } else{
+      c_anno <- copy(proteome_data$c_anno)
+    }
   } else if(type == "peptide"){
     data_matrix <- copy(proteome_data$dat_pep)
     data_matrix <- as.matrix(data_matrix[,-1])
-    c_anno <- copy(proteome_data$c_anno)
+    if(phospho_with_proteome){
+      c_anno <- copy(proteome_data$c_anno_phospho)
+    } else{
+      c_anno <- copy(proteome_data$c_anno)
+    }
   } else{
     stop("Invalid type parameter. Must be \"protein\" or \"peptide\"")
   }
@@ -168,14 +265,30 @@ mds_plot <- function(proteome_data, type) {
 #' @import data.table
 #' @export
 pca_plot <- function(proteome_data, type) {
+  if(("c_anno" %in% names(proteome_data))){
+    phospho_with_proteome = FALSE
+  } else if(("c_anno_proteome" %in% names(proteome_data)) & ("c_anno_phospho" %in% names(proteome_data))){
+    phospho_with_proteome = TRUE
+  } else{
+    stop("Missing sample annotation!")
+  }
+  
   if(type == "protein"){
     data_matrix <- copy(proteome_data$dat_gene)
     data_matrix <- as.matrix(data_matrix[,-1])
-    c_anno <- copy(proteome_data$c_anno)
+    if(phospho_with_proteome){
+      c_anno <- copy(proteome_data$c_anno_proteome)
+    } else{
+      c_anno <- copy(proteome_data$c_anno)
+    }
   } else if(type == "peptide"){
     data_matrix <- copy(proteome_data$dat_pep)
     data_matrix <- as.matrix(data_matrix[,-1])
-    c_anno <- copy(proteome_data$c_anno)
+    if(phospho_with_proteome){
+      c_anno <- copy(proteome_data$c_anno_phospho)
+    } else{
+      c_anno <- copy(proteome_data$c_anno)
+    }
   } else{
     stop("Invalid type parameter. Must be \"protein\" or \"peptide\"")
   }
@@ -216,7 +329,23 @@ pca_plot <- function(proteome_data, type) {
 #' @import data.table
 #' @export
 plot_selected_proteins <- function(proteome_data, list_protein) {
-  dat_gene <- copy(proteome_data$dat_gene)
+  if(("c_anno" %in% names(proteome_data))){
+    phospho_with_proteome = FALSE
+  } else if(("c_anno_phospho" %in% names(proteome_data))){
+    phospho_with_proteome = TRUE
+  } else{
+    stop("Missing sample annotation!")
+  }
+  
+  if(phospho_with_proteome){
+    dat_gene <- copy(proteome_data$dat_pep)
+    dat_gene[, GeneName := tstrsplit(ID_peptide, "_", keep = 1)[[1]]][, ID_peptide := NULL]
+    c_anno = copy(proteome_data$c_anno_phospho)
+  } else{
+    dat_gene <- copy(proteome_data$dat_gene)
+    c_anno = copy(proteome_data$c_anno)
+  }
+  
   prot_find <- unique(c(
     intersect(list_protein, dat_gene$GeneName),
     intersect(str_to_title(list_protein), dat_gene$GeneName),
@@ -230,7 +359,7 @@ plot_selected_proteins <- function(proteome_data, list_protein) {
 
     prot_intensity_long <- melt(dat_gene[GeneName %in% prot_find,], id.vars = "GeneName", variable.name = "sample", value.name = "Intensity")
     prot_intensity_long <- merge.data.table(prot_intensity_long, 
-                                            proteome_data$c_anno,
+                                            c_anno,
                                             by = "sample")
     
     prot_avg_se_long <- prot_intensity_long[, .(avg = mean(Intensity),

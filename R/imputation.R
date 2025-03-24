@@ -14,11 +14,17 @@ impute_intensity <- function(proteome_data) {
   # Load PhosR functions
   suppressWarnings(lapply(list.files("R/PhosR", pattern = ".R", full.names = T), function(x){if(!file.info(x)$isdir){source(x)}}))
   
-  
-  proteome_data$psm_log_prot_df <- impute_matrix(mat = proteome_data$psm_log_prot_df, c_anno = proteome_data$c_anno)
-  
-  proteome_data$psm_log_pet_df <- impute_matrix(proteome_data$psm_log_pet_df, proteome_data$c_anno)
-  
+  if(("c_anno" %in% names(proteome_data))){
+    proteome_data$psm_log_prot_df <- impute_matrix(mat = proteome_data$psm_log_prot_df, c_anno = proteome_data$c_anno)
+    
+    proteome_data$psm_log_pet_df <- impute_matrix(proteome_data$psm_log_pet_df, proteome_data$c_anno)
+  } else if(("c_anno_proteome" %in% names(proteome_data)) & ("c_anno_phospho" %in% names(proteome_data))){
+    proteome_data$psm_log_prot_df <- impute_matrix(mat = proteome_data$psm_log_prot_df, c_anno = proteome_data$c_anno_proteome)
+    
+    proteome_data$psm_log_pet_df <- impute_matrix(proteome_data$psm_log_pet_df, proteome_data$c_anno_phospho)
+  } else{
+    stop("Missing sample annotation!")
+  }
   return(proteome_data)
 }
 
