@@ -146,7 +146,7 @@ mds_plot <- function(proteome_data, type) {
   
   cmd <- ggplot(mds_cmdscale, aes(MDS_1, MDS_2, colour = condition)) +
     geom_point(size = 2, alpha = .9) +
-    geom_text_repel(aes(label = sample), size = 5, fontface = "bold", show.legend = FALSE) +
+    geom_text_repel(aes(label = sample), size = 4, fontface = "bold", show.legend = FALSE) +
     scale_colour_manual(values = cc) +
     theme_bw() +
     theme(legend.position = "right", panel.grid.minor = element_blank())
@@ -191,8 +191,8 @@ pca_plot <- function(proteome_data, type) {
   names(cc) <- unique(pc$condition)
   
   cmd <- ggplot(pc, aes(PC1, PC2, colour = condition)) +
-    geom_point(size = 1.5, alpha = .9) +
-    geom_text_repel(aes(label = sample), size = 3, fontface = "bold", show.legend = FALSE) +
+    geom_point(size = 2, alpha = .9) +
+    geom_text_repel(aes(label = sample), size = 4, fontface = "bold", show.legend = FALSE) +
     scale_colour_manual(values = cc) +
     theme_bw() +
     theme(legend.position = "right", panel.grid.minor = element_blank()) +

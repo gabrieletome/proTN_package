@@ -190,9 +190,6 @@ read_MQ_files <- function(anno_filename, pep_filename,
   psm_sig_prot_raw <- as.data.table(psm_sig_raw)
   psm_sig_pet_raw <- as.data.table(psm_sig_raw)
   
-  n_prot_preFILT <- uniqueN(psm_anno_raw$symbol)
-  n_pep_pre_FILT <- nrow(psm_peptide_table)
-  
   # Preprocess Protein intensities
   psm_sig_prot_raw[psm_sig_prot_raw == 0] <- NA  # Transform 0s into NAs
   sig_thr <- filt_absent_value  # NA threshold
@@ -264,9 +261,7 @@ read_MQ_files <- function(anno_filename, pep_filename,
   psm_log_pet_df <- psm_log_pet_df[ID_peptide %in% filter_df_single_pep]
   psm_peptide_table <- psm_peptide_table[ID_peptide %in% filter_df_single_pep]
   
-  message(paste0("\nN° Proteins (raw): ", n_prot_preFILT))
   message(paste0("N° Proteins (after filter): ", uniqueN(psm_anno_df$symbol)))
-  message(paste0("\nN° Peptides (raw): ", n_pep_pre_FILT))
   message(paste0("N° Peptides (after filter): ", uniqueN(psm_peptide_table$ID_peptide)))
   
   return(list("c_anno" = c_anno,
@@ -431,9 +426,6 @@ read_PD_files <- function(anno_filename, pep_filename, prot_filename,
   psm_sig_prot_raw <- as.data.table(psm_sig_raw)
   psm_sig_pet_raw <- as.data.table(psm_sig_raw)
   
-  n_prot_preFILT <- uniqueN(psm_anno_raw$symbol)
-  n_pep_pre_FILT <- nrow(psm_peptide_table)
-  
   # Preprocess Protein intensities
   psm_sig_prot_raw[psm_sig_prot_raw == 0] <- NA  # Transform 0s into NAs
   sig_thr <- filt_absent_value  # NA threshold
@@ -505,9 +497,7 @@ read_PD_files <- function(anno_filename, pep_filename, prot_filename,
   psm_log_pet_df <- psm_log_pet_df[ID_peptide %in% filter_df_single_pep]
   psm_peptide_table <- psm_peptide_table[ID_peptide %in% filter_df_single_pep]
   
-  message(paste0("\nN° Proteins (raw): ", n_prot_preFILT))
   message(paste0("N° Proteins (after filter): ", uniqueN(psm_anno_df$symbol)))
-  message(paste0("\nN° Peptides (raw): ", n_pep_pre_FILT))
   message(paste0("N° Peptides (after filter): ", uniqueN(psm_peptide_table$ID_peptide)))
   
   return(list("c_anno" = c_anno,
@@ -799,9 +789,6 @@ read_phospho_MQ_files <- function(anno_filename, pep_filename, keep_only_phospho
   psm_sig_prot_raw <- as.data.table(psm_sig_raw)
   psm_sig_pet_raw <- as.data.table(psm_sig_raw)
   
-  n_prot_preFILT <- uniqueN(psm_anno_raw$symbol)
-  n_pep_pre_FILT <- nrow(psm_peptide_table)
-  
   # Preprocess Protein intensities
   psm_sig_prot_raw[psm_sig_prot_raw == 0] <- NA  # Transform 0s into NAs
   sig_thr <- filt_absent_value  # NA threshold
@@ -873,9 +860,7 @@ read_phospho_MQ_files <- function(anno_filename, pep_filename, keep_only_phospho
   psm_log_pet_df <- psm_log_pet_df[ID_peptide %in% filter_df_single_pep]
   psm_peptide_table <- psm_peptide_table[ID_peptide %in% filter_df_single_pep]
   
-  message(paste0("\nN° Proteins (raw): ", n_prot_preFILT))
   message(paste0("N° Proteins (after filter): ", uniqueN(psm_anno_df$symbol)))
-  message(paste0("\nN° Peptides (raw): ", n_pep_pre_FILT))
   message(paste0("N° Peptides (after filter): ", uniqueN(psm_peptide_table$ID_peptide)))
   
   return(list("c_anno" = c_anno,
@@ -914,7 +899,6 @@ read_phospho_PD_files <- function(anno_filename, pep_filename, prot_filename, ps
   }, error=function(cond){
     stop(paste0("Missing file. The file \'PROTEIN\' is missing or not have the pattern in the filename or there are duplicates files."))
   })
-  message("File read.")
   # Read protein file
   input_files[["PSM"]] <- tryCatch({
     as.data.table(read_xlsx(psm_file_filename))
@@ -1034,6 +1018,9 @@ read_phospho_PD_files <- function(anno_filename, pep_filename, prot_filename, ps
   
   colnames(input_files$PD_PEP_matrix) <- gsub(" ", "_", colnames(input_files$PD_PEP_matrix))
   
+  #Made the description of the mpeptides
+  psm_peptide_table <- as.data.table(unique(input_files[["PD_PEP_matrix"]][, c("ID_peptide","Accession","Description","GeneName","Annotated_Sequence","Modifications","Position_in_Master_Proteins")]))
+  
   # Read PSM and filter Phospho Percentage
   input_files[["PSM"]] <- input_files[["PSM"]][
     !(`Annotated Sequence` %in% input_files[["PD_PEP_matrix"]]$Annotated_Sequence) &
@@ -1053,7 +1040,7 @@ read_phospho_PD_files <- function(anno_filename, pep_filename, prot_filename, ps
   pattern_sub <- lapply(regmatches(input_files$PSM$`ptmRS: Best Site Probabilities`, gregexpr("\\: \\d+\\.\\d+\\b|\\: \\d+\\b", 
                                                                                               input_files$PSM$`ptmRS: Best Site Probabilities`)), 
                         function(x) gsub("\\: ", "", x))
-  replacement <- lapply(pattern_sub, function(x) as.integer(as.numeric(x) > phospho_thr))
+  replacement <- lapply(pattern_sub, function(x) as.integer(as.numeric(x) > phospho_thr*100))
   
   input_files$PSM[, ID_peptide := unlist(lapply(1:length(input_files$PSM$`ptmRS: Best Site Probabilities`),
                                     function(x){
@@ -1070,28 +1057,30 @@ read_phospho_PD_files <- function(anno_filename, pep_filename, prot_filename, ps
   id_pep_doubt <- psm_peptide_table[grepl("\\/", Modifications), .(Accession, Description, GeneName, Annotated_Sequence, Modifications, Position_in_Master_Proteins, ID_peptide)]
   
   pattern <- input_files$PSM[Annotated_Sequence %in% id_pep_doubt$Annotated_Sequence & Master_Protein_Accessions %in% id_pep_doubt$Accession, .(Annotated_Sequence, Master_Protein_Accessions, ID_peptide)]
-  pattern[, modif_split := sapply(strsplit(ID_peptide, ";"), function(x) paste(Filter(function(y) substr(y, 2, 2) != "0", gsub(" ", "", x)), collapse = ""))]
+  pattern[, modif_split := unlist(lapply(stri_split_regex(pattern$ID_peptide, ";"), 
+                                         function(x){stri_c(unlist(lapply(stri_extract_all_regex(str_remove_all(x, "\\ "), "^.|.$"), 
+                                                                          function(y){y[y[2] != "0"]})), collapse = "")}))]
   
   pattern2 <- pattern[id_pep_doubt, on = c("Annotated_Sequence"="Annotated_Sequence", "Master_Protein_Accessions"="Accession"), mult = "first"]
   pattern2[, phospo_PEP := unlist(lapply(stri_extract_all_regex(i.ID_peptide, "\\w\\d+\\(1|\\w\\/"), 
                                          function(x){stri_c(unlist(stri_extract_all_regex(x, "^.|.$")), collapse = "")}))]
   
-  #TODO:check
   # Adjust doubtful phosphosites
   for (ids in unique(pattern2$i.ID_peptide)) {
     test <- pattern2[i.ID_peptide == ids & modif_split != phospo_PEP]
     if (nrow(test) > 0) {
-      test[, doubtSite := sapply(1:.N, function(x) gsub(phospo_PEP[x], "", modif_split[x]))]
-      site_to_take <- names(which.max(table(unlist(test$doubtSite))))
-      input_files$PD_PEP_matrix[ID_peptide == ids, Modifications := gsub("\\w\\/\\w\\/\\w|\\w\\/\\w", paste0(site_to_take, "(1)"), Modifications)]
-      input_files$PD_PEP_matrix[ID_peptide == ids, ID_peptide := paste(Accession, Annotated_Sequence, Modifications, sep = "_")]
+      test$doubtSite<-lapply(1:nrow(test), function(x){str_remove(test$modif_split[x], test$phospo_PEP[x])})
+      table_site <- table(unlist(test$doubtSite))
+      site_to_take <- stri_extract_all_regex(names(table_site[which(table_site == max(table_site))])[1], "^.")[[1]]
+      input_files$PD_PEP_matrix$Modifications[which(input_files$PD_PEP_matrix$ID_peptide == test$i.ID_peptide[1])]<- stri_replace_all_regex(test$Modifications[1], "\\w\\/\\w\\/\\w|\\w\\/\\w",paste0(site_to_take,"(100)"))
+      input_files$PD_PEP_matrix$new_seq[which(input_files$PD_PEP_matrix$ID_peptide == test$i.ID_peptide[1])]<- stri_replace_all_regex(test$Modifications[1], "\\w\\/\\w\\/\\w|\\w\\/\\w",paste0(site_to_take,"(100)"))
+      input_files$PD_PEP_matrix$ID_peptide[which(input_files$PD_PEP_matrix$ID_peptide == test$i.ID_peptide[1])]<- stri_replace_all_regex(test$i.ID_peptide[1], "\\w\\/\\w\\/\\w|\\w\\/\\w",paste0(site_to_take,"(100)"))
     }
   }
   
   
   #Maintain only the new complete matrix of abundance
-  input_files$PD_PEP_matrix[, ID_peptide := as.factor(paste(input_files[["PD_PEP_matrix"]]$GeneName, input_files[["PD_PEP_matrix"]]$new_seq, input_files[["PD_PEP_matrix"]]$Modifications, sep="_"))]
-  
+  input_files$PD_PEP_matrix[, ID_peptide := as.factor(paste(input_files[["PD_PEP_matrix"]]$GeneName, input_files[["PD_PEP_matrix"]]$Annotated_Sequence, input_files[["PD_PEP_matrix"]]$new_seq, sep="_"))]
   colToKeep <- c("ID_peptide",input_files$annotation$Sample)
   psm_sig_raw<-input_files$PD_PEP_matrix[, ..colToKeep]
   
@@ -1131,10 +1120,7 @@ read_phospho_PD_files <- function(anno_filename, pep_filename, prot_filename, ps
   # Convert to data.table
   psm_sig_prot_raw <- as.data.table(psm_sig_raw)
   psm_sig_pet_raw <- as.data.table(psm_sig_raw)
-  
-  n_prot_preFILT <- uniqueN(psm_anno_raw$symbol)
-  n_pep_pre_FILT <- nrow(psm_peptide_table)
-  
+
   # Preprocess Protein intensities
   psm_sig_prot_raw[psm_sig_prot_raw == 0] <- NA  # Transform 0s into NAs
   sig_thr <- filt_absent_value  # NA threshold
@@ -1174,7 +1160,6 @@ read_phospho_PD_files <- function(anno_filename, pep_filename, prot_filename, ps
   psm_peptide_table <- as.data.table(psm_peptide_table)[ID_peptide %in% filter_ID_peptide]
   
   # Determine tryptic condition
-  # TODO: check this triptic test
   peptides_df <- psm_peptide_table[, .(Accession, Annotated_Sequence)]
   peptides_df[, preAA := str_sub(str_extract(str_split_fixed(Annotated_Sequence,regex("\\."), n = 3)[,1], regex("\\[\\w+\\]")),
                                  2,
@@ -1206,9 +1191,7 @@ read_phospho_PD_files <- function(anno_filename, pep_filename, prot_filename, ps
   psm_log_pet_df <- psm_log_pet_df[ID_peptide %in% filter_df_single_pep]
   psm_peptide_table <- psm_peptide_table[ID_peptide %in% filter_df_single_pep]
   
-  message(paste0("\nN° Proteins (raw): ", n_prot_preFILT))
   message(paste0("N° Proteins (after filter): ", uniqueN(psm_anno_df$symbol)))
-  message(paste0("\nN° Peptides (raw): ", n_pep_pre_FILT))
   message(paste0("N° Peptides (after filter): ", uniqueN(psm_peptide_table$ID_peptide)))
   
   return(list("c_anno" = c_anno,

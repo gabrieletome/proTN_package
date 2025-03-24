@@ -60,7 +60,7 @@ generate_abundance
 generate_peptide_distribution <- generate_peptide_distribution_plot(proteome_data = proteome_data)
 generate_peptide_distribution
 
-create_phosphosite_fig <- create_phosphosite_plot(proteome_data = proteome_data, software = "MQ")
+create_phosphosite_fig <- create_phosphosite_plot(proteome_data = proteome_data, software = "PD")
 create_phosphosite_fig
 ```
 
@@ -127,7 +127,7 @@ prot_boxplot
 # Differential analysis
 
 ```{r differential_analysis}
-formule_contrast <- list("A2016vsWT"="A2016T-wt")
+formule_contrast <- list("A2016vsWT"="A2016T-WT")
 
 differential_results <- differential_analysis(proteome_data = normalized_data, formule_contrast = formule_contrast, 
                                               fc_thr=0.75, pval_fdr = "p_val", pval_thr=0.05, signal_thr=0)

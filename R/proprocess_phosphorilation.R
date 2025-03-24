@@ -15,10 +15,9 @@
 create_phosphosite_plot <- function(proteome_data, software) {
   psm_peptide_table <- copy(proteome_data$psm_peptide_table)
   
-  # TODO: check PD
   if (software == "PD") {
     active_sites <- lapply(lapply(
-      stri_extract_all_regex(psm_peptide_table$modif, "\\w\\d+\\(1|\\w\\d+\\.|\\ \\w\\]|\\w\\(1"), 
+      stri_extract_all_regex(psm_peptide_table$Modifications, "\\w\\d+\\(1|\\w\\d+\\.|\\ \\w\\]|\\w\\(1"), 
       function(x) { stri_replace_all(x, regex = " ", replacement = "") }), 
       function(y) { unlist(stri_extract_all_regex(unlist(y), "S|T|Y")) }
     ) |> unlist() |> table()
