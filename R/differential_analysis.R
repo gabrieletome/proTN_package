@@ -1,14 +1,30 @@
-#' Differential Analysis
+#' Differential Analysis for Proteomic and Phosphoproteomic Data
 #'
-#' @param proteome_data Object proTN
-#' @param pval_fdr "p_adj" else "p_val"
-#' @return A list of data tables.
-#' @details \strong{ProTN}
-#' @examples 
-#' ## ## Example:
-#' ## example
-#' ## example2
+#' This function performs differential expression analysis for proteomic and phosphoproteomic data, using limma for statistical analysis. It handles the combination of proteome and phosphoproteome data, calculates fold change, p-value, and other statistical parameters, and returns results in both long and wide formats.
+#'
+#' @param proteome_data A list containing proteomic data.
+#' @param formule_contrast A vector of formulas defining the contrasts for differential expression analysis.
+#' @param fc_thr Numeric. The threshold for fold change (default is 0.75).
+#' @param pval_fdr String. The column name for p-value after FDR adjustment (default is "p_val").
+#' @param pval_thr Numeric. The threshold for p-value (default is 0.05).
+#' @param signal_thr Numeric. The threshold for signal log2 intensity (default is 0).
+#'
+#' @return A list containing the results of the differential analysis
+#'
+#' @details
+#' If the input data includes phosphoproteomic and proteomic data, the function will merge these datasets, perform the differential analysis for both types, and return the results for both proteins and peptides. If only proteomic data is available, the function will analyze proteins and peptides separately.
+#'
+#' @examples
+#' # Example usage:
+#' results <- differential_analysis(proteome_data = proteome_data, 
+#'                                  formule_contrast = c("comparison1"="condition1-condition2"),
+#'                                  fc_thr = 0.75, pval_thr = 0.05)
+#'
 #' @import data.table
+#' @import stringr
+#' @import limma
+#' @import dplyr
+#' @import stringi
 #' @export
 differential_analysis <- function(proteome_data, formule_contrast, 
                                   fc_thr=0.75, pval_fdr = "p_val", pval_thr=0.05, 

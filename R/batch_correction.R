@@ -1,13 +1,26 @@
-#' Function to perform batch correction
+#' Apply Batch Effect Correction to Proteome Data
 #'
-#' @param proteome_data Object proTN
-#' @return A list of data tables.
-#' @details \strong{ProTN}
-#' @examples 
-#' ## ## Example:
-#' ## example
-#' ## example2
+#' This function applies batch effect correction to proteome data using the `proBatch` package. 
+#' It adjusts both peptide and gene data by correcting for batch effects based on the specified batch column.
+#'
+#' @param proteome_data A list containing proteome data and sample annotations.
+#' @param batch_col A string indicating the column name in the sample annotation to be used for batch correction (default is "batch").
+#'
+#' @return A list containing the batch-corrected proteome data, with `dat_pep` and `dat_gene` corrected for batch effects.
+#'
+#' @details
+#' The function uses the ComBat method for batch effect correction. 
+#' It adjusts both peptide and gene data separately, based on the sample annotation provided.
+#'
+#' @examples
+#' # Example usage:
+#' corrected_data <- batch_correction(proteome_data = proteome_data, batch_col = "batch")
+#'
 #' @import data.table
+#' @import proBatch
+#' @import dplyr
+#' @import tibble
+#' @import stringr
 #' @export
 batch_correction <- function(proteome_data, batch_col="batch") {
   message("A batch effect correction is applied to the dataset using the proBatch package.")

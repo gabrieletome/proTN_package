@@ -143,7 +143,7 @@ prot_boxplot
 # Differential analysis
 
 ```{r differential_analysis}
-formule_contrast <- list("A2016vsWT"="A2016T-WT")
+formule_contrast <- list("A2016vsWT"="A2016T-wt")
 
 differential_results <- differential_analysis(proteome_data = normalized_data, 
                                               formule_contrast = formule_contrast, 

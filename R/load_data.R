@@ -1,24 +1,28 @@
-#' From Proteome Discoverer or MaxQuant files to lists of data tables.
+#' Read Proteomics Data
 #'
-#' This function reads proteomics data.
+#' This function reads proteomics data from files based on the specified software (Proteome Discoverer or MaxQuant). 
+#' It supports reading annotation, peptide, and protein group data, with options for batch correction and filtering absent values.
 #'
-#' @param software Must be \strong{PD} for Proteome Discoverer or \strong{MQ} for MaxQuant
-#' @param folder Path with files
-#' @param annotation_filename Must 
-#' @param peptide_filename Must 
-#' @param proteinGroup_filename Must
-#' @param condition_col Must b
-#' @param sample_col Must 
-#' @param color_col Must
-#' @param batch_corr_exe description
-#' @param batch_col description
-#' @param filt_absent_value description
-#' @return A list of data tables.
-#' @details \strong{ProTN}
-#' @examples 
-#' ## ## Example:
-#' ## example
-#' ## example2
+#' @param software Character; the proteomics software used, either "PD" for Proteome Discoverer or "MQ" for MaxQuant.
+#' @param folder Character; the folder containing the data files.
+#' @param annotation_filename Character; the name or pattern of the annotation file. Default is "annotation".
+#' @param peptide_filename Character; the name or pattern of the peptide file. Default is "pep".
+#' @param proteinGroup_filename Character; the name or pattern of the protein group file. Default is "prot".
+#' @param condition_col Character; the column name representing condition information in the annotation file. Default is "Condition".
+#' @param sample_col Character; the column name representing sample information in the annotation file. Default is "Sample".
+#' @param color_col Character; the column name representing color information for the plot in the annotation file. Default is "Color".
+#' @param batch_corr_exe Logical; whether batch correction should be applied. Default is FALSE.
+#' @param batch_col Character; the column name representing batch information in the annotation file. Default is "batch".
+#' @param filt_absent_value Numeric; the value used to filter out absent data. Default is 0.
+#'
+#' @return A list containing proteomics data, including annotation and peptide data, 
+#'         with batch correction applied if specified.
+#'
+#' @examples
+#' \dontrun{
+#' proteome_data <- read_proteomics(software = "MQ", folder = "data_folder")
+#' }
+#'
 #' @import data.table
 #' @export
 read_proteomics <- function(software, folder, annotation_filename = "annotation",
@@ -509,27 +513,35 @@ read_PD_files <- function(anno_filename, pep_filename, prot_filename,
 }
 
 
-#' From Proteome Discoverer or MaxQuant files to lists of data tables.
+#' Read Phosphoproteomics Data
 #'
-#' This function reads phosphoproteomic data.
+#' This function reads phosphoproteomics data from files based on the specified software (Proteome Discoverer or MaxQuant). 
+#' It supports reading annotation, peptide, protein group, and PSM data, with options for batch correction, filtering absent values, 
+#' and keeping only phospho-modified peptides above a specified threshold.
 #'
-#' @param software Must be \strong{PD} for Proteome Discoverer or \strong{MQ} for MaxQuant
-#' @param folder Path with files
-#' @param annotation_filename Must 
-#' @param peptide_filename Must 
-#' @param proteinGroup_filename Must
-#' @param condition_col Must b
-#' @param sample_col Must 
-#' @param color_col Must
-#' @param batch_corr_exe description
-#' @param batch_col description
-#' @param filt_absent_value description
-#' @return A list of data tables.
-#' @details \strong{ProTN}
-#' @examples 
-#' ## ## Example:
-#' ## example
-#' ## example2
+#' @param software Character; the proteomics software used, either "PD" for Proteome Discoverer or "MQ" for MaxQuant.
+#' @param folder Character; the folder containing the data files.
+#' @param keep_only_phosphomodification Logical; whether to keep only phospho-modified peptides. Default is TRUE.
+#' @param phospho_thr Numeric; the threshold for phospho-modified peptides. Default is 0.75.
+#' @param annotation_filename Character; the name or pattern of the annotation file. Default is "annotation".
+#' @param peptide_filename Character; the name or pattern of the peptide file. Default is "pep".
+#' @param proteinGroup_filename Character; the name or pattern of the protein group file. Default is "prot".
+#' @param psm_filename Character; the name or pattern of the PSM file. Default is "psm".
+#' @param condition_col Character; the column name representing condition information in the annotation file. Default is "Condition".
+#' @param sample_col Character; the column name representing sample information in the annotation file. Default is "Sample".
+#' @param color_col Character; the column name representing color information for the plot in the annotation file. Default is "Color".
+#' @param batch_corr_exe Logical; whether batch correction should be applied. Default is FALSE.
+#' @param batch_col Character; the column name representing batch information in the annotation file. Default is "batch".
+#' @param filt_absent_value Numeric; the value used to filter out absent data. Default is 0.
+#'
+#' @return A list containing phosphoproteomics data, including annotation and peptide data, 
+#'         with batch correction applied if specified and only phospho-modified peptides kept if requested.
+#'
+#' @examples
+#' \dontrun{
+#' proteome_data <- read_phosphoproteomics(software = "MQ", folder = "data_folder")
+#' }
+#'
 #' @import data.table
 #' @export
 read_phosphoproteomics <- function(software, folder, 
@@ -1203,27 +1215,44 @@ read_phospho_PD_files <- function(anno_filename, pep_filename, prot_filename, ps
 }
 
 
-#' From Proteome Discoverer or MaxQuant files to lists of data tables.
+#' Read Phospho-Proteome Data
 #'
-#' This function reads phosphoproteomic data with proteome control.
+#' This function reads both proteome and phosphoproteome data from files based on the specified software (Proteome Discoverer or MaxQuant). 
+#' It supports reading annotation, peptide, protein group, and PSM data for both proteome and phosphoproteome, with options for batch correction, 
+#' filtering absent values, and keeping only phospho-modified peptides above a specified threshold.
 #'
-#' @param software Must be \strong{PD} for Proteome Discoverer or \strong{MQ} for MaxQuant
-#' @param folder Path with files
-#' @param annotation_filename Must 
-#' @param peptide_filename Must 
-#' @param proteinGroup_filename Must
-#' @param condition_col Must b
-#' @param sample_col Must 
-#' @param color_col Must
-#' @param batch_corr_exe description
-#' @param batch_col description
-#' @param filt_absent_value description
-#' @return A list of data tables.
-#' @details \strong{ProTN}
-#' @examples 
-#' ## ## Example:
-#' ## example
-#' ## example2
+#' @param software Character; the proteomics software used, either "PD" for Proteome Discoverer or "MQ" for MaxQuant.
+#' @param folder_proteome Character; the folder containing proteome data files.
+#' @param folder_phospho Character; the folder containing phosphoproteome data files.
+#' @param keep_only_phosphomodification Logical; whether to keep only phospho-modified peptides. Default is TRUE.
+#' @param phospho_thr Numeric; the threshold for phospho-modified peptides. Default is 0.75.
+#' @param annotation_proteome_filename Character; the name or pattern of the proteome annotation file. Default is "annotation".
+#' @param peptide_proteome_filename Character; the name or pattern of the proteome peptide file. Default is "pep".
+#' @param proteinGroup_proteome_filename Character; the name or pattern of the proteome protein group file. Default is "prot".
+#' @param condition_proteome_col Character; the column name representing condition information in the proteome annotation file. Default is "Condition".
+#' @param sample_proteome_col Character; the column name representing sample information in the proteome annotation file. Default is "Sample".
+#' @param color_proteome_col Character; the column name representing color information for the plot in the proteome annotation file. Default is "Color".
+#' @param annotation_phospho_filename Character; the name or pattern of the phosphoproteome annotation file. Default is "annotation".
+#' @param peptide_phospho_filename Character; the name or pattern of the phosphoproteome peptide file. Default is "pep".
+#' @param proteinGroup_phospho_filename Character; the name or pattern of the phosphoproteome protein group file. Default is "prot".
+#' @param psm_phospho_filename Character; the name or pattern of the phosphoproteome PSM file. Default is "psm".
+#' @param condition_phospho_col Character; the column name representing condition information in the phosphoproteome annotation file. Default is "Condition".
+#' @param sample_phospho_col Character; the column name representing sample information in the phosphoproteome annotation file. Default is "Sample".
+#' @param color_phospho_col Character; the column name representing color information for the plot in the phosphoproteome annotation file. Default is "Color".
+#' @param batch_corr_exe Logical; whether batch correction should be applied. Default is FALSE.
+#' @param batch_col Character; the column name representing batch information in the annotation file. Default is "batch".
+#' @param filt_absent_value Numeric; the value used to filter out absent data. Default is 0.
+#'
+#' @return A list containing both proteome and phosphoproteome data, including annotation and peptide data, 
+#'         with batch correction applied if specified and only phospho-modified peptides kept if requested.
+#'
+#' @examples
+#' \dontrun{
+#' phospho_proteome_data <- read_phospho_proteome_proteomics(software = "MQ", 
+#'                                                         folder_proteome = "proteome_folder", 
+#'                                                         folder_phospho = "phospho_folder")
+#' }
+#'
 #' @import data.table
 #' @export
 read_phospho_proteome_proteomics <- function(software, 

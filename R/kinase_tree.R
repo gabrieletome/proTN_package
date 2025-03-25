@@ -48,17 +48,28 @@ kinase_activity_calculation <- function(dirOutput_kinase, formule_CORAL, comp, d
 }
 
 
-#' Kinase Tree
+#' Kinase Activity Tree Calculation
 #'
-#' @param software Must be \strong{PD} for Proteome Discoverer or \strong{MQ} for MaxQuant
-#' @param folder Path with files
-#' @return A list of data tables.
-#' @details \strong{ProTN}
-#' @examples 
-#' ## ## Example:
-#' ## example
-#' ## example2
+#' This function calculates kinase activity for differential analysis results, creating a tree-based visualization of kinase activity. It uses CORAL-based formulae and generates kinase activity plots. The function allows the user to specify whether to include phospho-control data or not.
+#'
+#' @param proteome_data List; a list containing proteomics data.
+#' @param differential_results List; a list containing differential analysis results, specifically `peptide_results_long` for peptide-wise differential analysis.
+#' @param formule_CORAL List; a list of formulae for CORAL-based kinase activity calculations. It must include formulae for the comparisons of interest.
+#' @param dirOutput Character; the directory where the results will be stored. Default is "results_ProTN".
+#' @param subfold Character; the subdirectory within `dirOutput` to store the results, default is "pics".
+#' @param phospho_ctrl Logical; whether to include phospho-control data in the calculations. Default is FALSE (excludes phospho-control data).
+#'
+#' @return A list of SVG plots, one for each comparison in the `formule_CORAL` list, showing the kinase activity tree for each comparison.
+#'
+#' @examples
+#' \dontrun{
+#' kinase_tree_results <- kinase_tree(proteome_data = proteome_data, 
+#'                                    differential_results = differential_results, 
+#'                                    formule_CORAL = formule_CORAL)
+#' }
+#'
 #' @import data.table
+#' @import ggplot2
 #' @export
 kinase_tree <- function(proteome_data, differential_results, formule_CORAL, 
                         dirOutput = "results_ProTN", subfold="pics", phospho_ctrl = FALSE) {

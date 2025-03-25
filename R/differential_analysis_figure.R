@@ -1,12 +1,32 @@
-#' Function to generate barplots for differential proteins and peptides
+#' Generate Differential Barplots
 #'
-#' @param differential_results Object proTN
-#' @details \strong{ProTN}
-#' @examples 
-#' ## ## Example:
-#' ## example
-#' ## example2
+#' This function generates differential barplots based on the differential analysis results. 
+#' It creates a lollipop plot to visualize the comparison of protein or peptide differential expression results.
+#'
+#' @param differential_results A list containing the differential analysis results.
+#' @param data_type A character string indicating the type of data to plot. Must be either "protein" or "peptide".
+#' @param color_contrast A vector of colors to use for the plot (optional).
+#' @param phospho_ctrl A logical value indicating whether to include phospho-control comparisons in the plot (default is FALSE).
+#'
+#' @return A list containing the lollipop plot for differential expression results.
+#'
+#' @details
+#' This function filters the differential results based on the specified parameters, 
+#' such as whether to include phospho-control comparisons or not, and generates a 
+#' lollipop plot to visualize the differential expression of proteins or peptides.
+#'
+#' @examples
+#' # Example usage:
+#' plot_results <- generate_differential_barplots(differential_results = differential_results,
+#'                                                data_type = "protein")
+#'
 #' @import data.table
+#' @import ggplot2
+#' @import plyr
+#' @import dplyr
+#' @import stringr
+#' @import scales
+#' @import RColorBrewer
 #' @export
 generate_differential_barplots <- function(differential_results, data_type="protein", 
                                            color_contrast=NULL, phospho_ctrl = FALSE) {
@@ -71,15 +91,39 @@ generate_differential_barplots <- function(differential_results, data_type="prot
 }
 
 
-#' Function to generate volcano plots for differential proteins and peptides
+#' Generate Volcano Plots for Differential Expression Analysis
 #'
-#' @param differential_results Object proTN
-#' @details \strong{ProTN}
-#' @examples 
-#' ## ## Example:
-#' ## example
-#' ## example2
+#' This function generates volcano plots for visualizing the differential expression of proteins or peptides. 
+#' It plots the log2 fold change (log2_FC) against the -log10 p-value (or FDR adjusted p-value),
+#' highlighting significant changes based on fold-change and p-value thresholds.
+#'
+#' @param differential_results A list containing the differential analysis results.
+#' @param data_type A character string indicating the type of data to plot. Must be either "protein" or "peptide" (default is NULL).
+#' @param comparison A character string specifying the comparison to plot (e.g., "comparison1").
+#' @param fc_thr A numeric value for the fold-change threshold (default is 0.75).
+#' @param pval_fdr A character string indicating whether to use "p_val" or "p_adj" for the p-value threshold (default is "p_val").
+#' @param pval_thr A numeric value for the p-value threshold (default is 0.05).
+#' @param color_contrast A vector of two colors to use for plotting (optional).
+#'
+#' @return A list containing the volcano plot for the specified comparison.
+#'
+#' @details
+#' This function generates volcano plots to visualize differential expression analysis, 
+#' with fold-change and p-value (or FDR adjusted p-value) on the axes. 
+#' It highlights genes/peptides based on the fold-change and p-value thresholds.
+#'
+#' @examples
+#' # Example usage:
+#' volcano_plot <- generate_volcano_plots(differential_results = differential_results,
+#'                                        comparison = "comparison1",
+#'                                        fc_thr = 1, pval_thr = 0.05)
+#'
 #' @import data.table
+#' @import ggplot2
+#' @import plotly
+#' @import dplyr
+#' @import stringr
+#' @import RColorBrewer
 #' @export
 generate_volcano_plots <- function(differential_results, data_type=NULL, 
                                    comparison=NULL, fc_thr=0.75, pval_fdr = "p_val", 
@@ -145,17 +189,28 @@ generate_volcano_plots <- function(differential_results, data_type=NULL,
 
 
 
-#' Function to perform MDS analysis
+#' MDS Plot
 #'
-#' @param proteome_data Object proTN
-#' @param type \strong{protein} or \strong{peptide}
-#' @return A list of data tables.
-#' @details \strong{ProTN}
-#' @examples 
-#' ## ## Example:
-#' ## example
-#' ## example2
+#' This function generates a Multi-Dimensional Scaling (MDS) plot for either protein or peptide data, based on a Euclidean distance matrix of sample similarities.
+#' It supports the inclusion of phosphoproteomics data if available.
+#'
+#' @param proteome_data A list containing proteome data, including sample annotation and either protein or peptide data matrices.
+#' @param differential_results A list containing the differential analysis results.
+#' @param type Character; specifies the type of data to plot. Options are "protein" or "peptide".
+#'
+#' @return A list containing:
+#'   \item{mds_dt}{Data table containing the MDS coordinates for each sample.}
+#'   \item{plot}{ggplot2 object representing the MDS plot with sample labels and color-coded conditions.}
+#'
+#' @examples
+#' \dontrun{
+#' result <- mds_plot(proteome_data, type = "protein")
+#' print(result$plot)
+#' }
+#'
 #' @import data.table
+#' @import ggplot2
+#' @import ggrepel
 #' @export
 mds_differential_analysis_plot <- function(differential_analysis, proteome_data, type){
   if(("protein_results_long" %in% names(differential_analysis))){
@@ -193,17 +248,27 @@ mds_differential_analysis_plot <- function(differential_analysis, proteome_data,
 }
 
 
-#' Function to perform pca analysis
+#' PCA Plot
 #'
-#' @param proteome_data Object proTN
-#' @param type \strong{protein} or \strong{peptide}
-#' @return A list of data tables.
-#' @details \strong{ProTN}
-#' @examples 
-#' ## ## Example:
-#' ## example
-#' ## example2
+#' This function generates a Principal Component Analysis (PCA) plot for either protein or peptide data based on the first two principal components.
+#' It supports the inclusion of phosphoproteomics data if available and provides a variance explanation for the axes.
+#'
+#' @param proteome_data A list containing proteome data, including sample annotation and either protein or peptide data matrices.
+#' @param type Character; specifies the type of data to plot. Options are "protein" or "peptide".
+#'
+#' @return A list containing:
+#'   \item{pca_dt}{Data table containing the PCA coordinates for each sample.}
+#'   \item{plot}{ggplot2 object representing the PCA plot.}
+#'
+#' @examples
+#' \dontrun{
+#' result <- pca_plot(proteome_data, type = "protein")
+#' print(result$plot)
+#' }
+#'
 #' @import data.table
+#' @import ggplot2
+#' @import ggrepel
 #' @export
 pca_differential_analysis_plot <- function(differential_analysis, proteome_data, type){
   if(("protein_results_long" %in% names(differential_analysis))){

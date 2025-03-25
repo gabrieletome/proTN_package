@@ -1,15 +1,46 @@
-#' Enrichment Analysis
+#' Perform Enrichment Analysis on Differential Results
 #'
-#' @param proteome_data Object proTN
-#' @param pval_fdr "p_adj" else "p_val"
-#' @return A list of data tables.
-#' @details \strong{ProTN}
-#' @examples 
-#' ## ## Example:
-#' ## example
-#' ## example2
+#' This function performs enrichment analysis using the EnrichR tool based on the results
+#' of differential expression analysis (proteomics or phospho-proteomics). The function
+#' generates enrichment results and saves them as both an Excel file and an RData object
+#' for further analysis.
+#'
+#' It supports custom EnrichR databases and allows the user to filter enrichment results 
+#' based on p-value, FDR threshold, and overlap size.
+#'
+#' The function generates two types of output files:
+#' - `enrichment.xlsx`: An Excel file containing the enrichment results.
+#' - `enrichment.RData`: A saved RData file with the filtered enrichment results for further analysis.
+#'
+#' @param differential_results A list containing differential results, either `protein_results_long`
+#'   for proteomics data or `peptide_results_long` for phospho-proteomics data.
+#' @param dirOutput The directory where the results file will be saved. Default is "results_ProTN".
+#' @param subfold_Tab The subfolder within `dirOutput` where the Excel file will be saved. Default is "table".
+#' @param subfold_Dat The subfolder within `dirOutput` where the RData file will be saved. Default is "rdata".
+#' @param pval_fdr_enrich The column name in the differential results containing the p-value after FDR correction.
+#'   Default is `"p_adj"`.
+#' @param pval_enrich_thr The threshold for the p-value (adjusted) to consider significant enrichment.
+#'   Default is 0.05.
+#' @param overlap_size_enrich_thr The threshold for the size of the overlap (number of DEPs in the term) 
+#'   to consider significant enrichment. Default is 5.
+#' @param enrichR_custom_DB A logical flag to indicate if custom EnrichR databases should be used. Default is `FALSE`.
+#' @param enrich_filter_DBs A vector of custom EnrichR databases to filter enrichment results.
+#'   This argument is used if `enrichR_custom_DB` is set to `TRUE`.
+#' @param phospho_ctrl A logical flag to indicate if phospho control data should be excluded.
+#'   Default is `FALSE`.
+#'
+#' @return A data.table containing the enrichment results, including terms, significance scores, 
+#'   overlap sizes, and other relevant information.
+#'
+#' @import writexl
+#' @import dplyr
 #' @import data.table
-#' @export
+#'
+#' @examples
+#' # Example usage
+#' perform_enrichment_analysis(differential_results = differential_results_example,
+#'                             dirOutput = "results_directory")
+#'
 perform_enrichment_analysis <- function(differential_results, dirOutput="results_ProTN", 
                                         subfold_Tab="table", subfold_Dat="rdata",
                                         pval_fdr_enrich="p_adj", pval_enrich_thr=0.05, 

@@ -1,14 +1,22 @@
-#' Plot missing data
+#' Generate Abundance Plot
 #'
-#' @param proteome_data Object proTN
-#' @return A list of data tables.
-#' @details \strong{ProTN}
-#' @examples 
-#' ## ## Example:
-#' ## example
-#' ## example2
-#' @import data.table
+#' This function generates an abundance plot.
+#'
+#' @param proteome_data A list containing `c_anno` or `c_anno_phospho`, `psm_log_prot_df`, and `psm_log_pet_df`.
+#' @param phospho_with_proteome Logical. Whether to include phosphoproteome data alongside proteome data (default: `FALSE`).
+#'
+#' @return A list containing:
+#'   - `dt`: Data table for abundance.
+#'   - `plot`: A ggplot2 object visualizing abundance.
 #' @export
+#'
+#' @import data.table
+#' @import ggplot2
+#'
+#' @examples
+#' \dontrun{
+#'   abundance_plot <- generate_abundance_plot(proteome_data)
+#' }
 generate_abundance_plot <- function(proteome_data, phospho_with_proteome=FALSE) {
   if(("c_anno" %in% names(proteome_data))){
     phospho_with_proteome = FALSE
@@ -60,17 +68,26 @@ generate_abundance_subplot <- function(proteome_data) {
 }
 
 
-#' generate_peptide_distribution_plot
+#' Generate Peptide Distribution Plot
 #'
-#' @param proteome_data Object proTN
-#' @return A list of data tables.
-#' @details \strong{ProTN}
-#' @examples 
-#' ## ## Example:
-#' ## example
-#' ## example2
-#' @import data.table
+#' This function generates a peptide distribution plot for a given proteome dataset.
+#'
+
+#' @param proteome_data A list containing proteome data, including peptide annotation tables.
+#' @param phospho_with_proteome Logical; whether the dataset contains phosphoproteomics data alongside proteomics data. Default is FALSE.
+#' 
+#' @return A list containing:
+#'   - `dt`: Data table for abundance distribution.
+#'   - `plot`: A ggplot2 object visualizing abundance distribution.
 #' @export
+#'
+#' @import data.table
+#' @import ggplot2
+#'
+#' @examples
+#' \dontrun{
+#' result <- generate_peptide_distribution_plot(proteome_data)
+#' }
 generate_peptide_distribution_plot <- function(proteome_data, phospho_with_proteome=FALSE) {
   if(("c_anno" %in% names(proteome_data))){
     phospho_with_proteome = FALSE
@@ -119,18 +136,22 @@ generate_peptide_distribution_subplot <- function(proteome_data) {
 }
 
 
-#' Function to generate abundance distribution plots
+#' Plot Abundance Distribution
 #'
-#' @param proteome_data Object proTN
-#' @param type \strong{protein} or \strong{peptide}
-#' @return A list of data tables.
-#' @details \strong{ProTN}
-#' @examples 
-#' ## ## Example:
-#' ## example
-#' ## example2
-#' @import data.table
+#' This function generates a violin and boxplot representation of log2-normalized abundance values for proteins or peptides
+#' 
+#' @return A list containing:
+#'   - `dt`: A data.table of log2-normalized abundance values with sample annotations
+#'   - `plot`: A ggplot2 object representing the abundance distribution as a violin and boxplot.
 #' @export
+#'
+#' @import data.table
+#' @import ggplot2
+#'
+#' @examples
+#' \dontrun{
+#' result <- plot_abundance_distribution(proteome_data, type = "protein")
+#' }
 plot_abundance_distribution <- function(proteome_data, type) {
   if(("c_anno" %in% names(proteome_data))){
     phospho_with_proteome = FALSE
@@ -180,17 +201,27 @@ plot_abundance_distribution <- function(proteome_data, type) {
 }
 
 
-#' Function to perform MDS analysis
+#' MDS Plot
 #'
-#' @param proteome_data Object proTN
-#' @param type \strong{protein} or \strong{peptide}
-#' @return A list of data tables.
-#' @details \strong{ProTN}
-#' @examples 
-#' ## ## Example:
-#' ## example
-#' ## example2
+#' This function generates a Multi-Dimensional Scaling (MDS) plot for either protein or peptide data, based on a Euclidean distance matrix of sample similarities.
+#' It supports the inclusion of phosphoproteomics data if available.
+#'
+#' @param proteome_data A list containing proteome data, including sample annotation and either protein or peptide data matrices.
+#' @param type Character; specifies the type of data to plot. Options are "protein" or "peptide".
+#'
+#' @return A list containing:
+#'   \item{mds_dt}{Data table containing the MDS coordinates for each sample.}
+#'   \item{plot}{ggplot2 object representing the MDS plot with sample labels and color-coded conditions.}
+#'
+#' @examples
+#' \dontrun{
+#' result <- mds_plot(proteome_data, type = "protein")
+#' print(result$plot)
+#' }
+#'
 #' @import data.table
+#' @import ggplot2
+#' @import ggrepel
 #' @export
 mds_plot <- function(proteome_data, type) {
   if(("c_anno" %in% names(proteome_data))){
@@ -240,17 +271,27 @@ mds_plot <- function(proteome_data, type) {
 }
 
 
-#' Function to perform PCA analysis
+#' PCA Plot
 #'
-#' @param proteome_data Object proTN
-#' @param type \strong{protein} or \strong{peptide}
-#' @return A list of data tables.
-#' @details \strong{ProTN}
-#' @examples 
-#' ## ## Example:
-#' ## example
-#' ## example2
+#' This function generates a Principal Component Analysis (PCA) plot for either protein or peptide data based on the first two principal components.
+#' It supports the inclusion of phosphoproteomics data if available and provides a variance explanation for the axes.
+#'
+#' @param proteome_data A list containing proteome data, including sample annotation and either protein or peptide data matrices.
+#' @param type Character; specifies the type of data to plot. Options are "protein" or "peptide".
+#'
+#' @return A list containing:
+#'   \item{pca_dt}{Data table containing the PCA coordinates for each sample.}
+#'   \item{plot}{ggplot2 object representing the PCA plot.}
+#'
+#' @examples
+#' \dontrun{
+#' result <- pca_plot(proteome_data, type = "protein")
+#' print(result$plot)
+#' }
+#'
 #' @import data.table
+#' @import ggplot2
+#' @import ggrepel
 #' @export
 pca_plot <- function(proteome_data, type) {
   if(("c_anno" %in% names(proteome_data))){
@@ -304,17 +345,29 @@ pca_plot <- function(proteome_data, type) {
 }
 
 
-#' Function to find and plot selected protein abundances
+#' Plot Selected Proteins
 #'
-#' @param proteome_data Object proTN
-#' @param list_protein list protein
-#' @return A list of data tables.
-#' @details \strong{ProTN}
-#' @examples 
-#' ## ## Example:
-#' ## example
-#' ## example2
+#' This function generates a plot for the selected proteins' abundance across different conditions. It creates a crossbar plot 
+#' with error bars representing the average intensity and standard error of selected proteins. If phosphoproteomics data is available, 
+#' it uses the corresponding data, otherwise, it uses the proteomics data.
+#'
+#' @param proteome_data A list containing proteome data, including gene intensity data and sample annotations.
+#' @param list_protein A character vector of gene names to be plotted.
+#'
+#' @return A list containing:
+#'   \item{dt}{Data table of protein intensity values and the corresponding sample and condition information.}
+#'   \item{plot}{ggplot2 object representing the protein abundance plot for the selected proteins.}
+#'
+#' @examples
+#' \dontrun{
+#' result <- plot_selected_proteins(proteome_data, list_protein = c("ProteinA", "ProteinB"))
+#' print(result$plot)
+#' }
+#'
 #' @import data.table
+#' @import ggplot2
+#' @import ggbeeswarm
+#' @import stringr
 #' @export
 plot_selected_proteins <- function(proteome_data, list_protein) {
   if(("c_anno" %in% names(proteome_data))){

@@ -1,17 +1,24 @@
-#' From Proteome Discoverer or MaxQuant files to lists of data tables.
+#' Create Phosphosite Distribution Plot
 #'
-#' This function reads phosphoproteomic data.
+#' This function generates a lollipop plot showing the distribution of phosphorylated residues (S, T, Y)
+#' in phosphoproteomics data, based on the output of either Proteome Discoverer (PD) or MaxQuant (MQ).
 #'
-#' @param software Must be \strong{PD} for Proteome Discoverer or \strong{MQ} for MaxQuant
-#' @param folder Path with files
-#' @return A list of data tables.
-#' @details \strong{ProTN}
-#' @examples 
-#' ## ## Example:
-#' ## example
-#' ## example2
-#' @import data.table
+#' @param proteome_data A list containing `psm_peptide_table`, which includes peptide modification information.
+#' @param software Character. The software used for processing (`"PD"` for Proteome Discoverer, `"MQ"` for MaxQuant).
+#'
+#' @return A list containing:
+#'   - `dt`: A data table with phosphosite percentages.
+#'   - `plot`: A ggplot2 object visualizing the phosphosite distribution.
 #' @export
+#'
+#' @import data.table
+#' @import stringi
+#' @import ggplot2
+#'
+#' @examples
+#' \dontrun{
+#'   phospho_plot <- create_phosphosite_plot(proteome_data, software="MQ")
+#' }
 create_phosphosite_plot <- function(proteome_data, software) {
   psm_peptide_table <- copy(proteome_data$psm_peptide_table)
   

@@ -1,12 +1,13 @@
-#'  Function to save protein and peptide tables
+#' Save Abundance Tables for Proteomics Data
 #'
-#' @param proteome_data Object proTN
-#' @details \strong{ProTN}
-#' @examples 
-#' ## ## Example:
-#' ## example
-#' ## example2
+#' This function processes proteomics and phosphoproteomics data to compute summary statistics and save the results in an Excel file. It includes normalized, imputed, and batch-corrected abundance values for proteins and peptides, per sample and per condition.
+#'
+#' @param proteome_data List; a list containing proteomics or phosphoproteomics data.
+#' @param dirOutput Character; the directory path where the results should be saved. Default is "results_ProTN".
+#' @param subfolder Character; a subfolder within `dirOutput` where the results will be stored. Default is "table".
+#'
 #' @import data.table
+#' @import writexl
 #' @export
 save_abundance_tables <- function(proteome_data, dirOutput="results_ProTN", subfolder="table") {
   message("Saving abundance tables...")
@@ -113,16 +114,29 @@ save_abundance_tables <- function(proteome_data, dirOutput="results_ProTN", subf
   message("Abundance tables saved successfully.")
 }
 
-#'  Function to save differential results tables
+#' Save Differential Analysis Results to Excel
 #'
-#' @param proteome_data Object proTN
-#' @details \strong{ProTN}
-#' @examples 
-#' ## ## Example:
-#' ## example
-#' ## example2
-#' @import data.table
-#' @export
+#' This function saves the results of a differential analysis (proteomics or phospho-proteomics)
+#' into an Excel file. It merges the results with the sample annotation data and generates a
+#' comprehensive Excel file with the analysis results, including protein and peptide-level
+#' differential expression data.
+#'
+#' @param proteome_data A list containing proteomic data.
+#' @param differential_results A list containing differential expression results.
+#' @param dirOutput The directory where the results file will be saved. Default is "results_ProTN".
+#' @param subfolder The subfolder within `dirOutput` where the file will be saved. Default is "table".
+#' @param phospho_ctrl A logical flag to indicate if phospho control data should be excluded.
+#'   Default is `FALSE`.
+#'
+#' @import writexl
+#' @import dplyr
+#'
+#' @examples
+#' # Example usage
+#' save_differential_analysis_table(proteome_data = proteome_data_example,
+#'                                  differential_results = differential_results_example,
+#'                                  dirOutput = "results_directory")
+#'
 save_differential_analysis_table <- function(proteome_data, differential_results, 
                                              dirOutput="results_ProTN", subfolder="table",
                                              phospho_ctrl = FALSE){

@@ -1,13 +1,20 @@
-#' Imputation
+#' Intensity Imputation for Proteomics Data
 #'
-#' @param proteome_data Object proTN
-#' @return A list of data tables.
-#' @details \strong{ProTN}
-#' @examples 
-#' ## ## Example:
-#' ## example
-#' ## example2
+#' This function performs imputation of missing intensity values in a proteomics data matrix. 
+#' It uses PhosR's imputation methods or falls back to median imputation if PhosR's method fails. 
+#' The function works on intensity matrices for both proteome and phosphoproteome data.
+#'
+#' @param proteome_data List; a list containing proteomics data. It must include either `c_anno` (sample annotations for proteome) or `c_anno_proteome` and `c_anno_phospho` (sample annotations for proteome and phosphoproteome, respectively). It also requires `psm_log_prot_df` and `psm_log_pet_df` (log-transformed intensity matrices for proteome and phosphoproteome).
+#'
+#' @return A list with the imputed proteomics data, including the updated `psm_log_prot_df` and `psm_log_pet_df` matrices.
+#'
+#' @examples
+#' \dontrun{
+#' proteome_data_imputed <- impute_intensity(proteome_data)
+#' }
+#'
 #' @import data.table
+#' @import PhosR
 #' @export
 impute_intensity <- function(proteome_data) {
   message("Imputation of intensity matrix in progress...")
@@ -28,7 +35,18 @@ impute_intensity <- function(proteome_data) {
   return(proteome_data)
 }
 
-
+#' Matrix Imputation Function
+#'
+#' This function imputes missing values in a matrix using either PhosR's imputation method (scImpute + tImpute) for data or a median imputation approach if PhosR fails.
+#'
+#' @param mat Data frame or matrix; the intensity matrix to be imputed. The first column must be a peptide ID column, and the rest should contain intensity values.
+#' @param c_anno Data frame; a data frame containing sample annotations, with columns for the sample ID and condition.
+#'
+#' @return A data.table with the imputed intensity matrix, retaining the original peptide IDs.
+#'
+#' @import data.table
+#' @import PhosR
+#' @export
 impute_matrix <- function(mat, c_anno) {
   mat_df <- as.data.frame(mat[,-1], row.names = as.character(mat$ID_peptide))
   mat<-tryCatch({

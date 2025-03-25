@@ -1,15 +1,44 @@
-#' Enrichment Analysis figure
+#' Generate Enrichment Plots from Enrichment Analysis Results
 #'
-#' @param proteome_data Object proTN
-#' @param pval_fdr "p_adj" else "p_val"
-#' @return A list of data tables.
-#' @details \strong{ProTN}
-#' @examples 
-#' ## ## Example:
-#' ## example
-#' ## example2
+#' This function generates a set of plots visualizing the enrichment results obtained 
+#' from a differential expression analysis. It allows for filtering the enrichment results 
+#' based on specific categories, terms, and overlap size. The plots are then saved as PDF files 
+#' for further inspection.
+#'
+#' The function supports multiple categories and allows customization of colors for different 
+#' groups. The resulting plots are saved as individual PDFs and combined into a single PDF file 
+#' if the `save` parameter is set to TRUE.
+#'
+#' @param enr_df A data.table containing the enrichment results, typically generated from 
+#'   the `perform_enrichment_analysis` function.
+#' @param category A vector of categories to filter the enrichment results. 
+#'   Possible values: "all", "up", "down". Default is `c("all")`.
+#' @param enrich_filter_term A vector of terms to filter the enrichment results. Default is `NULL`.
+#'   If provided, only enrichment terms containing any of these words will be kept.
+#' @param overlap_size_enrich_thr The minimum overlap size (number of DEPs) required to retain 
+#'   an enrichment term. Default is 5.
+#' @param save A logical flag to indicate if the resulting plots should be saved to disk. 
+#'   Default is `FALSE`. If `TRUE`, plots are saved as individual PDFs and combined into one.
+#' @param color_contrast A vector of colors to be used for the plots. Default is `NULL`, 
+#'   in which case a default color scheme is applied.
+#' @param dirOutput The directory where the results will be saved. Default is `"results_ProTN"`.
+#' @param subfolder The subfolder within `dirOutput` where the plot files will be saved. 
+#'   Default is `"pics"`.
+#' @param namefile The base name for the combined PDF file if `save` is `TRUE`. Default is `"enrichment_plot"`.
+#'
+#' @return A list of `ggplot` objects (one for each category) that represent the enrichment plots 
+#'   visualizing the significant terms based on the selected categories and filtering criteria.
+#'
+#' @import ggplot2
+#' @import dplyr
 #' @import data.table
-#' @export
+#' @import gridExtra
+#' @import pdf_combine
+#'
+#' @examples
+#' # Example usage
+#' plotlist <- enrichment_figure(enr_df = enr_results, category = c("all"), save = TRUE)
+#'
 enrichment_figure <- function(enr_df, category = c("all"), enrich_filter_term=NULL, 
                               overlap_size_enrich_thr = 5, save=F,
                               color_contrast=NULL, dirOutput="results_ProTN", 

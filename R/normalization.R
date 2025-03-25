@@ -1,13 +1,21 @@
-#' Normalization
+#' Normalize Data
 #'
-#' @param proteome_data Object proTN
-#' @return A list of data tables.
-#' @details \strong{ProTN}
-#' @examples 
-#' ## ## Example:
-#' ## example
-#' ## example2
+#' This function normalizes data by summarizing peptide intensities into protein-level data, applying median-based normalization. 
+#' It also performs median centering for peptide-level log2 data.
+#'
+#' @param proteome_data A list containing proteome data, including peptide annotations, protein-level data, and peptide-level data.
+#'
+#' @return A list containing the normalized proteome data:
+#'   \item{dat_gene}{Data table containing the protein-level normalized data.}
+#'   \item{dat_pep}{Data table containing the peptide-level normalized data.}
+#'
+#' @examples
+#' \dontrun{
+#' proteome_data <- normalization_ProTN(proteome_data)
+#' }
+#'
 #' @import data.table
+#' @import DEqMS
 #' @export
 normalization_ProTN <- function(proteome_data) {
 

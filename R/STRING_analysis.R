@@ -1,15 +1,26 @@
-#' STRING db analysis
+#' STRINGdb Network Analysis
 #'
-#' @param proteome_data Object proTN
-#' @param type \strong{protein} or \strong{peptide}
-#' @return A list of data tables.
-#' @details \strong{ProTN}
-#' @examples 
-#' ## ## Example:
-#' ## example
-#' ## example2
-#' @import data.table
+#' This function performs a STRINGdb network analysis on differentially expressed proteins or peptides.  
+#' It processes input differential expression results and evaluates STRING network interactions.  
+#'
+#' @param differential_results A list containing differential expression results, either at the protein  
+#'   or peptide level. It should include `protein_results_long` or `peptide_results_long`.
+#' @param species Character. The species name (default: `"Homo sapiens"`).
+#' @param dirOutput Character. The main output directory (default: `"results_ProTN"`).
+#' @param subfold_Fig Character. Subfolder for figures (default: `"pics"`).
+#' @param subfold_net Character. Subfolder for STRINGdb network results (default: `"STRINGdb"`).
+#' @param phospho_ctrl Logical. Whether to include phospho-control comparisons (default: `FALSE`).
+#'
+#' @return A data frame with STRINGdb network results.
 #' @export
+#'
+#' @import data.table
+#' @import stringr
+#'
+#' @examples
+#' \dontrun{
+#'   results <- STRINGdb_network(differential_results, species="Mus musculus")
+#' }
 STRINGdb_network <- function(differential_results, species="Homo sapiens", 
                              dirOutput="results_ProTN", subfold_Fig="pics", subfold_net="STRINGdb",
                              phospho_ctrl = FALSE){
