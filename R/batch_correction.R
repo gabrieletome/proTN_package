@@ -13,21 +13,18 @@
 #' It adjusts both peptide and gene data separately, based on the sample annotation provided.
 #'
 #' @examples
-#' # Example usage:
+#' \dontrun{
 #' corrected_data <- batch_correction(proteome_data = proteome_data, batch_col = "batch")
-#'
-#' @import data.table
+#' }
+#' 
 #' @import proBatch
-#' @import dplyr
+#' @import tidyverse
 #' @import tibble
 #' @import stringr
+#' @import data.table
 #' @export
 batch_correction <- function(proteome_data, batch_col="batch") {
   message("A batch effect correction is applied to the dataset using the proBatch package.")
-  
-  batch_annotation <- copy(proteome_data$c_anno)
-  batch_annotation[, order := .I]
-  
   # Batch correction of peptides
   if(("c_anno" %in% names(proteome_data))){
     batch_annotation <- copy(proteome_data$c_anno)

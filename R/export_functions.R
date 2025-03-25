@@ -129,7 +129,7 @@ save_abundance_tables <- function(proteome_data, dirOutput="results_ProTN", subf
 #'   Default is `FALSE`.
 #'
 #' @import writexl
-#' @import dplyr
+#' @import tidyverse
 #'
 #' @examples
 #' # Example usage

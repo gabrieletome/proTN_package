@@ -6,16 +6,8 @@
 # Issue at: https://github.com/TebaldiLab/ProTN/issues                         #
 # PI: Dr. Toma Tebaldi, PhD                                                    #
 ################################################################################
-require(tidyverse)
-require(ggthemes)
-require(enrichR)
-require(extrafont)
-require(parallel)
-require(doParallel)
-require(foreach)
-loadfonts()
 
-### Sahred variables to load ----
+### Shared variables to load ----
 colour_vec<-c("dodgerblue2", "#E31A1C", "green4", "#6A3D9A","#FF7F00",
               "black", "gold1", "skyblue2", "#FB9A99", "palegreen2","#CAB2D6", "#FDBF6F",
               "#9af7c9","#c0a0e6","#f5939a","#5fefee","#e8d388","#8abdff","#e3bf7a","#48c0f6","#ccb86f","#fafeaf",
@@ -35,22 +27,22 @@ enrichment_test <- function(input_vec, # character vector, input genes
                             anno_class="a", # name for annotation class (groups of annotations, a by default)
                             id_separator=";" # character separating overlap ids in the resulting string (; by default)
 ){
-  bg_vec <- background_vec %>% stringr::str_trim() %>% stringr::str_to_upper() %>% 
-    unique() %>% stringr::str_sort() # clean background
+  bg_vec <- background_vec %>% str_trim() %>% str_to_upper() %>% 
+    unique() %>% str_sort() # clean background
   
-  ib_vec <- input_vec %>% stringr::str_trim() %>% stringr::str_to_upper() %>% 
-    unique() %>% stringr::str_sort() %>% 
+  ib_vec <- input_vec %>% str_trim() %>% str_to_upper() %>% 
+    unique() %>% str_sort() %>% 
     magrittr::extract(. %in% bg_vec) # clean input (overlap with bg)
   
-  ab_vec <- anno_vec %>% stringr::str_trim() %>% stringr::str_to_upper() %>% 
-    unique() %>% stringr::str_sort() %>% 
+  ab_vec <- anno_vec %>% str_trim() %>% str_to_upper() %>% 
+    unique() %>% str_sort() %>% 
     magrittr::extract(. %in% bg_vec) # clean anno (overlap with bg)
   
   ov_vec <- ib_vec %>% magrittr::extract(. %in% ab_vec) # overlap between input and anno
   
-  ovinput_vec <- input_vec %>% stringr::str_trim() %>% stringr::str_sort() %>% 
-    unique() %>% magrittr::extract(stringr::str_to_upper(.) %in% ov_vec) # overlap, with input case
-  ovinput_vec <- ovinput_vec[!duplicated(stringr::str_to_upper(ovinput_vec))] # remove of case sensitive duplicates
+  ovinput_vec <- input_vec %>% str_trim() %>% str_sort() %>% 
+    unique() %>% magrittr::extract(str_to_upper(.) %in% ov_vec) # overlap, with input case
+  ovinput_vec <- ovinput_vec[!duplicated(str_to_upper(ovinput_vec))] # remove of case sensitive duplicates
   
   IY<- length(ov_vec) # in input, in anno (overlap)
   IN<- length(ib_vec) - IY # in input, not in anno
@@ -92,9 +84,9 @@ enrichment_enrichr <- function(input_vec, # vector with gene names
                                return_size_in_anno = T # use only genes with at least 1 annotation to calculate input size
 ){ 
   
-  input_vec <- input_vec %>% stringr::str_trim() %>% stringr::str_sort() %>% 
+  input_vec <- input_vec %>% str_trim() %>% str_sort() %>% 
     unique() # clean input vector
-  input_vec <- input_vec[!duplicated(stringr::str_to_upper(input_vec))] # remove case duplicates
+  input_vec <- input_vec[!duplicated(str_to_upper(input_vec))] # remove case duplicates
   
   dbs_default <- as.vector(read_tsv("R/enrichR/dbs_enrichR.txt", col_names = FALSE)[,1]) %>% unlist()
   dbs <- listEnrichrDbs()
@@ -105,24 +97,24 @@ enrichment_enrichr <- function(input_vec, # vector with gene names
   out_df <- plyr::ldply(enrich_list,.id="anno_class")
   rm(enrich_list)
   
-  out_df <- out_df %>% dplyr::rename(anno_name=Term,
+  out_df <- out_df %>% rename(anno_name=Term,
                                      p_value=P.value,
                                      fdr=Adjusted.P.value,
                                      odds_ratio=Odds.Ratio,
                                      combined_score=Combined.Score,
                                      enrichr_ids=Genes)  # rename columns
   
-  transient <- stringr::str_split(out_df$Overlap,"/",simplify=T) # extract overlap and anno size
+  transient <- str_split(out_df$Overlap,"/",simplify=T) # extract overlap and anno size
   out_df$overlap_size <- transient[,1] %>% as.numeric()
   out_df$anno_size <- transient[,2] %>% as.numeric()
   rm(transient)
   
-  out_df <- out_df %>% dplyr::select(-c(Old.P.value,Old.Adjusted.P.value,Overlap)) # remove useless columns
+  out_df <- out_df %>% select(-c(Old.P.value,Old.Adjusted.P.value,Overlap)) # remove useless columns
   out_df$overlap_anno_ratio <- out_df$overlap_size/out_df$anno_size
   
   # sort genes and recover original gene names used for input
-  transient <- out_df %>% dplyr::select(anno_class,anno_name,enrichr_ids) %>% 
-    separate_rows(enrichr_ids,sep=";") %>% dplyr::arrange(anno_class,anno_name,enrichr_ids)
+  transient <- out_df %>% select(anno_class,anno_name,enrichr_ids) %>% 
+    separate_rows(enrichr_ids,sep=";") %>% arrange(anno_class,anno_name,enrichr_ids)
   
   out_df$enrichr_ids<-NULL 
   out_df$input_size <- ifelse(return_size_in_anno, 
@@ -133,9 +125,9 @@ enrichment_enrichr <- function(input_vec, # vector with gene names
                          "enrichr_ids"=toupper(input_vec))
   transient<- left_join(transient,match_df)
   
-  transient <- transient %>% dplyr::mutate(overlap_ids = ifelse(is.na(input_ids),enrichr_ids,input_ids))
-  transient <- transient %>% dplyr::group_by(anno_class,anno_name) %>% 
-    dplyr::summarise("overlap_ids"=str_c(overlap_ids,collapse=";")) %>% dplyr::ungroup() 
+  transient <- transient %>% mutate(overlap_ids = ifelse(is.na(input_ids),enrichr_ids,input_ids))
+  transient <- transient %>% group_by(anno_class,anno_name) %>% 
+    summarise("overlap_ids"=str_c(overlap_ids,collapse=";")) %>% ungroup() 
   
   out_df <- left_join(out_df,transient)
   rm(transient,match_df)
@@ -143,7 +135,7 @@ enrichment_enrichr <- function(input_vec, # vector with gene names
   out_df$overlap_input_ratio<-out_df$overlap_size/out_df$input_size
   out_df$input_name<- input_name
   
-  out_df <-out_df %>% dplyr::select(input_name,anno_name,anno_class,
+  out_df <-out_df %>% select(input_name,anno_name,anno_class,
                                     overlap_size,p_value,fdr,odds_ratio,combined_score,
                                     input_size,anno_size,overlap_input_ratio,overlap_anno_ratio,
                                     overlap_ids) %>% as_tibble()
@@ -180,7 +172,7 @@ enrichment_lollipop <- function(input_df, # input dataframe
                                 sort_y = T # sort rows according to y?
 ){
   # select and rename relevant columns for the plot   
-  plot_df <- input_df %>% dplyr::select(x_col=all_of(x_col),
+  plot_df <- input_df %>% select(x_col=all_of(x_col),
                                         y_col=all_of(y_col),
                                         size_col=any_of(size_col),
                                         shape_col=any_of(shape_col),
@@ -197,10 +189,10 @@ enrichment_lollipop <- function(input_df, # input dataframe
   
   # order rows by x, remove eventual duplicates
   if(sort_y){
-    plot_df<- plot_df %>% dplyr::arrange(-x_col)
+    plot_df<- plot_df %>% arrange(-x_col)
   }
   
-  plot_df<-plot_df[!duplicated(plot_df %>% dplyr::select(any_of(c("y_col","facet_col")))),]
+  plot_df<-plot_df[!duplicated(plot_df %>% select(any_of(c("y_col","facet_col")))),]
   plot_df$y_col<-factor(plot_df$y_col,levels=rev(unique(plot_df$y_col))) # factorization (y_col)
   
   lp <- ggplot(plot_df, aes(x_col, y_col)) +
@@ -274,7 +266,7 @@ enrichment_b2b_lollipop <- function(input_df, # input dataframe
                                     break_vec=seq(0,200,50) # specification of x breaks
 ){
   
-  plot_df <- input_df %>% dplyr::select(bb_col=all_of(bb_col),
+  plot_df <- input_df %>% select(bb_col=all_of(bb_col),
                                         x_col=all_of(x_col),
                                         y_col=all_of(y_col),
                                         size_col=any_of(size_col),
@@ -303,11 +295,11 @@ enrichment_b2b_lollipop <- function(input_df, # input dataframe
   
   # sort y_col
   if(sort_y){
-    plot_df<- plot_df %>% dplyr::arrange(-x_col)
+    plot_df<- plot_df %>% arrange(-x_col)
   }
   
   # remove eventual duplicates and factorize y_col 
-  plot_df<-plot_df[!duplicated(plot_df %>% dplyr::select(any_of(c("bb_col","y_col","facet_col")))),]
+  plot_df<-plot_df[!duplicated(plot_df %>% select(any_of(c("bb_col","y_col","facet_col")))),]
   plot_df$y_col<-factor(plot_df$y_col,levels=rev(unique(plot_df$y_col))) # factorization (y_col)
   
   # define shift (if 1, roughly 1/3 of the plot)
@@ -417,7 +409,7 @@ deps_b2b_lollipop <- function(input_df, # input dataframe
                               position_dodge = 0.06
 ){
   bf<-"Arial"
-  plot_df <- input_df %>% dplyr::select(bb_col=all_of(bb_col),
+  plot_df <- input_df %>% select(bb_col=all_of(bb_col),
                                         x_col=all_of(x_col),
                                         y_col=all_of(y_col),
                                         size_col=any_of(size_col),
@@ -440,11 +432,11 @@ deps_b2b_lollipop <- function(input_df, # input dataframe
   
   # sort y_col
   if(sort_y){
-    plot_df<- plot_df %>% dplyr::arrange(-x_col)
+    plot_df<- plot_df %>% arrange(-x_col)
   }
   
   # remove eventual duplicates and factorize y_col 
-  plot_df<-plot_df[!duplicated(plot_df %>% dplyr::select(any_of(c("bb_col","y_col","facet_col")))),]
+  plot_df<-plot_df[!duplicated(plot_df %>% select(any_of(c("bb_col","y_col","facet_col")))),]
   plot_df$y_col<-factor(plot_df$y_col,levels=rev(unique(plot_df$y_col))) # factorization (y_col)
   
   # define shift (if 1, roughly 1/3 of the plot)
@@ -554,7 +546,7 @@ enrichment_dotmatrix <- function(input_df, # input dataframe
   input_df$color<-ifelse(input_df$Significant==TRUE, color_vec[input_df$input_name], "white")
   
   # select and rename relevant columns for the plot   
-  plot_df <- input_df %>% dplyr::select(x_col=all_of(x_col),
+  plot_df <- input_df %>% select(x_col=all_of(x_col),
                                         y_col=all_of(y_col),
                                         size_col=any_of(size_col),
                                         shape_col=any_of(shape_col),
@@ -571,10 +563,10 @@ enrichment_dotmatrix <- function(input_df, # input dataframe
   
   # order rows by x, remove eventual duplicates
   if(sort_y | sort_x){
-    plot_df<- plot_df %>% dplyr::arrange(-size_col)
+    plot_df<- plot_df %>% arrange(-size_col)
   }
   
-  plot_df<-plot_df[!duplicated(plot_df %>% dplyr::select(any_of(c("x_col","y_col","facet_col")))),]
+  plot_df<-plot_df[!duplicated(plot_df %>% select(any_of(c("x_col","y_col","facet_col")))),]
   
   if(!(is.factor(plot_df$x_col))){
     plot_df$x_col<-factor(plot_df$x_col,levels=(unique(plot_df$x_col)))# factorization (x_col)
@@ -628,7 +620,7 @@ enrichment_geneterm_network <- function(input_df){
   
   col_vec<- c("#B2473E","black")
   
-  plot_df <- input_df %>% dplyr::select(term_col=all_of(term_col),
+  plot_df <- input_df %>% select(term_col=all_of(term_col),
                                         gene_col=all_of(gene_col))
   
   edges_df <- plot_df  %>% separate_rows(gene_col,sep=";")
@@ -746,7 +738,7 @@ resume_bedcoverage<-function(dir, # string: directory with the bed files
     s_name<-str_split(i,dir,simplify=T)[,2] 
     s_name<-str_split(s_name,"\\.",simplify=T)[,1]
     
-    x_tab <- i_tab %>% unite(id_name,all_of(name_cols)) %>% dplyr::select(id_name)
+    x_tab <- i_tab %>% unite(id_name,all_of(name_cols)) %>% select(id_name)
     x_tab[,s_name] <- i_tab[,cov_col]
     
     rm(i_tab)
@@ -884,31 +876,31 @@ limmafnc<-function(type = "PROT",c_anno,dat_gene,psm_count_table,contro_list,exp
     if(type == "PROT"){
       degs_u<-tryCatch({
         DEqMS::outputResult(fit3,coef_col = comp) %>% 
-          dplyr::rename("log2_FC"="logFC",
+          rename("log2_FC"="logFC",
                         "log2_expr"="AveExpr",
                         "p_val"="sca.P.Value",
                         "p_adj"="sca.adj.pval",
-                        "id"="gene") %>% dplyr::arrange(id)
+                        "id"="gene") %>% arrange(id)
       }, 
       error=function(cond){
         colnames(fit3$sca.t)<-colnames(fit3$coefficients)
         colnames(fit3$sca.p)<-colnames(fit3$coefficients)
         DEqMS::outputResult(fit3,coef_col = comp) %>% 
-          dplyr::rename("log2_FC"="logFC",
+          rename("log2_FC"="logFC",
                         "log2_expr"="AveExpr",
                         "p_val"="sca.P.Value",
                         "p_adj"="sca.adj.pval",
-                        "id"="gene") %>% dplyr::arrange(id)
+                        "id"="gene") %>% arrange(id)
       })
     }else if(type == "PEP"){
       degs_u<-topTable(fit3, coef = comp, number = Inf) %>% 
-        dplyr::rename("log2_FC"="logFC",
+        rename("log2_FC"="logFC",
                       "log2_expr"="AveExpr",
                       "p_val"="P.Value",
-                      "p_adj"="adj.P.Val") %>% dplyr::mutate("id"=rownames(topTable(fit3, coef = comp, number = Inf))) %>% dplyr::select(-c(t,B))
+                      "p_adj"="adj.P.Val") %>% mutate("id"=rownames(topTable(fit3, coef = comp, number = Inf))) %>% select(-c(t,B))
     }
     degs_u$log2_expr <- 2^degs_u$log2_FC
-    degs_u <- degs_u %>% dplyr::rename("FC"="log2_expr")
+    degs_u <- degs_u %>% rename("FC"="log2_expr")
     rownames(degs_u)<-degs_u$id
     #Recalculate the log2_expr
     # name_log2_expr<-paste0(names(contrast[which(contrast[,comp] != 0),comp]),"_avg")
@@ -924,9 +916,9 @@ limmafnc<-function(type = "PROT",c_anno,dat_gene,psm_count_table,contro_list,exp
                    degs_u[,pval_col]<=pval_thr),"class"]<-"-"
     
     
-    degs_l_df<-bind_rows(degs_l_df,degs_u %>% dplyr::select("id","comp","class","log2_FC","FC","p_val","p_adj"))
+    degs_l_df<-bind_rows(degs_l_df,degs_u %>% select("id","comp","class","log2_FC","FC","p_val","p_adj"))
     
-    degs_add<- degs_u %>% dplyr::select("class","log2_FC","FC","p_val","p_adj")
+    degs_add<- degs_u %>% select("class","log2_FC","FC","p_val","p_adj")
     colnames(degs_add)<-paste(comp,colnames(degs_add),sep="_")
     degs_w_df<-merge(degs_w_df,degs_add,by="row.names",all=TRUE)
     rownames(degs_w_df)<-degs_w_df$Row.names
@@ -951,9 +943,9 @@ enrichRfnc<-function(in_df, pval_fdr_enrich, pval_enrich_thr, overlap_size_enric
   
   for(comp_c in unique(in_df$comp)){
     
-    DEGs_lists[[paste0(comp_c,"_all")]]<-in_df %>% dplyr::filter(comp==comp_c,class!="=") %>% pull(id) %>% unique() %>% sort()
-    DEGs_lists[[paste0(comp_c,"_up")]]<-in_df %>% dplyr::filter(comp==comp_c,class=="+") %>% pull(id) %>% unique() %>% sort()
-    DEGs_lists[[paste0(comp_c,"_down")]]<-in_df %>% dplyr::filter(comp==comp_c,class=="-") %>% pull(id) %>% unique() %>% sort()
+    DEGs_lists[[paste0(comp_c,"_all")]]<-in_df %>% filter(comp==comp_c,class!="=") %>% pull(id) %>% unique() %>% sort()
+    DEGs_lists[[paste0(comp_c,"_up")]]<-in_df %>% filter(comp==comp_c,class=="+") %>% pull(id) %>% unique() %>% sort()
+    DEGs_lists[[paste0(comp_c,"_down")]]<-in_df %>% filter(comp==comp_c,class=="-") %>% pull(id) %>% unique() %>% sort()
     
   }
   ncores <- min(detectCores()-2, length(unique(in_df$comp)))
@@ -1054,7 +1046,7 @@ find_communities <- function(genes, thr_score,string_gene_df){
   
   # community detection ----
   
-  i_links <- dt_links %>% dplyr::filter(from %in% genes, to %in% genes, weight>thr_score)
+  i_links <- dt_links %>% filter(from %in% genes, to %in% genes, weight>thr_score)
   i_nodes <- data.frame("id"=unique(c(i_links$from,i_links$to)))
   i_net <- igraph::graph_from_data_frame(d=i_links, vertices=i_nodes, directed=F)
   i_net_2<-igraph::simplify(i_net)
@@ -1063,65 +1055,16 @@ find_communities <- function(genes, thr_score,string_gene_df){
   i_comms_df<- data.frame("gene" = i_clp$names,
                           "comm_o" = as.factor(i_clp$membership),stringsAsFactors = F)
   
-  comms_size <- i_comms_df %>% dplyr::group_by(comm_o) %>% dplyr::summarise("size"=n()) %>%
-    dplyr::ungroup() %>% dplyr::arrange(-size) %>% dplyr::mutate("comm_n" = factor(order(-size))) %>% dplyr::select(comm_o,comm_n)
+  comms_size <- i_comms_df %>% group_by(comm_o) %>% summarise("size"=n()) %>%
+    ungroup() %>% arrange(-size) %>% mutate("comm_n" = factor(order(-size))) %>% select(comm_o,comm_n)
   i_comms_df <- left_join(i_comms_df,comms_size)
   rownames(i_comms_df)<-i_comms_df$gene
   
   i_comms_list<-list()
   for(comm_x in sort(unique(i_comms_df$comm_n))){
-    i_comms_list[[comm_x]] <- i_comms_df %>% dplyr::filter(comm_n==comm_x) %>% pull(gene)
+    i_comms_list[[comm_x]] <- i_comms_df %>% filter(comm_n==comm_x) %>% pull(gene)
   }
   return(list("i_comms_df"=i_comms_df, "i_comms_list"=i_comms_list, "dt_links"=dt_links))
-}
-
-
-### Function to plot the PPI networks in multithreading ----
-
-plot_networks<-function(g, scr_thr, bf, comp, colour_vector, bs, dirOutput_net, layouts){
-  library(parallel)
-  library(ggraph)
-  library(ggplot2)
-  library(doParallel)
-  library(foreach)
-  library(qpdf)
-  #Multicore parallelizatio of plot
-  ncores <- length(layouts)
-  cluster_ext <- makeCluster(ncores, type = "SOCK")
-  registerDoParallel(cl = cluster_ext)
-  name_list=vector()
-  name_list<-foreach (l = layouts, .packages = c("ggraph"), .combine = 'c') %dopar% {
-    tryCatch({
-      l_list<-ggraph(g,layout=l) +
-        # geom_edge_link2(aes(edge_width=(0.05+abs(weight-scr_thr)/400), alpha = (weight/1000)-0.5),edge_colour = "grey70") +
-        geom_edge_link2(aes(edge_width=weight, alpha = (weight/1000)-0.5),edge_colour = "grey70") +
-        
-        # ggtitle(paste0("Network of ",comp),subtitle = paste0("Layout: ",l))+
-        scale_edge_width(range = c(0.1,1)) +
-        geom_node_point(aes(fill = Community, size = Degree), shape = 21,pch='.') +
-        geom_node_text(aes(label = name, color=Community),family = bf, repel = TRUE, size=bs*0.3, show.legend = FALSE) +
-        scale_fill_manual(values = colour_vector[[comp]]) +
-        # scale_edge_width_continuous(name=c("Weigth","Size","Community")) +
-        scale_color_manual(values = colour_vector[[comp]]) +
-        theme_bw(base_size = bs, base_family = bf) +
-        theme(legend.position = "bottom", panel.grid = element_blank(),
-              panel.border = element_blank(), panel.background = element_blank(),
-              axis.text = element_blank(), axis.ticks = element_blank(), axis.title = element_blank()) +
-        guides(text=F, colour = guide_legend(override.aes = list(size=5)), edge_alpha="none")
-      l_list$labels$edge_width<-"STRINGdb score"
-      # l_list$labels$edge_alpha<-"Weight"
-      l_list
-      ggsave(paste0(dirOutput_net,gsub(comp, pattern = "\\/", replacement="vs"),"_",l,"_network.pdf"), l_list, device=cairo_pdf, width = 20, height = 12, units = c("in"))
-      #
-      print(paste0(dirOutput_net,gsub(comp, pattern = "\\/", replacement="vs"),"_",l,"_network.pdf"))
-      # name_list<-append(name_list,paste0(dirOutput_net,comp,"_",l,"_network.pdf"))
-    }, error=function(cond){print("Error: Error occur during the plot of network.\n")})
-  }
-  tryCatch({
-    pdf_combine(input = name_list, output = paste0(dirOutput_net,comp,"_network.pdf"))
-    unlink(name_list)
-  }, error=function(cond){print("Error: Not possible combine PDFs network in single file.\n")})
-  stopCluster(cluster_ext)
 }
 
 
@@ -1312,28 +1255,28 @@ limmafnc_dt <- function(type = "PROT", c_anno, dat_gene, psm_count_table, formul
     if(type == "PROT"){
       degs_u<-tryCatch({
         DEqMS::outputResult(fit3,coef_col = comp) %>% 
-          dplyr::rename("log2_FC"="logFC",
+          rename("log2_FC"="logFC",
                         "log2_expr"="AveExpr",
                         "p_val"="sca.P.Value",
                         "p_adj"="sca.adj.pval",
-                        "id"="gene") %>% dplyr::arrange(id)
+                        "id"="gene") %>% arrange(id)
       }, 
       error=function(cond){
         colnames(fit3$sca.t) <- colnames(fit3$coefficients)
         colnames(fit3$sca.p) <- colnames(fit3$coefficients)
         DEqMS::outputResult(fit3,coef_col = comp) %>% 
-          dplyr::rename("log2_FC"="logFC",
+          rename("log2_FC"="logFC",
                         "log2_expr"="AveExpr",
                         "p_val"="sca.P.Value",
                         "p_adj"="sca.adj.pval",
-                        "id"="gene") %>% dplyr::arrange(id)
+                        "id"="gene") %>% arrange(id)
       })
     }else if(type == "PEP"){
       degs_u<-topTable(fit3, coef = comp, number = Inf) %>% 
-        dplyr::rename("log2_FC"="logFC",
+        rename("log2_FC"="logFC",
                       "log2_expr"="AveExpr",
                       "p_val"="P.Value",
-                      "p_adj"="adj.P.Val") %>% dplyr::mutate("id"=rownames(topTable(fit3, coef = comp, number = Inf))) %>% dplyr::select(-c(t,B))
+                      "p_adj"="adj.P.Val") %>% mutate("id"=rownames(topTable(fit3, coef = comp, number = Inf))) %>% select(-c(t,B))
     }
     
     degs_u <- as.data.table(degs_u)

@@ -12,7 +12,7 @@ output:
 
 # Tester ProTN package
 
-```{r load functions, warning=F, message=FALSE, results='hide'}
+```{r load functions, warning=F, message=FALSE, results='hide', eval=FALSE}
 setwd("/home/gabriele/Desktop/UNITN/proTN_package/")
 outputdir = "results_proteome"
 suppressPackageStartupMessages(suppressMessages(suppressWarnings({

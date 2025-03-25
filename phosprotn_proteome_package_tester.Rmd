@@ -12,7 +12,7 @@ output:
 
 # Tester PhosProTN package
 
-```{r load functions, warning=F, message=FALSE, results='hide'}
+```{r load functions, warning=F, message=FALSE, results='hide', eval=FALSE}
 # setwd("/home/gabriele/Desktop/UNITN/proTN_package/")
 outputdir = "results_phospho_proteome"
 suppressPackageStartupMessages(suppressMessages(suppressWarnings({
@@ -39,6 +39,13 @@ suppressPackageStartupMessages(suppressMessages(suppressWarnings({
   library(svgPanZoom)
   library(SummarizedExperiment)
   library(parallel)
+  
+  library(tidyverse)
+  library(ggthemes)
+  library(extrafont)
+  library(doParallel)
+  library(foreach)
+  loadfonts()
 })))
 ```
 

@@ -30,10 +30,10 @@
 #'   visualizing the significant terms based on the selected categories and filtering criteria.
 #'
 #' @import ggplot2
-#' @import dplyr
+#' @import tidyverse
 #' @import data.table
 #' @import gridExtra
-#' @import pdf_combine
+#' @import qpdf
 #'
 #' @examples
 #' # Example usage

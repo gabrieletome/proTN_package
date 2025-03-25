@@ -16,17 +16,18 @@
 #' lollipop plot to visualize the differential expression of proteins or peptides.
 #'
 #' @examples
-#' # Example usage:
+#' \dontrun{
 #' plot_results <- generate_differential_barplots(differential_results = differential_results,
 #'                                                data_type = "protein")
-#'
-#' @import data.table
+#' }
+#' 
 #' @import ggplot2
-#' @import plyr
-#' @import dplyr
+#' @importFrom plyr round_any
+#' @import tidyverse
 #' @import stringr
 #' @import scales
 #' @import RColorBrewer
+#' @import data.table
 #' @export
 generate_differential_barplots <- function(differential_results, data_type="protein", 
                                            color_contrast=NULL, phospho_ctrl = FALSE) {
@@ -113,15 +114,16 @@ generate_differential_barplots <- function(differential_results, data_type="prot
 #' It highlights genes/peptides based on the fold-change and p-value thresholds.
 #'
 #' @examples
-#' # Example usage:
+#' \dontrun{
 #' volcano_plot <- generate_volcano_plots(differential_results = differential_results,
 #'                                        comparison = "comparison1",
 #'                                        fc_thr = 1, pval_thr = 0.05)
-#'
+#' }
+#' 
+#' @import tidyverse
 #' @import data.table
 #' @import ggplot2
-#' @import plotly
-#' @import dplyr
+#' @importFrom plotly ggplotly
 #' @import stringr
 #' @import RColorBrewer
 #' @export
