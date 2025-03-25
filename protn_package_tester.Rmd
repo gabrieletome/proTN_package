@@ -14,35 +14,48 @@ output:
 
 ```{r load functions, warning=F, message=FALSE, results='hide'}
 setwd("/home/gabriele/Desktop/UNITN/proTN_package/")
-lapply(list.files("./R", pattern = ".R", full.names = T), function(x){if(!file.info(x)$isdir){source(x)}})
-
-# Package requided
-library(data.table)
-library(readxl)
-library(stringi)
-library(ggplot2)
-library(DEqMS)
-library(proBatch)
-library(writexl)
-library(ggrepel)
-library(ggbeeswarm)
-library(limma)
-library(plotly)
-library(enrichR)
-library(qpdf)
-library(STRINGdb)
-library(PhosR)
+outputdir = "results_proteome"
+suppressPackageStartupMessages(suppressMessages(suppressWarnings({
+  lapply(list.files("./R", pattern = ".R", full.names = T), function(x){if(!file.info(x)$isdir){source(x)}})
+  
+  # Package requided
+  library(data.table)
+  library(readxl)
+  library(stringi)
+  library(ggplot2)
+  library(DEqMS)
+  library(proBatch)
+  library(writexl)
+  library(ggrepel)
+  library(ggbeeswarm)
+  library(limma)
+  library(plotly)
+  library(enrichR)
+  library(qpdf)
+  library(STRINGdb)
+  library(PhosR)
+  
+  library(pheatmap)
+  library(svgPanZoom)
+  library(SummarizedExperiment)
+  library(parallel)
+})))
 ```
 
 
 # Test proteomics pipeline
 
 ```{r read_proteomics_MQ}
-proteome_data <- read_proteomics(software = "MQ", folder = "./data/case_study_proteomics/case_study_1/", peptide_filename = "evidence")
+proteome_data <- read_proteomics(software = "MQ",
+                                 folder = "./data/case_study_proteomics/case_study_1/",
+                                 peptide_filename = "evidence")
 ```
 
 ```{r read_proteomics_PD, eval=FALSE}
-proteome_data <- read_proteomics(software = "PD", folder = "data/PD/proteome", annotation_filename = "INPUT", proteinGroup_filename = "PROT.xlsx")
+proteome_data <- read_proteomics(software = "PD",
+                                 folder = "data/PD/proteome",
+                                 annotation_filename = "INPUT",
+                                 proteinGroup_filename = "PROT.xlsx")
 ```
 
 
@@ -72,45 +85,54 @@ normalized_data
 
 ```{r batch_function, eval=FALSE}
 # TODO: NEED TO TEST
-batch_coor_data <- normalization_ProTN(proteome_data = normalized_data, batch_col = "batch")
+batch_coor_data <- normalization_ProTN(proteome_data = normalized_data,
+                                       batch_col = "batch")
 batch_coor_data
 ```
 
 # Test Exporter
 
-```{r exporter, eval=FALSE}
-save_abundance_tables(proteome_data = normalized_data)
+```{r exporter}
+save_abundance_tables(proteome_data = normalized_data, 
+                      dirOutput=outputdir)
 ```
 
 # Test figure distribution normalized
 
 ```{r normalized_plot}
-prot_plot <- plot_abundance_distribution(proteome_data = normalized_data, type = "protein")
+prot_plot <- plot_abundance_distribution(proteome_data = normalized_data,
+                                         type = "protein")
 prot_plot
-pep_plot <- plot_abundance_distribution(proteome_data = normalized_data, type = "peptide")
+pep_plot <- plot_abundance_distribution(proteome_data = normalized_data,
+                                        type = "peptide")
 pep_plot
 ```
 
 # MDS AND PCA
 
 ```{r mds_normalized}
-prot_mds <- mds_plot(proteome_data = normalized_data, type = "protein")
+prot_mds <- mds_plot(proteome_data = normalized_data,
+                     type = "protein")
 prot_mds
-pep_mds <- mds_plot(proteome_data = normalized_data, type = "peptide")
+pep_mds <- mds_plot(proteome_data = normalized_data,
+                    type = "peptide")
 pep_mds
 ```
 
 ```{r pca_normalized}
-prot_mds <- pca_plot(proteome_data = normalized_data, type = "protein")
+prot_mds <- pca_plot(proteome_data = normalized_data,
+                     type = "protein")
 prot_mds
-pep_mds <- pca_plot(proteome_data = normalized_data, type = "peptide")
+pep_mds <- pca_plot(proteome_data = normalized_data,
+                    type = "peptide")
 pep_mds
 ```
 
 # List protein boxplot
 
 ```{r boxplot_protein}
-prot_boxplot <- plot_selected_proteins(proteome_data = normalized_data, list_protein = c("Aaas","Aacs"))
+prot_boxplot <- plot_selected_proteins(proteome_data = normalized_data,
+                                       list_protein = c("Aaas","Aacs"))
 prot_boxplot
 ```
 
@@ -120,18 +142,25 @@ prot_boxplot
 ```{r differential_analysis}
 formule_contrast <- list("A2016vsWT"="A2016T-wt")
 
-differential_results <- differential_analysis(proteome_data = normalized_data, formule_contrast = formule_contrast, 
-                                              fc_thr=0.75, pval_fdr = "p_val", pval_thr=0.05, signal_thr=0)
+differential_results <- differential_analysis(proteome_data = normalized_data,
+                                              formule_contrast = formule_contrast,
+                                              fc_thr=0.75,
+                                              pval_fdr = "p_val",
+                                              pval_thr=0.05,
+                                              signal_thr=0)
 
 differential_results
 
-save_differential_analysis_table(proteome_data = normalized_data, differential_results = differential_results, 
-                                 dirOutput="results_ProTN", subfolder="table")
+save_differential_analysis_table(proteome_data = normalized_data,
+                                 differential_results = differential_results,
+                                 dirOutput=outputdir)
 
-ploft_diff_number <- generate_differential_barplots(differential_results, data_type="protein")
+ploft_diff_number <- generate_differential_barplots(differential_results,
+                                                    data_type="protein")
 ploft_diff_number
 
-ploft_diff_number <- generate_differential_barplots(differential_results, data_type="peptide")
+ploft_diff_number <- generate_differential_barplots(differential_results,
+                                                    data_type="peptide")
 ploft_diff_number
 # chunk: diff_analysis
 ```
@@ -139,10 +168,14 @@ ploft_diff_number
 # Test vulcano plot
 
 ```{r vulcano_plot}
-generate_volcano_plots_protein<-generate_volcano_plots(differential_results, data_type="protein", comparison="A2016vsWT")
+generate_volcano_plots_protein<-generate_volcano_plots(differential_results,
+                                                       data_type="protein",
+                                                       comparison="A2016vsWT")
 generate_volcano_plots_protein
 
-generate_volcano_plots_peptide<-generate_volcano_plots(differential_results, data_type="peptide", comparison="A2016vsWT")
+generate_volcano_plots_peptide<-generate_volcano_plots(differential_results,
+                                                       data_type="peptide",
+                                                       comparison="A2016vsWT")
 generate_volcano_plots_peptide
 ```
 
@@ -150,37 +183,55 @@ generate_volcano_plots_peptide
 # MDS differential analysis
 
 ```{r mds_differential}
-mds_diff <- mds_differential_analysis_plot(differential_analysis = differential_results, proteome_data = normalized_data, type = "protein")
+mds_diff <- mds_differential_analysis_plot(differential_analysis = differential_results,
+                                           proteome_data = normalized_data,
+                                           type = "protein")
 mds_diff
 
-mds_diff_pep <- mds_differential_analysis_plot(differential_analysis = differential_results, proteome_data = normalized_data, type = "peptide")
+mds_diff_pep <- mds_differential_analysis_plot(differential_analysis = differential_results,
+                                               proteome_data = normalized_data,
+                                               type = "peptide")
 mds_diff_pep
 ```
 
 # pca differential analysis
 
 ```{r pca_differential}
-pca_diff <- pca_differential_analysis_plot(differential_analysis = differential_results, proteome_data = normalized_data, type = "protein")
+pca_diff <- pca_differential_analysis_plot(differential_analysis = differential_results,
+                                           proteome_data = normalized_data,
+                                           type = "protein")
 pca_diff
 
-pca_diff_pep <- pca_differential_analysis_plot(differential_analysis = differential_results, proteome_data = normalized_data, type = "peptide")
+pca_diff_pep <- pca_differential_analysis_plot(differential_analysis = differential_results,
+                                               proteome_data = normalized_data,
+                                               type = "peptide")
 pca_diff_pep
 ```
 
 # TEST enrichement
 
 ```{r enrichment}
-enrichemnt_results <- perform_enrichment_analysis(differential_results = differential_results, enrichR_custom_DB = T,
+enrichemnt_results <- perform_enrichment_analysis(differential_results = differential_results,
+                                                  enrichR_custom_DB = T,
                                                   enrich_filter_DBs=c("Human_Gene_Atlas","BioPlanet_2019","KEGG_2021_Human",
-                                                                      "Reactome_2022","ChEA_2022"))
+                                                                      "Reactome_2022","ChEA_2022"),
+                                                  dirOutput=outputdir)
 
-plots_all <- enrichment_figure(enr_df = enrichemnt_results, category = c("all"), save=T)
+plots_all <- enrichment_figure(enr_df = enrichemnt_results,
+                               category = c("all"),
+                               save=T,
+                               dirOutput=outputdir)
 plots_all
 
-plots_down <- enrichment_figure(enr_df = enrichemnt_results, category = c("down","up"), save=F)
+plots_down <- enrichment_figure(enr_df = enrichemnt_results,
+                                category = c("down","up"),
+                                save=F)
 plots_down
 
-plots_terms <- enrichment_figure(enr_df = enrichemnt_results, category = c("down","up"), save=F, enrich_filter_term = c("cell","pathways"))
+plots_terms <- enrichment_figure(enr_df = enrichemnt_results,
+                                 category = c("down","up"),
+                                 save=F,
+                                 enrich_filter_term = c("cell","pathways"))
 plots_terms
 ```
 
@@ -194,8 +245,10 @@ plots_terms
 
 ```{r string network}
 
-strindb_res <- STRINGdb_network(differential_results = differential_results, species="Homo sapiens")
+strindb_res <- STRINGdb_network(differential_results = differential_results,
+                                species="Homo sapiens", 
+                                dirOutput=outputdir)
 strindb_res  
-  
+
 ```
 

@@ -10,12 +10,14 @@
 #' ## example2
 #' @import data.table
 #' @export
-enrichment_figure <- function(enr_df, category = c("all"), enrich_filter_term=NULL, overlap_size_enrich_thr = 5, save=F,
-                              color_contrast=NULL, dirOutput="results_ProTN", subfolder="pics", namefile="enrichement_plot"){
+enrichment_figure <- function(enr_df, category = c("all"), enrich_filter_term=NULL, 
+                              overlap_size_enrich_thr = 5, save=F,
+                              color_contrast=NULL, dirOutput="results_ProTN", 
+                              subfolder="pics", namefile="enrichement_plot"){
   # Esecuzione delle funzioni
   enr_sele_df <- enrichment_filter(enr_df, category, overlap_size_enrich_thr, enrich_filter_term)
   category_db <- generate_category_db(enr_sele_df)
-  plotlist <- generate_plotlist(enr_sele_df, category_db, color_contrast)
+  plotlist <- generate_plotlist(enr_sele_df, category, category_db, color_contrast)
   if(save){save_plotlist(plotlist, enr_sele_df, category_db, dirOutput, subfolder, namefile)}
   
   return(plotlist)
@@ -60,7 +62,7 @@ enrichment_filter <- function(enr_df, category = c("all"), overlap_size_enrich_t
                           Significant == "TRUE" & 
                           grepl(paste0("_",category,"$"), input_name)]
   }
-  enr_sele_df <- enr_sele_df[, .SD[overlap_size %in% tail(sort(unique(overlap_size)), 10)], by=c("input_name","anno_class")]
+  enr_sele_df <- enr_sele_df[, .SD[overlap_size %in% tail(sort((overlap_size)), 10)], by=c("input_name","anno_class")]
   setorder(enr_sele_df, -overlap_size)
   enr_sele_names <- unique(enr_sele_df[, .(anno_class, anno_name)])
   enr_sele_df <- enr_sele_df[enr_sele_names, on = .(anno_class, anno_name)]
@@ -84,11 +86,11 @@ generate_category_db <- function(enr_sele_df) {
 }
 
 # Funzione per generare la lista di plot
-generate_plotlist <- function(enr_sele_df, category_db, color_contrast=NULL) {
+generate_plotlist <- function(enr_sele_df, category, category_db, color_contrast=NULL) {
   plotlist <- list()
   
   if(is.null(color_contrast)){
-    color_contrast=c("#664069","#8A628D")
+    color_contrast=if(length(category)==1){ c("#664069") } else{ c("#664069","#8A628D") }
     col_vec <- rep(as.vector(t(color_contrast)), uniqueN(enr_sele_df$input_name))
     message("Set default colors.")
   } else{
@@ -96,7 +98,7 @@ generate_plotlist <- function(enr_sele_df, category_db, color_contrast=NULL) {
   }
   
   tryCatch({
-    names(col_vec) <- unique(enr_sele_df$input_name)
+    names(col_vec) <- (unique(enr_sele_df$input_name))
   }, error = function(cond){
     stop("Color must be a vector of the same length of the number of comparison.")
   })

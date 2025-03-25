@@ -10,7 +10,9 @@
 #' ## example2
 #' @import data.table
 #' @export
-STRINGdb_network <- function(differential_results, species="Homo sapiens", dirOutput="results_ProTN", subfold_Fig="pics", subfold_net="STRINGdb"){
+STRINGdb_network <- function(differential_results, species="Homo sapiens", 
+                             dirOutput="results_ProTN", subfold_Fig="pics", subfold_net="STRINGdb",
+                             phospho_ctrl = FALSE){
   #Read Taxonomy
   codtax <- fread("R/NCBI_taxID/subset_tax.csv")
   tryCatch({
@@ -18,7 +20,23 @@ STRINGdb_network <- function(differential_results, species="Homo sapiens", dirOu
     taxonomy_NCBI <- codtax[name == taxonomy_NCBI, taxid]
   }, error = function(cond){stop(paste0("Species not present in the db. Select one of the following: ",paste(codtax$name,collapse = ",")))})
   
-  deps_l_df <- copy(differential_results$protein_results_long)
+  if(("protein_results_long" %in% names(differential_results))){
+    phospho_with_proteome = FALSE
+    deps_l_df <- copy(differential_results$protein_results_long)
+  } else if(!("protein_results_long" %in% names(differential_results)) & 
+            ("peptide_results_long" %in% names(differential_results))){
+    phospho_with_proteome = TRUE
+    deps_l_df <- copy(differential_results$peptide_results_long)
+    deps_l_df[, id := tstrsplit(id, "_", keep = 1)[[1]]]
+    
+    if(!phospho_ctrl){
+      compToKeep <- unique(grep("_Phospho_CTRL", deps_l_df$comp, value = T, invert = T))
+      deps_l_df <- deps_l_df[comp %in% compToKeep]
+    }
+    
+  } else{
+    stop("Error in differential results paramenter! Verify the presence of protein_results_long or peptide_results_long")
+  }
   
   res <- select_regulated_genes(deps_l_df)
   

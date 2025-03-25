@@ -10,18 +10,12 @@
 #' @import data.table
 #' @export
 generate_abundance_plot <- function(proteome_data, phospho_with_proteome=FALSE) {
-  if(("c_anno" %in% names(proteome_data)) & !phospho_with_proteome){
-    if("c_anno_proteome" %in% names(proteome_data)){
-      warning("Data seems from phosphoproteomic with proteome control. Next time change: `phospho_with_proteome=TRUE`")
-      phospho_with_proteome = TRUE
-    } else{
-      stop("c_anno not present!")
-    }
-  }
-  
-  if(("c_anno" %in% names(proteome_data)) & phospho_with_proteome){
-    warning("Data are not phosphoproteomic with proteome control. Next time change: `phospho_with_proteome=FALSE`")
+  if(("c_anno" %in% names(proteome_data))){
     phospho_with_proteome = FALSE
+  } else if(("c_anno_phospho" %in% names(proteome_data))){
+    phospho_with_proteome = TRUE
+  } else{
+    stop("Missing sample annotation!")
   }
   
   result <- list()
@@ -78,18 +72,12 @@ generate_abundance_subplot <- function(proteome_data) {
 #' @import data.table
 #' @export
 generate_peptide_distribution_plot <- function(proteome_data, phospho_with_proteome=FALSE) {
-  if(("c_anno" %in% names(proteome_data)) & !phospho_with_proteome){
-    if("c_anno_proteome" %in% names(proteome_data)){
-      warning("Data seems from phosphoproteomic with proteome control. Next time change: `phospho_with_proteome=TRUE`")
-      phospho_with_proteome = TRUE
-    } else{
-      stop("c_anno not present!")
-    }
-  }
-  
-  if(("c_anno" %in% names(proteome_data)) & phospho_with_proteome){
-    warning("Data are not phosphoproteomic with proteome control. Next time change: `phospho_with_proteome=FALSE`")
+  if(("c_anno" %in% names(proteome_data))){
     phospho_with_proteome = FALSE
+  } else if(("c_anno_phospho" %in% names(proteome_data))){
+    phospho_with_proteome = TRUE
+  } else{
+    stop("Missing sample annotation!")
   }
   
   result <- list()

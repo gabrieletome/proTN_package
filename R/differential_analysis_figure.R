@@ -8,10 +8,25 @@
 #' ## example2
 #' @import data.table
 #' @export
-generate_differential_barplots <- function(differential_results, data_type="protein", color_contrast=NULL) {
+generate_differential_barplots <- function(differential_results, data_type="protein", 
+                                           color_contrast=NULL, phospho_ctrl = FALSE) {
+  if(("protein_results_long" %in% names(differential_results))){
+    phospho_with_proteome = FALSE
+  } else if(("peptide_results_long" %in% names(differential_results))){
+    phospho_with_proteome = TRUE
+    data_type="peptide"
+  } else{
+    stop("Error in differential results paramenter! Verify the presence of protein_results_long or peptide_results_long")
+  }
+  
   deps_l_df <- if (data_type == "protein"){ copy(differential_results$protein_results_long)
   } else if(data_type == "peptide") { copy(differential_results$peptide_results_long)
       } else{stop("data_type MUST be \"protein\" or \"peptide\"")}
+  
+  if(!phospho_ctrl){
+    compToKeep <- unique(grep("_Phospho_CTRL", deps_l_df$comp, value = T, invert = T))
+    deps_l_df <- deps_l_df[comp %in% compToKeep]
+  }
   
   if (nrow(deps_l_df[class != "="]) > 0) {
     lolli_df <- data.table(
@@ -66,22 +81,34 @@ generate_differential_barplots <- function(differential_results, data_type="prot
 #' ## example2
 #' @import data.table
 #' @export
-generate_volcano_plots <- function(differential_results, data_type=NULL, comparison=NULL, fc_thr=0.75, pval_fdr = "p_val", pval_thr=0.05, color_contrast=NULL) {
+generate_volcano_plots <- function(differential_results, data_type=NULL, 
+                                   comparison=NULL, fc_thr=0.75, pval_fdr = "p_val", 
+                                   pval_thr=0.05, color_contrast=NULL) {
   if(is.null(comparison)){
     stop("Provide a valid comparison")
+  }
+  if(("protein_results_long" %in% names(differential_results))){
+    phospho_with_proteome = FALSE
+  } else if(("peptide_results_long" %in% names(differential_results))){
+    phospho_with_proteome = TRUE
+    data_type="peptide"
   } else{
-    comp = comparison
+    stop("Error in differential results paramenter! Verify the presence of protein_results_long or peptide_results_long")
   }
   
   deps_l_df <- if (data_type == "protein"){ copy(differential_results$protein_results_long)
   } else if(data_type == "peptide") { copy(differential_results$peptide_results_long)
   } else{stop("data_type MUST be \"protein\" or \"peptide\"")}
   
+  if(!(comparison %in% unique(deps_l_df$comp))){
+    stop("Provide a valid comparison. Comparison not present in the differential analysis")
+  }
+    
   if (nrow(deps_l_df[class != "="]) > 0) {
     plotlist <- list()
     
     col <- if (pval_fdr == "p_adj") "p_adj" else if(pval_fdr == "p_val") "p_val" else stop("pval_fdr MUST be p_adj or p_val")
-    input_df <- deps_l_df[comp == comp]
+    input_df <- deps_l_df[comp == comparison]
     input_df[, log2_FC := round(log2_FC, 2)]
     input_df[, (col) := round(-log10(get(col)), 2)]
     
@@ -102,14 +129,14 @@ generate_volcano_plots <- function(differential_results, data_type=NULL, compari
       geom_point(pch = 20, cex = 2) +
       geom_hline(yintercept = -log10(pval_thr), col = "black") +
       geom_vline(xintercept = c(-fc_thr, fc_thr), col = "black") +
-      ggtitle(paste0("Volcano Plot of ", comp)) +
+      ggtitle(paste0("Volcano Plot of ", comparison)) +
       ylab(if (pval_fdr=="p_adj") "-log10(fdr)" else "-log10(p_val)") +
       scale_color_manual(values = c("+" = col_vec[1], "-" = col_vec[2], "=" = "grey70")) +
       scale_x_continuous(limits = c(min(-max(abs(input_df$log2_FC)), -3), max(max(abs(input_df$log2_FC)), 3))) +
       scale_y_continuous(limits = c(0, max(max(abs(input_df[,get(col)])), 4))) +
       theme_bw(base_size = bs)
     
-    plotlist[[comp]] <- ggplotly(cmd, tooltip = c("text"))
+    plotlist[[comparison]] <- ggplotly(cmd, tooltip = c("text"))
     return(plotlist)
   } else{
     stop("No gene differentiated discovered.")
@@ -131,11 +158,26 @@ generate_volcano_plots <- function(differential_results, data_type=NULL, compari
 #' @import data.table
 #' @export
 mds_differential_analysis_plot <- function(differential_analysis, proteome_data, type){
+  if(("protein_results_long" %in% names(differential_analysis))){
+    phospho_with_proteome = FALSE
+  } else if(!("protein_results_long" %in% names(differential_analysis)) & 
+            ("peptide_results_long" %in% names(differential_analysis))){
+    phospho_with_proteome = TRUE
+    type="peptide"
+  } else{
+    stop("Error in differential results paramenter! Verify the presence of protein_results_long or peptide_results_long")
+  }
+  
   deps_l_df <- if (type == "protein"){ 
-    copy(differential_results$protein_results_long)
+    copy(differential_analysis$protein_results_long)
   } else if(type == "peptide") { 
-    copy(differential_results$peptide_results_long)
+    copy(differential_analysis$peptide_results_long)
   } else{stop("type MUST be \"protein\" or \"peptide\"")}
+  
+  if(phospho_with_proteome){
+    compToKeep <- unique(grep("_Phospho_CTRL", deps_l_df$comp, value = T, invert = T))
+    deps_l_df <- deps_l_df[comp %in% compToKeep]
+  }
   
   proteome_data_copy <- copy(proteome_data)
   deps_vec_all<- unique(deps_l_df[class != "=", id])
@@ -164,11 +206,26 @@ mds_differential_analysis_plot <- function(differential_analysis, proteome_data,
 #' @import data.table
 #' @export
 pca_differential_analysis_plot <- function(differential_analysis, proteome_data, type){
+  if(("protein_results_long" %in% names(differential_analysis))){
+    phospho_with_proteome = FALSE
+  } else if(!("protein_results_long" %in% names(differential_analysis)) & 
+            ("peptide_results_long" %in% names(differential_analysis))){
+    phospho_with_proteome = TRUE
+    type="peptide"
+  } else{
+    stop("Error in differential results paramenter! Verify the presence of protein_results_long or peptide_results_long")
+  }
+  
   deps_l_df <- if (type == "protein"){ 
     copy(differential_results$protein_results_long)
   } else if(type == "peptide") { 
     copy(differential_results$peptide_results_long)
   } else{stop("type MUST be \"protein\" or \"peptide\"")}
+  
+  if(phospho_with_proteome){
+    compToKeep <- unique(grep("_Phospho_CTRL", deps_l_df$comp, value = T, invert = T))
+    deps_l_df <- deps_l_df[comp %in% compToKeep]
+  }
   
   proteome_data_copy <- copy(proteome_data)
   deps_vec_all<- unique(deps_l_df[class != "=", id])

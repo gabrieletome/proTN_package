@@ -60,7 +60,8 @@ kinase_activity_calculation <- function(dirOutput_kinase, formule_CORAL, comp, d
 #' ## example2
 #' @import data.table
 #' @export
-kinase_tree <- function(proteome_data, differential_results, formule_CORAL, dirOutput = "results_ProTN", subfold="pics") {
+kinase_tree <- function(proteome_data, differential_results, formule_CORAL, 
+                        dirOutput = "results_ProTN", subfold="pics", phospho_ctrl = FALSE) {
   # oldwd <- getwd()
   source("R/functions.R")
   lapply(list.files("R/PhosR", full.names = TRUE), source)
@@ -73,14 +74,30 @@ kinase_tree <- function(proteome_data, differential_results, formule_CORAL, dirO
   dat_pep = copy(proteome_data$dat_pep)
   deps_pep_l_df <- copy(differential_results$peptide_results_long)
   psm_peptide_table <- copy(proteome_data$psm_peptide_table)
-  c_anno <- copy(proteome_data$c_anno)
+  
+  if(("c_anno" %in% names(proteome_data))){
+    c_anno <- copy(proteome_data$c_anno)
+  } else if(("c_anno_phospho" %in% names(proteome_data))){
+    c_anno <- copy(proteome_data$c_anno_phospho)
+  } else{
+    stop("Missing sample annotation!")
+  }
+  
+  if(!phospho_ctrl){
+    compToKeep <- unique(grep("_Phospho_CTRL", names(formule_CORAL), value = T, invert = T))
+    formule_CORAL <- formule_CORAL[compToKeep]
+  }
   
   list_svg <- list()
   for(comparison in names(formule_CORAL)){
     message(paste0("\nDoing: ",comparison,"\n"))
-    list_svg[[comparison]] <- kinase_activity_calculation(dirOutput_kinase = dirOutput_kinase, formule_CORAL = formule_CORAL, 
-                                                          comp = comparison, dat_pep = dat_pep, deps_pep_l_df = deps_pep_l_df, 
-                                                          psm_peptide_table = psm_peptide_table, c_anno = c_anno)
+    list_svg[[comparison]] <- kinase_activity_calculation(dirOutput_kinase = dirOutput_kinase, 
+                                                          formule_CORAL = formule_CORAL, 
+                                                          comp = comparison, 
+                                                          dat_pep = dat_pep, 
+                                                          deps_pep_l_df = deps_pep_l_df, 
+                                                          psm_peptide_table = psm_peptide_table, 
+                                                          c_anno = c_anno)
   }
   
   # setwd(oldwd)

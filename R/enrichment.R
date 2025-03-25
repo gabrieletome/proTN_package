@@ -13,7 +13,25 @@
 perform_enrichment_analysis <- function(differential_results, dirOutput="results_ProTN", 
                                         subfold_Tab="table", subfold_Dat="rdata",
                                         pval_fdr_enrich="p_adj", pval_enrich_thr=0.05, 
-                                        overlap_size_enrich_thr=5, enrichR_custom_DB=FALSE, enrich_filter_DBs=NULL) {
+                                        overlap_size_enrich_thr=5, enrichR_custom_DB=FALSE, enrich_filter_DBs=NULL,
+                                        phospho_ctrl = FALSE) {
+  if(("protein_results_long" %in% names(differential_results))){
+    phospho_with_proteome = FALSE
+    diff_dt <- differential_results$protein_results_long
+  } else if(("peptide_results_long" %in% names(differential_results))){
+    phospho_with_proteome = TRUE
+    diff_dt <- copy(differential_results$peptide_results_long)
+    diff_dt[, id := tstrsplit(id, "_", keep = 1)[[1]]]
+    
+    if(!phospho_ctrl){
+      compToKeep <- unique(grep("_Phospho_CTRL", diff_dt$comp, value = T, invert = T))
+      diff_dt <- diff_dt[comp %in% compToKeep]
+    }
+    
+  } else{
+    stop("Error in differential results paramenter! Verify the presence of protein_results_long or peptide_results_long")
+  }
+  
   doNextChunk <- tryCatch({
     dbs <- NULL
     if (enrichR_custom_DB) {
@@ -25,7 +43,7 @@ perform_enrichment_analysis <- function(differential_results, dirOutput="results
     dir.create(file.path(dirOutput, subfold_Tab), showWarnings = FALSE, recursive = TRUE)
 
     # Perform enriched analysis with EnrichR
-    enr_df <- enrichRfnc(in_df = differential_results$protein_results_long, pval_fdr_enrich, pval_enrich_thr, overlap_size_enrich_thr, dbs)
+    enr_df <- enrichRfnc(in_df = diff_dt, pval_fdr_enrich, pval_enrich_thr, overlap_size_enrich_thr, dbs)
     enr_df <- as.data.table(enr_df)
     # Save in RData for possible further analysis
     enrich_df <- enr_df[overlap_size >= overlap_size_enrich_thr, .SD, .SDcols = 1:13]
