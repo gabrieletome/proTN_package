@@ -55,7 +55,13 @@ proteome_data <- read_phospho_proteome_proteomics(software = "MQ",
 ```
 
 ```{r read_proteomics_PD, eval=FALSE}
-proteome_data <- read_phospho_proteome_proteomics(software = "PD", folder = "data/PD/phospho", annotation_filename = "INPUT", proteinGroup_filename = "PROT.xlsx")
+proteome_data <- read_phospho_proteome_proteomics(software = "PD", 
+                                                  folder_proteome = "data/PD/proteome",  
+                                                  folder_phospho = "data/PD/phospho", 
+                                                  annotation_proteome_filename = "INPUT", 
+                                                  proteinGroup_proteome_filename = "PROT.xlsx", 
+                                                  annotation_phospho_filename = "INPUT", 
+                                                  proteinGroup_phospho_filename = "PROT.xlsx")
 ```
 
 ```{r preprocess_figure}
