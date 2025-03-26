@@ -32,16 +32,16 @@ enrichment_test <- function(input_vec, # character vector, input genes
   
   ib_vec <- input_vec %>% str_trim() %>% str_to_upper() %>% 
     unique() %>% str_sort() %>% 
-    magrittr::extract(. %in% bg_vec) # clean input (overlap with bg)
+    extract(. %in% bg_vec) # clean input (overlap with bg)
   
   ab_vec <- anno_vec %>% str_trim() %>% str_to_upper() %>% 
     unique() %>% str_sort() %>% 
-    magrittr::extract(. %in% bg_vec) # clean anno (overlap with bg)
+    extract(. %in% bg_vec) # clean anno (overlap with bg)
   
-  ov_vec <- ib_vec %>% magrittr::extract(. %in% ab_vec) # overlap between input and anno
+  ov_vec <- ib_vec %>% extract(. %in% ab_vec) # overlap between input and anno
   
   ovinput_vec <- input_vec %>% str_trim() %>% str_sort() %>% 
-    unique() %>% magrittr::extract(str_to_upper(.) %in% ov_vec) # overlap, with input case
+    unique() %>% extract(str_to_upper(.) %in% ov_vec) # overlap, with input case
   ovinput_vec <- ovinput_vec[!duplicated(str_to_upper(ovinput_vec))] # remove of case sensitive duplicates
   
   IY<- length(ov_vec) # in input, in anno (overlap)
@@ -88,13 +88,13 @@ enrichment_enrichr <- function(input_vec, # vector with gene names
     unique() # clean input vector
   input_vec <- input_vec[!duplicated(str_to_upper(input_vec))] # remove case duplicates
   
-  dbs_default <- as.vector(read_tsv("R/enrichR/dbs_enrichR.txt", col_names = FALSE)[,1]) %>% unlist()
+  dbs_default <- as.vector(suppressMessages(read_tsv("R/enrichR/dbs_enrichR.txt", col_names = FALSE))[,1]) %>% unlist()
   dbs <- listEnrichrDbs()
   if(!is.null(dbs_vec)){dbs_used<-intersect(dbs_vec,dbs$libraryName)
   } else {dbs_used<-intersect(dbs_default,dbs$libraryName)}
   
   enrich_list <- enrichr(input_vec, dbs_used)
-  out_df <- plyr::ldply(enrich_list,.id="anno_class")
+  out_df <- ldply(enrich_list,.id="anno_class")
   rm(enrich_list)
   
   out_df <- out_df %>% rename(anno_name=Term,
@@ -227,7 +227,7 @@ enrichment_lollipop <- function(input_df, # input dataframe
   }
   
   if("facet_col" %in% colnames(plot_df)){
-    lp <- lp + ggforce::facet_col(vars(facet_col), scales = "free_y", space = "free") + 
+    lp <- lp + facet_col(vars(facet_col), scales = "free_y", space = "free") + 
       theme(strip.text = element_text(margin = margin(1,1,1,1), face="bold"))
   }
   
@@ -368,7 +368,7 @@ enrichment_b2b_lollipop <- function(input_df, # input dataframe
   }
   
   if("facet_col" %in% colnames(plot_df)){
-    lp <- lp + ggforce::facet_col(vars(facet_col), scales = "free_y", space = "free") + 
+    lp <- lp + facet_col(vars(facet_col), scales = "free_y", space = "free") + 
       theme(strip.text = element_text(margin = margin(1,1,1,1), face="bold"))
   }
   
@@ -464,7 +464,7 @@ deps_b2b_lollipop <- function(input_df, # input dataframe
           axis.title.y = element_blank(),
           axis.text.y = element_blank(),
           legend.position = "none")+
-    labs(x = "N° DEPs")
+    labs(x = "N DEPs")
   
   
   if("size_col" %in% colnames(plot_df)){
@@ -601,7 +601,7 @@ enrichment_dotmatrix <- function(input_df, # input dataframe
   }
   
   if("facet_col" %in% colnames(plot_df)){
-    lp <- lp + ggforce::facet_col(vars(facet_col), scales = "free_y",  space = "free") +
+    lp <- lp + facet_col(vars(facet_col), scales = "free_y",  space = "free") +
       theme(strip.text = element_text( margin = margin(1,1,1,1)))
   }
   
@@ -635,11 +635,6 @@ enrichment_geneterm_network <- function(input_df){
                     class="gene")
   nodes_df<-bind_rows(terms_df,genes_df)
   
-  library(geomnet)
-  library(data.table)
-  library(igraph)
-  library(ggraph)
-  
   net_net <- fortify(as.edgedf(as.data.frame(edges_df)), nodes_df)
   net_net <- subset(net_net, from_id!=to_id)
   g <- graph_from_data_frame(net_net, directed=FALSE, vertices = nodes_df)
@@ -658,38 +653,6 @@ enrichment_geneterm_network <- function(input_df){
     guides(text=F)
   l
 }
-
-### enrichment_clusterprofiler ----
-
-enrichment_clusterprofiler <- function()
-  
-{
-  
-  library(clusterProfiler)
-  
-  gene_list<-c("a","i","g","z")
-  universe_list<-c("a","b","c","d","e","f","g","h","i","z")
-  
-  anno_df<-data.frame(
-    "term"=c("on","on","on","on","tw","tw","tw","tw","tw"),
-    "gene"=c("a","b","c","d","e","f","g","h","i")
-  )
-  
-  enricher(
-    gene=gene_list,
-    pvalueCutoff = 1,
-    pAdjustMethod = "none",
-    universe=universe_list,
-    minGSSize = 1,
-    maxGSSize = 10000,
-    qvalueCutoff = 1,
-    TERM2GENE=anno_df,
-    TERM2NAME = NA
-  )@result
-  
-}
-
-
 
 ### Function to extract coverage data from bedtools coverage with option d (coverage for each nucleotide) ----
 
@@ -717,46 +680,8 @@ resume_bedcoverage_d<-function(dir,
   return(o_tab)
 }
 
-### Function to create a data frame of gene counts from bedtools coverage files (bed format) ----
-
-
-resume_bedcoverage<-function(dir, # string: directory with the bed files
-                             name_cols=c(1,2,3,6), # numeric or vector: columns with feature names
-                             cov_col=7  # numeric: column with coverage values
-) {
-  
-  list_input<-fs::dir_ls(dir,glob="*.bed",type="file") # only files with .bed extension
-  
-  if(exists("o_tab")){
-    rm(o_tab)
-  }
-  
-  for(i in (list_input)){
-    
-    i_tab<-read_tsv(i,col_names=F, progress = F,show_col_types = F)
-    
-    s_name<-str_split(i,dir,simplify=T)[,2] 
-    s_name<-str_split(s_name,"\\.",simplify=T)[,1]
-    
-    x_tab <- i_tab %>% unite(id_name,all_of(name_cols)) %>% select(id_name)
-    x_tab[,s_name] <- i_tab[,cov_col]
-    
-    rm(i_tab)
-    
-    if(!exists("o_tab")){
-      o_tab<- x_tab
-    } else {
-      o_tab<- full_join(o_tab,x_tab,by="id_name")
-    }
-  }
-  return(o_tab)
-}
-
-
 
 ### Function to use edgeR function glmQLF generalized linear models (quasi likelihood function) ----
-
-
 edgeRglmQLF<-function(mat=edge_f, # object of class DGEGLM
                       contro, # comparison, create with makeContrasts
                       cpm_mat=edge_n, #used to calculate average signal
@@ -790,27 +715,7 @@ edgeRglmQLF<-function(mat=edge_f, # object of class DGEGLM
   return(degs)
 }
 
-
-
-
-
-### Function to load all the sheets of an excel file in a list ----
-
-
-read_excel_allsheets <- function(filename, tibble = FALSE) 
-{
-  sheets <- readxl::excel_sheets(filename)
-  x <- lapply(sheets, function(X) readxl::read_excel(filename, sheet = X, guess_max = 1048576))
-  if(!tibble) x <- lapply(x, as.data.frame)
-  names(x) <- sheets
-  x
-}
-
-
-
 ### Function to extract and save only the different part of two string ----
-
-
 mf <- function(x,sep){
   xsplit = strsplit(x,split = sep)
   xdfm <- as.data.frame(do.call(rbind,xsplit))
@@ -825,118 +730,7 @@ mf <- function(x,sep){
   return(res)
 }
 
-
-### Function for the limma analysis and DEqMS spectraCountBayes  ----
-
-
-limmafnc<-function(type = "PROT",c_anno,dat_gene,psm_count_table,contro_list,expr_avgse_df,signal_thr,fc_thr, pval_thr, pval_fdr){
-  # make design table
-  design = model.matrix(~0+c_anno$condition) 
-  colnames(design) = levels(as.factor(c_anno$condition))
-  rownames(design)<-c_anno$sample
-  gene_matrix = as.matrix(dat_gene)
-  gene_matrix <- gene_matrix[,rownames(design)]
-  
-  #DEqMS part analysis
-  colnames(psm_count_table)<-c("gene","count")
-  rownames(psm_count_table) = psm_count_table$gene
-  
-  filt_contro_list <- list()
-  for (i in 1:length(contro_list)) {
-    if(all(str_extract_all(contro_list[i], "\\[a-zA-Z]+")[[1]] %in% colnames(design))){
-      filt_contro_list<-c(filt_contro_list,i)
-    }
-  }
-  contro_list<-contro_list[unlist(filt_contro_list)]
-  if(length(contro_list) == 0){ stop("Error: No valid contrast design given. Check the match between the spell of Condition and contrast design.")}
-  contrast =  limma::makeContrasts(contrasts=contro_list,levels=design)
-  colnames(contrast)<-names(contro_list)
-  
-  #limma part analysis
-  fit1 <- limma::lmFit(gene_matrix,design)
-  fit2 <- limma::eBayes(contrasts.fit(fit1,contrasts = contrast))
-  
-  if(type == "PROT"){
-    fit2$count = psm_count_table[rownames(fit2$coefficients),"count"]
-    fit3 = DEqMS::spectraCounteBayes(fit2) # Perform analysis based on the number of PSMs
-  }else if(type == "PEP"){
-    fit3<-fit2
-  }
-  
-  # extract results
-  
-  degs_w_df<-NULL
-  degs_l_df<-NULL
-  
-  signal_col="log2_expr"
-  fc_col="log2_FC"
-  if(pval_fdr){pval_col="p_adj"}else{pval_col="p_val"}
-  
-  for(comp in colnames(fit3$coefficients)){
-    if(type == "PROT"){
-      degs_u<-tryCatch({
-        DEqMS::outputResult(fit3,coef_col = comp) %>% 
-          rename("log2_FC"="logFC",
-                        "log2_expr"="AveExpr",
-                        "p_val"="sca.P.Value",
-                        "p_adj"="sca.adj.pval",
-                        "id"="gene") %>% arrange(id)
-      }, 
-      error=function(cond){
-        colnames(fit3$sca.t)<-colnames(fit3$coefficients)
-        colnames(fit3$sca.p)<-colnames(fit3$coefficients)
-        DEqMS::outputResult(fit3,coef_col = comp) %>% 
-          rename("log2_FC"="logFC",
-                        "log2_expr"="AveExpr",
-                        "p_val"="sca.P.Value",
-                        "p_adj"="sca.adj.pval",
-                        "id"="gene") %>% arrange(id)
-      })
-    }else if(type == "PEP"){
-      degs_u<-topTable(fit3, coef = comp, number = Inf) %>% 
-        rename("log2_FC"="logFC",
-                      "log2_expr"="AveExpr",
-                      "p_val"="P.Value",
-                      "p_adj"="adj.P.Val") %>% mutate("id"=rownames(topTable(fit3, coef = comp, number = Inf))) %>% select(-c(t,B))
-    }
-    degs_u$log2_expr <- 2^degs_u$log2_FC
-    degs_u <- degs_u %>% rename("FC"="log2_expr")
-    rownames(degs_u)<-degs_u$id
-    #Recalculate the log2_expr
-    # name_log2_expr<-paste0(names(contrast[which(contrast[,comp] != 0),comp]),"_avg")
-    # mean_exprAvg_column<-rowMeans(x=expr_avgse_df[name_log2_expr], na.rm = TRUE)
-    # degs_u$log2_expr<-mean_exprAvg_column
-    
-    degs_u$comp<-comp
-    degs_u$class<-"="
-    degs_u[which(degs_u[,fc_col]>=fc_thr & 
-                   degs_u[,pval_col]<=pval_thr),"class"]<-"+"
-    
-    degs_u[which(degs_u[,fc_col]<=(-fc_thr) & 
-                   degs_u[,pval_col]<=pval_thr),"class"]<-"-"
-    
-    
-    degs_l_df<-bind_rows(degs_l_df,degs_u %>% select("id","comp","class","log2_FC","FC","p_val","p_adj"))
-    
-    degs_add<- degs_u %>% select("class","log2_FC","FC","p_val","p_adj")
-    colnames(degs_add)<-paste(comp,colnames(degs_add),sep="_")
-    degs_w_df<-merge(degs_w_df,degs_add,by="row.names",all=TRUE)
-    rownames(degs_w_df)<-degs_w_df$Row.names
-    degs_w_df<-degs_w_df[,-1]
-  }
-  
-  rownames(degs_l_df)<-NULL
-  degs_w_df <- degs_w_df %>% add_column(id=rownames(degs_w_df),.before=1)
-  
-  return(list("degs_l_df"=degs_l_df,"degs_w_df"=degs_w_df))
-}
-
-
-
-
 ### Function for the enrichment of the protein in the dataset. It use the function enrichment_enrichr ----
-
-
 enrichRfnc<-function(in_df, pval_fdr_enrich, pval_enrich_thr, overlap_size_enrich_thr, dbs=NULL){
   setEnrichrSite("Enrichr") 
   DEGs_lists<-NULL
@@ -976,7 +770,6 @@ enrichRfnc<-function(in_df, pval_fdr_enrich, pval_enrich_thr, overlap_size_enric
   }
   
   if(any(is.na(enr_df))){
-    shiny::setProgress(0.75, detail = "Enrichment in progress... \n Can require several minutes... \n WARNING: Connection problem with EnrichR. Retry with single connection. REQUIRE TIME...")
     enr_df<-NULL
     for(a in names(DEGs_lists)){
       frg<-DEGs_lists[[a]]
@@ -1007,8 +800,6 @@ enrichRfnc<-function(in_df, pval_fdr_enrich, pval_enrich_thr, overlap_size_enric
 }
 
 ### Function for the enrichment of the protein of an universe. It use the function enrichment_enrichr ----
-
-
 enrichRfnc_universe<-function(in_df, pval_fdr_enrich, pval_enrich_thr, overlap_size_enrich_thr, dbs=NULL){
   enr_df <- tryCatch({
     DEGs_lists<-NULL
@@ -1028,185 +819,6 @@ enrichRfnc_universe<-function(in_df, pval_fdr_enrich, pval_enrich_thr, overlap_s
   return(enr_df)
 }
 
-
-### Function to discover the communities in the network of STRING based on our genes. ----
-
-
-find_communities <- function(genes, thr_score,string_gene_df){
-  
-  # links_selection ----
-  
-  dt_links <- as.data.table(string_gene_df) 
-  
-  remove(string_gene_df)
-  dt_links[gene1 %in% genes & gene2 %in% genes]
-  
-  colnames(dt_links)<- c("from","to","weight")
-  rownames(dt_links)<- NULL
-  
-  # community detection ----
-  
-  i_links <- dt_links %>% filter(from %in% genes, to %in% genes, weight>thr_score)
-  i_nodes <- data.frame("id"=unique(c(i_links$from,i_links$to)))
-  i_net <- igraph::graph_from_data_frame(d=i_links, vertices=i_nodes, directed=F)
-  i_net_2<-igraph::simplify(i_net)
-  i_clp <- cluster_fast_greedy(i_net_2)
-  
-  i_comms_df<- data.frame("gene" = i_clp$names,
-                          "comm_o" = as.factor(i_clp$membership),stringsAsFactors = F)
-  
-  comms_size <- i_comms_df %>% group_by(comm_o) %>% summarise("size"=n()) %>%
-    ungroup() %>% arrange(-size) %>% mutate("comm_n" = factor(order(-size))) %>% select(comm_o,comm_n)
-  i_comms_df <- left_join(i_comms_df,comms_size)
-  rownames(i_comms_df)<-i_comms_df$gene
-  
-  i_comms_list<-list()
-  for(comm_x in sort(unique(i_comms_df$comm_n))){
-    i_comms_list[[comm_x]] <- i_comms_df %>% filter(comm_n==comm_x) %>% pull(gene)
-  }
-  return(list("i_comms_df"=i_comms_df, "i_comms_list"=i_comms_list, "dt_links"=dt_links))
-}
-
-
-### Function to kinase study in multithreading. It identify the kinases, their activities and it draw the CORAL tree ----
-
-kinase_act_phosr <- function(dirOutput_kinase, formule_CORAL, comp, dat_pep, deps_pep_l_df, psm_peptide_table, c_anno_phos, df){
-  
-  data("KinaseMotifs")
-  data("PhosphoSitePlus")
-  
-  library(SummarizedExperiment)
-  lapply(list.files("PhosR", full.names = T), function(c) {source(c)})
-  
-  tmp_dat_pep <- dat_pep[rownames(psm_peptide_table[which(psm_peptide_table[, "GeneName"] 
-                                                          %in% 
-                                                            deps_pep_l_df[which(deps_pep_l_df$comp == comp 
-                                                                                & 
-                                                                                  (deps_pep_l_df$class == "+" 
-                                                                                   | 
-                                                                                     deps_pep_l_df$class == "-")),
-                                                                          "id"]),
-  ]),
-  ]
-  rownames(tmp_dat_pep) <- make.names(psm_peptide_table[rownames(tmp_dat_pep), "GeneName"], unique = T)
-  
-  tmp_dat_pep<- tmp_dat_pep[,(c_anno_phos[str_remove(c_anno_phos$condition, "_p\\b") %in% df$p[unlist(lapply(df$p, function(x) grepl(x, formule_CORAL[comp])))], "sample"])]
-  ppe <- PhosphoExperiment(assays = list(Quantification = as.matrix(tmp_dat_pep)))
-  colnames(ppe@assays@data$Quantification) <- c_anno_phos[str_remove(c_anno_phos$condition, "_p\\b") %in% df$p[unlist(lapply(df$p, function(x) grepl(x, formule_CORAL[comp])))], "condition"]
-  GeneSymbol(ppe)<-psm_peptide_table[rownames(psm_peptide_table[which(psm_peptide_table[, "GeneName"] 
-                                                                      %in% 
-                                                                        deps_pep_l_df[which(deps_pep_l_df$comp == comp 
-                                                                                            & 
-                                                                                              (deps_pep_l_df$class == "+" 
-                                                                                               | 
-                                                                                                 deps_pep_l_df$class == "-")),
-                                                                                      "id"]),
-  ]),"GeneName"]
-  Sequence(ppe)<-psm_peptide_table[rownames(psm_peptide_table[which(psm_peptide_table[, "GeneName"] 
-                                                                    %in% 
-                                                                      deps_pep_l_df[which(deps_pep_l_df$comp == comp 
-                                                                                          & 
-                                                                                            (deps_pep_l_df$class == "+" 
-                                                                                             | 
-                                                                                               deps_pep_l_df$class == "-")),
-                                                                                    "id"]),
-  ]), "Annotated Sequence"]
-  
-  mat <- SummarizedExperiment::assay(ppe, "Quantification")
-  grps =colnames(ppe)
-  
-  substrate.list = PhosphoSite.human
-  substrate.list=sapply(substrate.list, function(y){unlist(lapply(y, function(x){ gsub(";.+","",x)}))})
-  
-  mat.std <- standardise(mat)
-  mat.std.geneSymbol <- mat.std
-  rownames(mat.std.geneSymbol)<-str_to_upper(unlist(str_split_fixed(rownames(mat.std.geneSymbol), "\\.", n=2)[,1]))
-  mat.std<-data.frame(mat.std)
-  mat.std$geneSymbol <- unlist(str_split_fixed(rownames((mat.std)), "\\.", n=2)[,1])
-  mat.std$id<-rownames(mat.std)
-  seqs <- na.omit(ppe@Sequence)
-  kssMat <- kinaseSubstrateScore(substrate.list = substrate.list,
-                                 mat = mat.std.geneSymbol,
-                                 seqs = seqs,
-                                 numMotif = 5,
-                                 numSub = 1,
-                                 species = "human",
-                                 verbose = T)
-  set.seed(42)
-  predMat <- kinaseSubstratePred(kssMat, inclusion = 5)
-  
-  colnames(kssMat$ksActivityMatrix) <- str_remove(c_anno_phos[str_remove(colnames(kssMat$ksActivityMatrix), "_p\\b"), "condition"], "_p\\b")
-  #Fare magia per le varie formule
-  tttt<- str_remove(c_anno_phos$condition, "_p\\b")
-  design = model.matrix(~0+tttt)
-  colnames(design) = levels(as.factor(tttt))
-  rownames(design)<-str_remove(c_anno_phos$sample, "_p\\b")
-  contrast =  limma::makeContrasts(contrasts=formule_CORAL[comp],levels=design)
-  
-  mean_kinase_activity <- lapply(rownames(contrast)[which((contrast != 0)[,1])], function(x){(rowMeans(kssMat$ksActivityMatrix[, grepl(x, colnames(kssMat$ksActivityMatrix))])[colnames(predMat)])*contrast[x,]})
-  kinase_Act <- Reduce("+", mean_kinase_activity)
-  
-  write.table(data.frame(kinase_Act), file = paste0(dirOutput_kinase,comp,"_kinase_activity.txt"), col.names = F, quote = F)
-  
-  renderSvgPanZoom(comp, kinase_Act, dirOutput_kinase)
-}
-
-
-
-### Knit Tab for figure ----
-
-in_tabs <- function(l, labels = names(l), level, knit = TRUE, close_tabset = FALSE) {                                                  
-  if(is.null(labels)) {                                                                                                              
-    stop("labels are NULL, it is required not to be so that the tabs have proper names")                                           
-  }                                                                                                                                  
-  names(l) <- labels                                                                                                                 
-  rmd_code <- lapply(seq_along(l), FUN = function(i) obj_to_rmd(l[[i]], name = names(l)[i], level = level + 1L))                     
-  if(isTRUE(getOption("knitr.in.progress"))) {                                                                                       
-    res <- knitr::knit(text = unlist(rmd_code), quiet = TRUE)                                                                      
-    cat(res)                                                                                                                       
-  } else {                                                                                                                           
-    if(!knit) {                                                                                                                    
-      cat(unlist(rmd_code))                                                                                                      
-    } else {                                                                                                                       
-      return(l)                                                                                                                  
-    }                                                                                                                              
-  }                                                                                                                                  
-  if(close_tabset) {                                                                                                                 
-    cat(paste(get_section(level), "{.unlisted .unnumbered .toc-ignore .tabset}", "\n"))                                            
-  }                                                                                                                                  
-}                                                                                                                                      
-
-get_section <- function(level) {                                                                                                       
-  paste(rep("#", times = level), collapse = "")                                                                                      
-}                                                                                                                                      
-
-get_tabset <- function(obj) {                                                                                                          
-  ifelse(inherits(obj, "list"), "{.tabset}", "")                                                                                     
-}                                                                                                                                      
-
-obj_to_rmd <- function(obj, parent_name = "l", name, level) {                                                                          
-  section_code <- sprintf("%s %s %s\n", get_section(level), name, get_tabset(obj))                                                   
-  if(!inherits(obj, "list")) {                                                                                                       
-    rmd_code <- c("```{r, echo = FALSE}\n",                                                                                    
-                  sprintf("%s$`%s`\n", parent_name, name),                                                                     
-                  "```\n",                                                                                                     
-                  "\n")                                                                                                        
-  } else {                                                                                                                           
-    rmd_code <- c("\n",                                                                                                            
-                  lapply(X = seq_along(obj),                                                                                       
-                         FUN = function(i) obj_to_rmd(obj[[i]], sprintf("%s$`%s`", parent_name, name), names(obj)[i], level + 1L)))
-  }                                                                                                                                  
-  return(c(section_code, rmd_code))                                                                                                  
-} 
-
-### Function to plot Enrichment category ----
-
-resize_plot <- function(resizePlot, resizeHeight) {
-  resizePlot <- resizePlot
-  resizeHeight <- resizeHeight
-  res <- rmarkdown::render("enrich_plot.Rmd", quiet = T)
-  htmltools::includeHTML(res)
-}
 
 ### Update limma function with data.table ----
 limmafnc_dt <- function(type = "PROT", c_anno, dat_gene, psm_count_table, formule_contrast, expr_avgse_df, signal_thr, fc_thr, pval_thr, pval_fdr) {
@@ -1254,7 +866,7 @@ limmafnc_dt <- function(type = "PROT", c_anno, dat_gene, psm_count_table, formul
   for (comp in (colnames(fit3$coefficients))) {
     if(type == "PROT"){
       degs_u<-tryCatch({
-        DEqMS::outputResult(fit3,coef_col = comp) %>% 
+        outputResult(fit3,coef_col = comp) %>% 
           rename("log2_FC"="logFC",
                         "log2_expr"="AveExpr",
                         "p_val"="sca.P.Value",
@@ -1264,7 +876,7 @@ limmafnc_dt <- function(type = "PROT", c_anno, dat_gene, psm_count_table, formul
       error=function(cond){
         colnames(fit3$sca.t) <- colnames(fit3$coefficients)
         colnames(fit3$sca.p) <- colnames(fit3$coefficients)
-        DEqMS::outputResult(fit3,coef_col = comp) %>% 
+        outputResult(fit3,coef_col = comp) %>% 
           rename("log2_FC"="logFC",
                         "log2_expr"="AveExpr",
                         "p_val"="sca.P.Value",

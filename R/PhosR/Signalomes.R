@@ -75,7 +75,7 @@
 #' 
 #' L6.phos.seq <- Sequence(phospho.L6.ratio.pe)[idx]
 #' 
-#' L6.matrices <- kinaseSubstrateScore(PhosphoSite.mouse, L6.phos.std,
+#' L6.matrices <- kinaseSubstrateScore_local(PhosphoSite.mouse, L6.phos.std,
 #'                                     L6.phos.seq, numMotif = 5, numSub = 1)
 #' set.seed(1)
 #' L6.predMat <- kinaseSubstratePred(L6.matrices, top=30)

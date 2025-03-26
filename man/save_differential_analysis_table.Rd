@@ -31,9 +31,10 @@ comprehensive Excel file with the analysis results, including protein and peptid
 differential expression data.
 }
 \examples{
-# Example usage
+\dontrun{
 save_differential_analysis_table(proteome_data = proteome_data_example,
                                  differential_results = differential_results_example,
                                  dirOutput = "results_directory")
+}
 
 }

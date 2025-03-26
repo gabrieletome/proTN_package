@@ -33,8 +33,9 @@ such as whether to include phospho-control comparisons or not, and generates a
 lollipop plot to visualize the differential expression of proteins or peptides.
 }
 \examples{
-# Example usage:
+\dontrun{
 plot_results <- generate_differential_barplots(differential_results = differential_results,
                                                data_type = "protein")
+}
 
 }

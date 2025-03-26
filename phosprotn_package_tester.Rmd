@@ -12,49 +12,25 @@ output:
 
 # Tester PhosProTN package
 
-```{r load functions, warning=F, message=FALSE, results='hide'}
+```{r set_dir, warning=F, message=FALSE, results='hide'}
 # setwd("/home/gabriele/Desktop/UNITN/proTN_package/")
 outputdir = "results_phospho"
-suppressPackageStartupMessages(suppressMessages(suppressWarnings({
-  lapply(list.files("./R", pattern = ".R", full.names = T), function(x){if(!file.info(x)$isdir){source(x)}})
-  
-  # Package requided
-  library(data.table)
-  library(readxl)
-  library(stringi)
-  library(ggplot2)
-  library(DEqMS)
-  library(proBatch)
-  library(writexl)
-  library(ggrepel)
-  library(ggbeeswarm)
-  library(limma)
-  library(plotly)
-  library(enrichR)
-  library(qpdf)
-  library(STRINGdb)
-  library(PhosR)
-  
-  library(pheatmap)
-  library(svgPanZoom)
-  library(SummarizedExperiment)
-  library(parallel)
-})))
+devtools::load_all(".")
 ```
-
 
 # Test proteomics pipeline
 
-```{r read_proteomics_MQ}
+```{r read_proteomics_MQ, eval=FALSE}
+
 proteome_data <- read_phosphoproteomics(software = "MQ",
-                                        folder = "./data/case_study_phospho/txt_Phospho/", 
+                                        folder = "inst/extdata/case_study_phospho/txt_Phospho", 
                                         peptide_filename = "evidence",
                                         phospho_thr = 0.75)
 ```
 
-```{r read_proteomics_PD, eval=FALSE}
+```{r read_proteomics_PD}
 proteome_data <- read_phosphoproteomics(software = "PD",
-                                        folder = "data/PD/phospho",
+                                        folder = "inst/extdata/PD/phospho",
                                         annotation_filename = "INPUT",
                                         proteinGroup_filename = "PROT.xlsx")
 ```
@@ -75,14 +51,12 @@ create_phosphosite_fig
 
 ```{r impute_function}
 imputed_data <- impute_intensity(proteome_data = proteome_data)
-imputed_data
 ```
 
 # Test normalization
 
 ```{r normalization_function}
 normalized_data <- normalization_ProTN(proteome_data = imputed_data)
-normalized_data
 ```
 
 # Test Batch Correction -- NOT TESTED YET
@@ -91,7 +65,6 @@ normalized_data
 # TODO: NEED TO TEST
 batch_coor_data <- batch_correction(proteome_data = normalized_data,
                                     batch_col = "batch")
-batch_coor_data
 ```
 
 # Test Exporter
@@ -143,7 +116,7 @@ prot_boxplot
 # Differential analysis
 
 ```{r differential_analysis}
-formule_contrast <- list("A2016vsWT"="A2016T-wt")
+formule_contrast <- list("A2016vsWT"="A2016T-WT")
 
 differential_results <- differential_analysis(proteome_data = normalized_data, 
                                               formule_contrast = formule_contrast, 

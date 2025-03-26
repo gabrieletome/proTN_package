@@ -140,6 +140,9 @@ generate_peptide_distribution_subplot <- function(proteome_data) {
 #'
 #' This function generates a violin and boxplot representation of log2-normalized abundance values for proteins or peptides
 #' 
+#' @param proteome_data A list containing proteome data, including peptide annotation tables.
+#' @param type Character; specifies the type of data to plot. Options are "protein" or "peptide".
+#'
 #' @return A list containing:
 #'   - `dt`: A data.table of log2-normalized abundance values with sample annotations
 #'   - `plot`: A ggplot2 object representing the abundance distribution as a violin and boxplot.

@@ -36,9 +36,10 @@ This function performs differential expression analysis for proteomic and phosph
 If the input data includes phosphoproteomic and proteomic data, the function will merge these datasets, perform the differential analysis for both types, and return the results for both proteins and peptides. If only proteomic data is available, the function will analyze proteins and peptides separately.
 }
 \examples{
-# Example usage:
+\dontrun{
 results <- differential_analysis(proteome_data = proteome_data, 
                                  formule_contrast = c("comparison1"="condition1-condition2"),
                                  fc_thr = 0.75, pval_thr = 0.05)
+}
 
 }

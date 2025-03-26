@@ -33,8 +33,13 @@
 #'   overlap sizes, and other relevant information.
 #'
 #' @import writexl
-#' @import tidyverse
 #' @import data.table
+#' @import enrichR
+#' @import parallel
+#' @importFrom readr read_tsv
+#' @importFrom plyr ldply
+#' @importFrom tidyr separate_rows
+#' @importFrom dplyr summarise rename select arrange group_by ungroup mutate left_join
 #'
 #' @examples
 #' \dontrun{
@@ -47,6 +52,8 @@ perform_enrichment_analysis <- function(differential_results, dirOutput="results
                                         pval_fdr_enrich="p_adj", pval_enrich_thr=0.05, 
                                         overlap_size_enrich_thr=5, enrichR_custom_DB=FALSE, enrich_filter_DBs=NULL,
                                         phospho_ctrl = FALSE) {
+  
+  library(enrichR)
   if(("protein_results_long" %in% names(differential_results))){
     phospho_with_proteome = FALSE
     diff_dt <- differential_results$protein_results_long
@@ -75,7 +82,7 @@ perform_enrichment_analysis <- function(differential_results, dirOutput="results
     dir.create(file.path(dirOutput, subfold_Tab), showWarnings = FALSE, recursive = TRUE)
 
     # Perform enriched analysis with EnrichR
-    enr_df <- enrichRfnc(in_df = diff_dt, pval_fdr_enrich, pval_enrich_thr, overlap_size_enrich_thr, dbs)
+    enr_df <- suppressMessages(enrichRfnc(in_df = diff_dt, pval_fdr_enrich, pval_enrich_thr, overlap_size_enrich_thr, dbs))
     enr_df <- as.data.table(enr_df)
     # Save in RData for possible further analysis
     enrich_df <- enr_df[overlap_size >= overlap_size_enrich_thr, .SD, .SDcols = 1:13]
@@ -102,10 +109,10 @@ perform_enrichment_analysis <- function(differential_results, dirOutput="results
       "13. *overlap_ids*: gene symbols identified in the term"
     ))
     
-    writexl::write_xlsx(enrich_df, path = paste0(dirOutput, "/", subfold_Tab, "/", "enrichment.xlsx"))
+    write_xlsx(enrich_df, path = paste0(dirOutput, "/", subfold_Tab, "/", "enrichment.xlsx"))
     
     return(enr_df)
   }, error = function(cond) {
-    stop("An error occurred when connecting to EnrichR. \n ")
+    stop(paste0("An error occurred when connecting to EnrichR. \n ",as.character(cond)))
   })
 }

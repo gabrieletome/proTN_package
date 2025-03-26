@@ -16,6 +16,7 @@
 #'
 #' @import data.table
 #' @import stringr
+#' @import STRINGdb
 #'
 #' @examples
 #' \dontrun{

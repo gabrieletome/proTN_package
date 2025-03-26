@@ -7,6 +7,8 @@
 pca_differential_analysis_plot(differential_analysis, proteome_data, type)
 }
 \arguments{
+\item{differential_analysis}{A list containing the differential analysis results.}
+
 \item{proteome_data}{A list containing proteome data, including sample annotation and either protein or peptide data matrices.}
 
 \item{type}{Character; specifies the type of data to plot. Options are "protein" or "peptide".}

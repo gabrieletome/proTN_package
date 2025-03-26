@@ -23,8 +23,9 @@
 #' proteome_data <- read_proteomics(software = "MQ", folder = "data_folder")
 #' }
 #'
-#' @import tidyverse
+#' @importFrom dplyr ungroup mutate filter group_by n
 #' @import data.table
+#' @import readxl
 #' @export
 read_proteomics <- function(software, folder, annotation_filename = "annotation",
                             peptide_filename = "pep", proteinGroup_filename = "prot", 
@@ -32,7 +33,7 @@ read_proteomics <- function(software, folder, annotation_filename = "annotation"
                             color_col="Color", batch_corr_exe = FALSE, batch_col="batch",
                             filt_absent_value = 0){
   
-  source("./R/functions.R")
+  # source("./R/functions.R")
   
   if(!(software %in% c("PD","MQ"))){
     stop("Valid software is required. Write PD or MQ.",
@@ -266,8 +267,8 @@ read_MQ_files <- function(anno_filename, pep_filename,
   psm_log_pet_df <- psm_log_pet_df[ID_peptide %in% filter_df_single_pep]
   psm_peptide_table <- psm_peptide_table[ID_peptide %in% filter_df_single_pep]
   
-  message(paste0("N° Proteins (after filter): ", uniqueN(psm_anno_df$symbol)))
-  message(paste0("N° Peptides (after filter): ", uniqueN(psm_peptide_table$ID_peptide)))
+  message(paste0("N Proteins (after filter): ", uniqueN(psm_anno_df$symbol)))
+  message(paste0("N Peptides (after filter): ", uniqueN(psm_peptide_table$ID_peptide)))
   
   return(list("c_anno" = c_anno,
               "psm_anno_df" = psm_anno_df,
@@ -502,8 +503,8 @@ read_PD_files <- function(anno_filename, pep_filename, prot_filename,
   psm_log_pet_df <- psm_log_pet_df[ID_peptide %in% filter_df_single_pep]
   psm_peptide_table <- psm_peptide_table[ID_peptide %in% filter_df_single_pep]
   
-  message(paste0("N° Proteins (after filter): ", uniqueN(psm_anno_df$symbol)))
-  message(paste0("N° Peptides (after filter): ", uniqueN(psm_peptide_table$ID_peptide)))
+  message(paste0("N Proteins (after filter): ", uniqueN(psm_anno_df$symbol)))
+  message(paste0("N Peptides (after filter): ", uniqueN(psm_peptide_table$ID_peptide)))
   
   return(list("c_anno" = c_anno,
               "psm_anno_df" = psm_anno_df,
@@ -543,8 +544,9 @@ read_PD_files <- function(anno_filename, pep_filename, prot_filename,
 #' proteome_data <- read_phosphoproteomics(software = "MQ", folder = "data_folder")
 #' }
 #'
-#' @import tidyverse
+#' @importFrom dplyr ungroup mutate filter group_by n
 #' @import data.table
+#' @import readxl
 #' @export
 read_phosphoproteomics <- function(software, folder, 
                                    keep_only_phosphomodification = T, phospho_thr = 0.75, 
@@ -874,8 +876,8 @@ read_phospho_MQ_files <- function(anno_filename, pep_filename, keep_only_phospho
   psm_log_pet_df <- psm_log_pet_df[ID_peptide %in% filter_df_single_pep]
   psm_peptide_table <- psm_peptide_table[ID_peptide %in% filter_df_single_pep]
   
-  message(paste0("N° Proteins (after filter): ", uniqueN(psm_anno_df$symbol)))
-  message(paste0("N° Peptides (after filter): ", uniqueN(psm_peptide_table$ID_peptide)))
+  message(paste0("N Proteins (after filter): ", uniqueN(psm_anno_df$symbol)))
+  message(paste0("N Peptides (after filter): ", uniqueN(psm_peptide_table$ID_peptide)))
   
   return(list("c_anno" = c_anno,
               "psm_anno_df" = psm_anno_df,
@@ -1205,8 +1207,8 @@ read_phospho_PD_files <- function(anno_filename, pep_filename, prot_filename, ps
   psm_log_pet_df <- psm_log_pet_df[ID_peptide %in% filter_df_single_pep]
   psm_peptide_table <- psm_peptide_table[ID_peptide %in% filter_df_single_pep]
   
-  message(paste0("N° Proteins (after filter): ", uniqueN(psm_anno_df$symbol)))
-  message(paste0("N° Peptides (after filter): ", uniqueN(psm_peptide_table$ID_peptide)))
+  message(paste0("N Proteins (after filter): ", uniqueN(psm_anno_df$symbol)))
+  message(paste0("N Peptides (after filter): ", uniqueN(psm_peptide_table$ID_peptide)))
   
   return(list("c_anno" = c_anno,
               "psm_anno_df" = psm_anno_df,
@@ -1255,8 +1257,9 @@ read_phospho_PD_files <- function(anno_filename, pep_filename, prot_filename, ps
 #'                                                         folder_phospho = "phospho_folder")
 #' }
 #'
-#' @import tidyverse
+#' @importFrom dplyr ungroup mutate filter group_by n
 #' @import data.table
+#' @import readxl
 #' @export
 read_phospho_proteome_proteomics <- function(software, 
                                              folder_proteome, folder_phospho, 

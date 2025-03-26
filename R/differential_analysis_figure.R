@@ -23,11 +23,12 @@
 #' 
 #' @import ggplot2
 #' @importFrom plyr round_any
-#' @import tidyverse
+#' @importFrom dplyr pull select arrange
 #' @import stringr
 #' @import scales
 #' @import RColorBrewer
 #' @import data.table
+#' @import ggthemes
 #' @export
 generate_differential_barplots <- function(differential_results, data_type="protein", 
                                            color_contrast=NULL, phospho_ctrl = FALSE) {
@@ -75,8 +76,8 @@ generate_differential_barplots <- function(differential_results, data_type="prot
     
     pDEPs <- deps_b2b_lollipop(
       input_df = lolli_df,
-      break_vec = seq(0, plyr::round_any(max(lolli_df$N) * 1.2, if (max(lolli_df$N) > 90) 100 else 10, f = ceiling),
-                      round(plyr::round_any(max(lolli_df$N) * 1.2, if (max(lolli_df$N) > 90) 100 else 10, f = ceiling) / 5, 0)),
+      break_vec = seq(0, round_any(max(lolli_df$N) * 1.2, if (max(lolli_df$N) > 90) 100 else 10, f = ceiling),
+                      round(round_any(max(lolli_df$N) * 1.2, if (max(lolli_df$N) > 90) 100 else 10, f = ceiling) / 5, 0)),
       fill_vec = col_vec,
       color_vec = col_vec,
       char_max = 30,
@@ -197,7 +198,7 @@ generate_volcano_plots <- function(differential_results, data_type=NULL,
 #' It supports the inclusion of phosphoproteomics data if available.
 #'
 #' @param proteome_data A list containing proteome data, including sample annotation and either protein or peptide data matrices.
-#' @param differential_results A list containing the differential analysis results.
+#' @param differential_analysis A list containing the differential analysis results.
 #' @param type Character; specifies the type of data to plot. Options are "protein" or "peptide".
 #'
 #' @return A list containing:
@@ -255,6 +256,7 @@ mds_differential_analysis_plot <- function(differential_analysis, proteome_data,
 #' This function generates a Principal Component Analysis (PCA) plot for either protein or peptide data based on the first two principal components.
 #' It supports the inclusion of phosphoproteomics data if available and provides a variance explanation for the axes.
 #'
+#' @param differential_analysis A list containing the differential analysis results.
 #' @param proteome_data A list containing proteome data, including sample annotation and either protein or peptide data matrices.
 #' @param type Character; specifies the type of data to plot. Options are "protein" or "peptide".
 #'

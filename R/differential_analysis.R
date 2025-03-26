@@ -23,9 +23,10 @@
 #' 
 #' @import stringr
 #' @import limma
-#' @import tidyverse
+#' @importFrom dplyr arrange rename select mutate
 #' @import data.table
 #' @import stringi
+#' @import DEqMS
 #' @export
 differential_analysis <- function(proteome_data, formule_contrast, 
                                   fc_thr=0.75, pval_fdr = "p_val", pval_thr=0.05, 
@@ -111,11 +112,11 @@ differential_analysis <- function(proteome_data, formule_contrast,
     contro_list <- df$rule
     
     contro_list<-c(contro_list,
-                   str_c(str_c("(", stringi::stri_replace_all_regex(formule_contrast, 
+                   str_c(str_c("(", stri_replace_all_regex(formule_contrast, 
                                                                     str_c("\\b",df$phospho,"\\b"), 
                                                                     str_c(df$phospho, "_phospho"), vectorize = FALSE), ")"),
                          "-",
-                         str_c("(", stringi::stri_replace_all_regex(formule_contrast, 
+                         str_c("(", stri_replace_all_regex(formule_contrast, 
                                                                     str_c("\\b",df$phospho,"\\b"), 
                                                                     str_c(df$phospho, "_proteome"), vectorize = FALSE), ")"))
     )
@@ -155,7 +156,7 @@ differential_analysis <- function(proteome_data, formule_contrast,
       stop("No valid contrast design given. Check the match between the spell of Condition and contrast design.")
     }
     
-    contrast <- limma::makeContrasts(contrasts = contro_list, levels = design)
+    contrast <- makeContrasts(contrasts = contro_list, levels = design)
     colnames(contrast) <- names(contro_list)
     
     unique_cond <- colSums(design) == 1

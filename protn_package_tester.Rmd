@@ -12,34 +12,10 @@ output:
 
 # Tester ProTN package
 
-```{r load functions, warning=F, message=FALSE, results='hide', eval=FALSE}
-setwd("/home/gabriele/Desktop/UNITN/proTN_package/")
+```{r set_dir, warning=F, message=FALSE, results='hide'}
+# setwd("/home/gabriele/Desktop/UNITN/proTN_package/")
 outputdir = "results_proteome"
-suppressPackageStartupMessages(suppressMessages(suppressWarnings({
-  lapply(list.files("./R", pattern = ".R", full.names = T), function(x){if(!file.info(x)$isdir){source(x)}})
-  
-  # Package requided
-  library(data.table)
-  library(readxl)
-  library(stringi)
-  library(ggplot2)
-  library(DEqMS)
-  library(proBatch)
-  library(writexl)
-  library(ggrepel)
-  library(ggbeeswarm)
-  library(limma)
-  library(plotly)
-  library(enrichR)
-  library(qpdf)
-  library(STRINGdb)
-  library(PhosR)
-  
-  library(pheatmap)
-  library(svgPanZoom)
-  library(SummarizedExperiment)
-  library(parallel)
-})))
+devtools::load_all(".")
 ```
 
 
@@ -47,7 +23,7 @@ suppressPackageStartupMessages(suppressMessages(suppressWarnings({
 
 ```{r read_proteomics_MQ}
 proteome_data <- read_proteomics(software = "MQ",
-                                 folder = "./data/case_study_proteomics/case_study_1/",
+                                 folder = "inst/extdata/case_study_proteomics/case_study_1",
                                  peptide_filename = "evidence")
 ```
 
@@ -61,24 +37,22 @@ proteome_data <- read_proteomics(software = "PD",
 
 ```{r preprocess_figure}
 generate_abundance <- generate_abundance_plot(proteome_data = proteome_data)
-generate_abundance
+generate_abundance$plot
 
 generate_peptide_distribution <- generate_peptide_distribution_plot(proteome_data = proteome_data)
-generate_peptide_distribution
+generate_peptide_distribution$plot
 ```
 
 # Test impute function
 
 ```{r impute_function}
 imputed_data <- impute_intensity(proteome_data = proteome_data)
-imputed_data
 ```
 
 # Test normalization
 
 ```{r normalization_function}
 normalized_data <- normalization_ProTN(proteome_data = imputed_data)
-normalized_data
 ```
 
 # Test Batch Correction -- NOT TESTED YET
@@ -102,10 +76,10 @@ save_abundance_tables(proteome_data = normalized_data,
 ```{r normalized_plot}
 prot_plot <- plot_abundance_distribution(proteome_data = normalized_data,
                                          type = "protein")
-prot_plot
+prot_plot$plot
 pep_plot <- plot_abundance_distribution(proteome_data = normalized_data,
                                         type = "peptide")
-pep_plot
+pep_plot$plot
 ```
 
 # MDS AND PCA
@@ -113,27 +87,28 @@ pep_plot
 ```{r mds_normalized}
 prot_mds <- mds_plot(proteome_data = normalized_data,
                      type = "protein")
-prot_mds
+prot_mds$plot
 pep_mds <- mds_plot(proteome_data = normalized_data,
                     type = "peptide")
-pep_mds
+pep_mds$plot
 ```
 
 ```{r pca_normalized}
 prot_mds <- pca_plot(proteome_data = normalized_data,
                      type = "protein")
-prot_mds
+prot_mds$plot
 pep_mds <- pca_plot(proteome_data = normalized_data,
                     type = "peptide")
-pep_mds
+pep_mds$plot
 ```
 
 # List protein boxplot
 
 ```{r boxplot_protein}
+# TODO: check warning
 prot_boxplot <- plot_selected_proteins(proteome_data = normalized_data,
                                        list_protein = c("Aaas","Aacs"))
-prot_boxplot
+prot_boxplot$plot
 ```
 
 
@@ -149,20 +124,17 @@ differential_results <- differential_analysis(proteome_data = normalized_data,
                                               pval_thr=0.05,
                                               signal_thr=0)
 
-differential_results
-
 save_differential_analysis_table(proteome_data = normalized_data,
                                  differential_results = differential_results,
                                  dirOutput=outputdir)
 
 ploft_diff_number <- generate_differential_barplots(differential_results,
                                                     data_type="protein")
-ploft_diff_number
+ploft_diff_number$plot
 
 ploft_diff_number <- generate_differential_barplots(differential_results,
                                                     data_type="peptide")
-ploft_diff_number
-# chunk: diff_analysis
+ploft_diff_number$plot
 ```
 
 # Test vulcano plot
@@ -186,12 +158,12 @@ generate_volcano_plots_peptide
 mds_diff <- mds_differential_analysis_plot(differential_analysis = differential_results,
                                            proteome_data = normalized_data,
                                            type = "protein")
-mds_diff
+mds_diff$plot
 
 mds_diff_pep <- mds_differential_analysis_plot(differential_analysis = differential_results,
                                                proteome_data = normalized_data,
                                                type = "peptide")
-mds_diff_pep
+mds_diff_pep$plot
 ```
 
 # pca differential analysis
@@ -200,12 +172,12 @@ mds_diff_pep
 pca_diff <- pca_differential_analysis_plot(differential_analysis = differential_results,
                                            proteome_data = normalized_data,
                                            type = "protein")
-pca_diff
+pca_diff$plot
 
 pca_diff_pep <- pca_differential_analysis_plot(differential_analysis = differential_results,
                                                proteome_data = normalized_data,
                                                type = "peptide")
-pca_diff_pep
+pca_diff_pep$plot
 ```
 
 # TEST enrichement

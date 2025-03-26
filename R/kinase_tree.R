@@ -15,16 +15,16 @@ kinase_activity_calculation <- function(dirOutput_kinase, formule_CORAL, comp, d
   GeneSymbol(ppe) <- tmp_dat_pep$GeneName
   Sequence(ppe) <- tmp_dat_pep$Annotated_Sequence
   
-  mat <- SummarizedExperiment::assay(ppe, "Quantification")
+  mat <- assay(ppe, "Quantification")
   substrate.list <- sapply(PhosphoSite.human, function(y) unlist(lapply(y, function(x) gsub(";.+", "", x))))
   
   mat.std <- standardise(mat)
   rownames(mat.std) <- toupper(sub("\\..*", "", rownames(mat.std)))
-  
-  kssMat <- kinaseSubstrateScore(substrate.list, mat.std, na.omit(ppe@Sequence), 5, 1, "human", TRUE)
+  kssMat <- kinaseSubstrateScore_local(substrate.list, mat = mat.std, seqs=na.omit(ppe@Sequence), 5, 1, "human", TRUE)
   set.seed(42)
+
   predMat <- kinaseSubstratePred(kssMat, inclusion = 5)
-  
+
   design <- model.matrix(~0 + c_anno$condition)
   colnames(design) <- unique(c_anno$condition)
   rownames(design) <- c_anno$sample
@@ -39,10 +39,14 @@ kinase_activity_calculation <- function(dirOutput_kinase, formule_CORAL, comp, d
   kinase_Act <- Reduce("+", mean_kinase_activity)
   
   dt <- as.data.table(kssMat$ksActivityMatrix, keep.rownames = "GeneName")
+  message("Saving differential kinase activity.")
   fwrite(data.table(kinase_Act, keep.rownames = T), file = file.path(dirOutput_kinase, paste0(comp, "_kinase_activity_differential.txt")), col.names = FALSE, quote = FALSE)
-  writexl::write_xlsx(dt, file.path(dirOutput_kinase, paste0(comp, "_kinase_activity_matrix.xlsx")), col_names = T)
+  message("Saving kinase activity matrix.")
+  write_xlsx(dt, file.path(dirOutput_kinase, paste0(comp, "_kinase_activity_matrix.xlsx")), col_names = T)
   
-  renderSvgPanZoom(comp, kinase_Act, dirOutput_kinase)
+  message("Preparing svg tree...")
+  
+  renderSvg(comp, kinase_Act, dirOutput_kinase)
   
   return(list(dt))
 }
@@ -70,6 +74,16 @@ kinase_activity_calculation <- function(dirOutput_kinase, formule_CORAL, comp, d
 #'
 #' @import data.table
 #' @import ggplot2
+#' @import writexl
+#' @importFrom SummarizedExperiment assay
+#' @importFrom readr read_tsv
+#' @import rsvg
+#' @import RColorBrewer
+#' @import colourpicker
+#' @import jsonlite
+#' @import data.tree
+#' @import pheatmap
+#' 
 #' @export
 kinase_tree <- function(proteome_data, differential_results, formule_CORAL, 
                         dirOutput = "results_ProTN", subfold="pics", phospho_ctrl = FALSE) {

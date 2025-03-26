@@ -34,11 +34,13 @@
 #' @import data.table
 #' @import gridExtra
 #' @import qpdf
+#' @import ggforce
 #'
 #' @examples
-#' # Example usage
+#' \dontrun{
 #' plotlist <- enrichment_figure(enr_df = enr_results, category = c("all"), save = TRUE)
-#'
+#' }
+#' 
 enrichment_figure <- function(enr_df, category = c("all"), enrich_filter_term=NULL, 
                               overlap_size_enrich_thr = 5, save=F,
                               color_contrast=NULL, dirOutput="results_ProTN", 

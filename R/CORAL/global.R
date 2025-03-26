@@ -1,26 +1,4 @@
 # setwd(paste0(getwd(),"/R/CORAL"))
-#---------------------- LOAD LIBRARIES ----------------------#
-
-# load basic libraries
-library(shiny)
-library(shinydashboard)
-library(shinyBS)
-library(readr)
-library(rsvg)
-library(shinyWidgets)
-library(RColorBrewer)
-
-# load Manning-related libraries
-library(svgPanZoom)
-
-# load ui-related libraries
-library(colourpicker)
-library(DT)
-
-# load other network libraries
-library(data.tree)
-library(jsonlite)
-
 #---------------------- SOURCE R FILES ----------------------#
 
 source("R/CORAL/R/colorby.R")
@@ -39,7 +17,7 @@ source("R/CORAL/R/radiobuttonswithimages.R")
 orig_svginfo = readRDS("R/CORAL/Data/kintree.RDS")
 
 # if you need to up date the data frame read in the new info here
-orig_svginfo$dataframe = data.frame(read_tsv("R/CORAL/Data/coral_dataframe.tsv"))
+orig_svginfo$dataframe = data.frame(suppressMessages(read_tsv("R/CORAL/Data/coral_dataframe.tsv")))
 
 # remove NAs from subfamilies
 NAs = which(is.na(orig_svginfo$dataframe$kinase.subfamily))

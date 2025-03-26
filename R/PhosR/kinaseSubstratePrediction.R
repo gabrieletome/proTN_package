@@ -61,14 +61,15 @@
 #' 
 #' L6.phos.seq <- Sequence(ppe)[idx]
 #' 
-#' L6.matrices <- kinaseSubstrateScore(PhosphoSite.mouse, L6.phos.std,
+#' L6.matrices <- kinaseSubstrateScore_local(PhosphoSite.mouse, L6.phos.std,
 #'     L6.phos.seq, numMotif = 5, numSub = 1)
 #' @export
-kinaseSubstrateScore <- function(substrate.list, mat, seqs, numMotif = 5, 
+kinaseSubstrateScore_local <- function(substrate.list, mat, seqs, numMotif = 5, 
                                 numSub = 1, species = "mouse", verbose = TRUE) {
+  
     ks.profile.list <- kinaseSubstrateProfile(substrate.list, mat)
     # motif.mouse.list = PhosR::motif.mouse.list
-    utils::data("KinaseMotifs", envir = environment())
+    data("KinaseMotifs", envir = environment())
     if (!(species %in% c("mouse", "human", "rat"))) {
         stop("Parameter 'species' must be one of 'mouse', 'human' or 'rat'")
     }
@@ -131,12 +132,14 @@ by motifs and phospho profiles:")
     if (verbose)
         message("done.")
     # visualise
+    message("Preparing table.")
     ksActivityMatrix <- do.call(rbind, ks.profile.list.filtered)[o, ]
     phosScoringMatrices <- list(motifScoreMatrix = motifScoreMatrix,
         profileScoreMatrix = profileScoreMatrix,
         combinedScoreMatrix = combinedScoreMatrix,
         ksActivityMatrix = ksActivityMatrix, weights = w3)
-    kinaseSubstrateHeatmap(phosScoringMatrices)
+    message("Done.")
+    # kinaseSubstrateHeatmap_local(phosScoringMatrices)
     return(phosScoringMatrices)
 }
 
@@ -262,7 +265,7 @@ kinaseActivityHeatmap <- function(ksProfileMatrix) {
 
 #' @title Kinase-substrate annotation prioritisation heatmap
 #'
-#' @param phosScoringMatrices a matrix returned from kinaseSubstrateScore.
+#' @param phosScoringMatrices a matrix returned from kinaseSubstrateScore_local
 #' @param top the number of top ranked phosphosites for each kinase to be
 #' included in the heatmap. Default is 1.
 #' @param printPlot indicate whether the plot should be saved as a PDF
@@ -310,15 +313,15 @@ kinaseActivityHeatmap <- function(ksProfileMatrix) {
 #' 
 #' L6.phos.seq <- Sequence(ppe)[idx]
 #' 
-#' L6.matrices <- kinaseSubstrateScore(PhosphoSite.mouse, L6.phos.std,
+#' L6.matrices <- kinaseSubstrateScore_local(PhosphoSite.mouse, L6.phos.std,
 #'     L6.phos.seq, numMotif = 5, numSub = 1)
 #'     
-#' kinaseSubstrateHeatmap(L6.matrices)
-#' kinaseSubstrateHeatmap(L6.matrices, printPlot=TRUE)
+#' kinaseSubstrateHeatmap_local(L6.matrices)
+#' kinaseSubstrateHeatmap_local(L6.matrices, printPlot=TRUE)
 #' }
 #' @export
-kinaseSubstrateHeatmap <- function(phosScoringMatrices, top = 3, printPlot=NULL, 
-    filePath="./kinaseSubstrateHeatmap.pdf", width=10, height=10) {
+kinaseSubstrateHeatmap_local <- function(phosScoringMatrices, top = 3, printPlot=NULL, 
+    filePath="./kinaseSubstrateHeatmap.pdf", width=20, height=20) {
     # KinaseFamily = PhosR::KinaseFamily
     utils::data("KinaseFamily", envir = environment())
     ####### heatmap 1
@@ -328,17 +331,15 @@ kinaseSubstrateHeatmap <- function(phosScoringMatrices, top = 3, printPlot=NULL,
             sort(phosScoringMatrices$combinedScoreMatrix[,i],
                 decreasing = TRUE)[seq_len(top)]))
     }
-
     o <- intersect(colnames(phosScoringMatrices$combinedScoreMatrix),
         rownames(KinaseFamily))
     annotation_col = data.frame(group = KinaseFamily[o,
         "kinase_group"], family = KinaseFamily[o,
         "kinase_family"])
     rownames(annotation_col) <- o
-
+    library(pheatmap)
     if (is.null(printPlot)==TRUE) {
-        
-        pheatmap(phosScoringMatrices$combinedScoreMatrix[sites,
+      pheatmap(phosScoringMatrices$combinedScoreMatrix[sites,
         ], annotation_col = annotation_col,
         cluster_rows = TRUE, cluster_cols = TRUE,
         fontsize = 7, main = paste("Top",
@@ -365,7 +366,7 @@ kinaseSubstrateHeatmap <- function(phosScoringMatrices, top = 3, printPlot=NULL,
 #'
 #'
 #' @param site site the ID of a phosphosite
-#' @param phosScoringMatrices output from function kinaseSubstrateScore()
+#' @param phosScoringMatrices output from function kinaseSubstrateScore_local()
 #' @param predMatrix a prediction matrix from kinaseSubstratePred()
 #'
 #' @return A graphical plot
@@ -400,7 +401,7 @@ kinaseSubstrateHeatmap <- function(phosScoringMatrices, top = 3, printPlot=NULL,
 #' 
 #' L6.phos.seq <- Sequence(ppe)[idx]
 #' 
-#' L6.matrices <- kinaseSubstrateScore(PhosphoSite.mouse, L6.phos.std,
+#' L6.matrices <- kinaseSubstrateScore_local(PhosphoSite.mouse, L6.phos.std,
 #'     L6.phos.seq, numMotif = 5, numSub = 1)
 #'     
 #' set.seed(1)
@@ -450,7 +451,7 @@ siteAnnotate <- function(site, phosScoringMatrices,
 #'     verbose = TRUE
 #' )
 #'
-#' @param phosScoringMatrices An output of kinaseSubstrateScore.
+#' @param phosScoringMatrices An output of kinaseSubstrateScore_local
 #' @param ensembleSize An ensemble size.
 #' @param top a number to select top kinase substrates.
 #' @param cs Score threshold.
@@ -492,7 +493,7 @@ siteAnnotate <- function(site, phosScoringMatrices,
 #' 
 #' L6.phos.seq <- Sequence(ppe)[idx]
 #' 
-#' L6.matrices <- kinaseSubstrateScore(PhosphoSite.mouse, L6.phos.std,
+#' L6.matrices <- kinaseSubstrateScore_local(PhosphoSite.mouse, L6.phos.std,
 #'     L6.phos.seq, numMotif = 5, numSub = 1)
 #' set.seed(1)
 #' L6.predMat <- kinaseSubstratePred(L6.matrices, top=30)

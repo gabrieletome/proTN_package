@@ -43,9 +43,10 @@ with fold-change and p-value (or FDR adjusted p-value) on the axes.
 It highlights genes/peptides based on the fold-change and p-value thresholds.
 }
 \examples{
-# Example usage:
+\dontrun{
 volcano_plot <- generate_volcano_plots(differential_results = differential_results,
                                        comparison = "comparison1",
                                        fc_thr = 1, pval_thr = 0.05)
+}
 
 }

@@ -26,7 +26,6 @@ newdf <- function(comp, kinase_df) {
     
     # convert to coral id
     recolordf = convertID (tempdf, recolordf, inputtype = "HGNC")
-    
     if (nrow(recolordf) > 0)
     {
       {
@@ -168,12 +167,11 @@ newdf <- function(comp, kinase_df) {
 # ----------------- PLOTS ---------------- #
 
 # build the manning tree
-renderSvgPanZoom <- function(comp, kinase_Act, dirOutput_kinase) {
+renderSvg <- function(comp, kinase_Act, dirOutput_kinase) {
   # recolor the official matrix
   dfandlegend = newdf(comp, kinase_Act)
   svginfo$dataframe = dfandlegend[[1]]
   svginfo$legend = dfandlegend[[2]]
-  
   # set title
   svginfo$title = paste0("Kinase Tree - Comparison: ", comp)
   

@@ -6,6 +6,11 @@
 \usage{
 plot_abundance_distribution(proteome_data, type)
 }
+\arguments{
+\item{proteome_data}{A list containing proteome data, including peptide annotation tables.}
+
+\item{type}{Character; specifies the type of data to plot. Options are "protein" or "peptide".}
+}
 \value{
 A list containing:
 \itemize{

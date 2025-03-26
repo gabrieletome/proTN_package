@@ -58,7 +58,8 @@ groups. The resulting plots are saved as individual PDFs and combined into a sin
 if the \code{save} parameter is set to TRUE.
 }
 \examples{
-# Example usage
+\dontrun{
 plotlist <- enrichment_figure(enr_df = enr_results, category = c("all"), save = TRUE)
+}
 
 }

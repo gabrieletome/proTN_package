@@ -101,14 +101,14 @@ save_abundance_tables <- function(proteome_data, dirOutput="results_ProTN", subf
     message(paste0("Creating dir: ",dirOutput))
     dir.create(dirOutput)
   }
-  if(!is_null(subfolder)){
+  if(!is.null(subfolder)){
     if(!dir.exists(paste0(dirOutput, "/", subfolder))){
       message(paste0("Creating dir: ",dirOutput, "/", subfolder))
       dir.create(paste0(dirOutput, "/", subfolder))
     }
-    writexl::write_xlsx(df_to_save, paste0(dirOutput,"/", subfolder, "/normalised_abundances.xlsx"))
+    write_xlsx(df_to_save, paste0(dirOutput,"/", subfolder, "/normalised_abundances.xlsx"))
   } else{
-    writexl::write_xlsx(df_to_save, paste0(dirOutput, "/normalised_abundances.xlsx"))
+    write_xlsx(df_to_save, paste0(dirOutput, "/normalised_abundances.xlsx"))
   }
   
   message("Abundance tables saved successfully.")
@@ -129,14 +129,15 @@ save_abundance_tables <- function(proteome_data, dirOutput="results_ProTN", subf
 #'   Default is `FALSE`.
 #'
 #' @import writexl
-#' @import tidyverse
+#' @importFrom dplyr left_join inner_join group_by summarize_all
 #'
 #' @examples
-#' # Example usage
+#' \dontrun{
 #' save_differential_analysis_table(proteome_data = proteome_data_example,
 #'                                  differential_results = differential_results_example,
 #'                                  dirOutput = "results_directory")
-#'
+#' }
+#' 
 save_differential_analysis_table <- function(proteome_data, differential_results, 
                                              dirOutput="results_ProTN", subfolder="table",
                                              phospho_ctrl = FALSE){
@@ -226,14 +227,14 @@ save_differential_analysis_table <- function(proteome_data, differential_results
     message(paste0("Creating dir: ",dirOutput))
     dir.create(dirOutput)
   }
-  if(!is_null(subfolder)){
+  if(!is.null(subfolder)){
     if(!dir.exists(paste0(dirOutput, "/", subfolder))){
       message(paste0("Creating dir: ",dirOutput, "/", subfolder))
       dir.create(paste0(dirOutput, "/", subfolder))
     }
-    writexl::write_xlsx(df_to_save, paste0(dirOutput,"/", subfolder, "/differential_expression.xlsx"))
+    write_xlsx(df_to_save, paste0(dirOutput,"/", subfolder, "/differential_expression.xlsx"))
   } else{
-    writexl::write_xlsx(df_to_save, paste0(dirOutput, "/differential_expression.xlsx"))
+    write_xlsx(df_to_save, paste0(dirOutput, "/differential_expression.xlsx"))
   }
   
 }

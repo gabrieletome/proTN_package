@@ -12,50 +12,18 @@ output:
 
 # Tester PhosProTN package
 
-```{r load functions, warning=F, message=FALSE, results='hide', eval=FALSE}
+```{r set_dir, warning=F, message=FALSE, results='hide'}
 # setwd("/home/gabriele/Desktop/UNITN/proTN_package/")
 outputdir = "results_phospho_proteome"
-suppressPackageStartupMessages(suppressMessages(suppressWarnings({
-  lapply(list.files("./R", pattern = ".R", full.names = T), function(x){if(!file.info(x)$isdir){source(x)}})
-  
-  # Package requided
-  library(data.table)
-  library(readxl)
-  library(stringi)
-  library(ggplot2)
-  library(DEqMS)
-  library(proBatch)
-  library(writexl)
-  library(ggrepel)
-  library(ggbeeswarm)
-  library(limma)
-  library(plotly)
-  library(enrichR)
-  library(qpdf)
-  library(STRINGdb)
-  library(PhosR)
-  
-  library(pheatmap)
-  library(svgPanZoom)
-  library(SummarizedExperiment)
-  library(parallel)
-  
-  library(tidyverse)
-  library(ggthemes)
-  library(extrafont)
-  library(doParallel)
-  library(foreach)
-  loadfonts()
-})))
+devtools::load_all(".")
 ```
-
 
 # Test proteomics pipeline
 
 ```{r read_proteomics_MQ}
 proteome_data <- read_phospho_proteome_proteomics(software = "MQ", 
-                                                  folder_proteome = "./data/case_study_phospho/txt_PROTEOME/",
-                                                  folder_phospho = "./data/case_study_phospho/txt_Phospho/",
+                                                  folder_proteome = "inst/extdata/case_study_phospho/txt_PROTEOME",
+                                                  folder_phospho = "inst/extdata/case_study_phospho/txt_Phospho",
                                                   peptide_proteome_filename = "evidence", 
                                                   peptide_phospho_filename = "evidence", 
                                                   phospho_thr = 0.75)

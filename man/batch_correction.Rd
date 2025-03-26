@@ -23,7 +23,8 @@ The function uses the ComBat method for batch effect correction.
 It adjusts both peptide and gene data separately, based on the sample annotation provided.
 }
 \examples{
-# Example usage:
+\dontrun{
 corrected_data <- batch_correction(proteome_data = proteome_data, batch_col = "batch")
+}
 
 }
