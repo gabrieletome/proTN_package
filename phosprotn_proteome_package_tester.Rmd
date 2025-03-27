@@ -15,9 +15,14 @@ output:
 ```{r set_dir, warning=F, message=FALSE, results='hide'}
 # setwd("/home/gabriele/Desktop/UNITN/proTN_package/")
 outputdir = "results_phospho_proteome"
-devtools::load_all(".")
 ```
 
+```{r setup}
+library(proTN)
+extract_example(path_phospho = "/home/gabriele/Desktop/UNITN/data/phospho", 
+                path_proteome = "/home/gabriele/Desktop/UNITN/data/proteome")
+outputdir="/home/gabriele/Desktop/UNITN/data/proteome"
+```
 # Test proteomics pipeline
 
 ```{r read_proteomics_MQ}
