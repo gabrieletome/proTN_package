@@ -1,27 +1,15 @@
 ![image](www/images/logo_scritta_black.svg)
 
 # ProTN
-ProTN is a novel R Shiny web app of an integrative pipeline that can perform all the steps of proteomics and phospho-proteomic analysis downstream of peptide quantification. ProTN works with any MS proteomic experiments managed with Proteome Discoverer and MaxQuant, two of the most used bioinformatic platforms to obtain peptide abundances from raw MS spectra. The implementation of ProTN focuses on being user-friendly, quick in doing the analysis, and comprehensive in the generation of images and tables that help the biological interpretation of results.
+ProTN is a R package to perform an integrative pipeline that can perform all the steps of proteomics and phospho-proteomic analysis downstream of peptide quantification. ProTN works with any MS proteomic experiments managed with Proteome Discoverer and MaxQuant, two of the most used bioinformatic platforms to obtain peptide abundances from raw MS spectra. The implementation of ProTN focuses on being user-friendly, quick in doing the analysis, and comprehensive in the generation of images and tables that help the biological interpretation of results.
 
 All the required information can be found on the info page of the web app.
 
 ## Before starting
 ### Dependencies
-ProTN requires R version >= 4.1 and RStudio.
-
-The app should automatically started installing all the required package. Otherwise the manual installation can be done via the **INSTALL.R** script. Before execute the shiny app verify the correct installation.
-
-## How execute the app
-  1. Open the file **app.R**.
-  2. Click **Run App**
+ProTN requires R version >= 4.1.
 
 ## Getting help
-The menu is on the left of the web page, it contain the guide pages for ProTN and PhosProTN and the tabs for the execution of the pipelines. Last tab are the contacts.
-
-The two info tabs containt information about the workflow and detailed information about the input and output files.
-
-![image](www/images/ProTN_UI.png)
-
 Bugs and errors can be reported at the issues page on GitHub. Before filing new issues, please read the documentation and take a look at currently open and already closed discussions.
 
 ## Workflow description 
@@ -39,7 +27,6 @@ ProTN is an integrative pipeline that analyze DDA proteomics data obtained from 
 #### Set settings for the execution and read the raw data from loaded files
 ProTN analyse the results of Proteome Discoverer and MaxQuant. The essential parameters and files to run ProTN are: (additional details on the input can be found in the ProTN info tab)
 
-- **Title of Analysis**: title of the experiment. It will be the title of the web page report.
 - **Software Analyzer**: determine with software was use to identify peptides and proteins (PD for Protein Discoverer, MQ for MaxQuant).
 - **Sample Annotation file**: file with the information about the samples and the correlation between replicate ID and condition. (WARNING: Condition name MUST contain at least 1 character!)
     *   **Condition** column (`REQUIRED`): define the condition of each sample that divide the samples in groups. The conditions need to be the same of the the Contrast Design. (WARNING: Condition name MUST contain at least 1 character!)
@@ -50,11 +37,6 @@ ProTN analyse the results of Proteome Discoverer and MaxQuant. The essential par
         *   In case of **MQ** analysis the this column is `REQUIRED`. **`ATTENTION`****: SAMPLE NAME MUST BE EQUAL TO THE NAME INSERTED IN MAXQUANT (name of the column in peptide file).**
 - **Peptides file**: raw file of peptides obtained from PD or MQ (file peptides.txt).
 - **Proteins file**: raw file of protein groups obtained from PD or MQ (file proteinGroups.txt).
-- **Design for the comparison file**: Excel file containing the formulas of the contrast comparison you want to analyse. [Example of Design file in Data folder] The table can have 3 columns:
-    
-    *   **Formule** column (`REQUIRED`): The formulas need to follow the syntax of [Limma](https://bioinf.wehi.edu.au/limma/). `AT LEAST 1 FORMULA IS REQUIRED`.
-    *   **Name** column (`OPTIONAL`): personalized name assign to the comparison.
-    *   **Color** columns (`OPTIONAL`): define a color for the condition in the graphs. If not present use the default palette.
 
 #### Normalization and imputation of the intensities
 The intensities are log2 transformed and normalized with DEqMS (Zhu 2022). Two methods are applied because a double normalization is required, one for peptides and one for proteins. At the peptide level, the normalization is done by the function equalMedianNormalization, which normalizes intensity distributions in samples so that they have median equal to 0.
@@ -137,13 +119,7 @@ PhosProTN analyse the phosphoproteomic data at peptide level, with background th
 
 #### Set settings for the execution and read the raw data from loaded files
 ProTN analyse the results of Proteome Discoverer and MaxQuant. The essential parameters and files to run ProTN are: (additional details on the input can be found in the ProTN info tab)
-- **Title of Analysis**: title of the experiment. It will be the title of the web page report.
 - **Software Analyzer**: determine with software was use to identify peptides and proteins (PD for Protein Discoverer, MQ for MaxQuant).
-- **Design for the comparison file**: Excel file containing the formulas of the contrast comparison you want to analyse. [Example of Design file in Data folder] The table can have 3 columns:
-    
-    *   **Formule** column (`REQUIRED`): The formulas need to follow the syntax of [Limma](https://bioinf.wehi.edu.au/limma/). `AT LEAST 1 FORMULA IS REQUIRED`.
-    *   **Name** column (`OPTIONAL`): personalized name assign to the comparison.
-    *   **Color** columns (`OPTIONAL`): define a color for the condition in the graphs. If not present use the default palette.
 *   **Required for Proteome Discoverer**:
     *   **PROTEOMIC files:**
         *   `Sample Annotation file`: file with the information about the samples and the correlation between replicate ID and condition of the proteomic (WARNING: Condition name MUST contain at least 1 character!). The **Sample\_Annotation** file is an Excel file with the following column \[Example of an Sample\_Annotation file HERE...\]:
@@ -197,6 +173,6 @@ The activity score provide by PhosR is used to generated a graphical versione of
 <img src="www/images/figures/TA_kinase_Tree_CORAL-cropped.svg" width="75%" style="display:block;margin-left:auto;margin-right:auto"/>
 
 ## Contacts
-Gabriele Tomè, Developer: gtome@fbk.eu; gabriele.tome@unitn.it
+Gabriele Tomè, Developer: gabriele.tome@unitn.it
 
 Dr. Toma Tebaldi, PI: toma.tebaldi@unitn.it
