@@ -10,14 +10,14 @@ output:
     gallery: true
 ---
 
-# Tester PhosProTN package
+# PhosProTN package
 
 ```{r setup}
 library(proTN)
 extract_example(path_phospho = "./phospho")
 outputdir="./phospho"
 ```
-# Test proteomics pipeline
+# proteomics pipeline
 
 ```{r read_proteomics_MQ, eval=FALSE}
 
@@ -46,19 +46,19 @@ create_phosphosite_fig <- create_phosphosite_plot(proteome_data = proteome_data,
 create_phosphosite_fig
 ```
 
-# Test impute function
+# impute function
 
 ```{r impute_function}
 imputed_data <- impute_intensity(proteome_data = proteome_data)
 ```
 
-# Test normalization
+# normalization
 
 ```{r normalization_function}
 normalized_data <- normalization_ProTN(proteome_data = imputed_data)
 ```
 
-# Test Batch Correction -- NOT TESTED YET
+# Batch Correction -- NOT TESTED YET
 
 ```{r batch_function, eval=FALSE}
 # TODO: NEED TO TEST
@@ -66,14 +66,14 @@ batch_coor_data <- batch_correction(proteome_data = normalized_data,
                                     batch_col = "batch")
 ```
 
-# Test Exporter
+# Exporter
 
 ```{r exporter}
 save_abundance_tables(proteome_data = normalized_data, 
                       dirOutput=outputdir)
 ```
 
-# Test figure distribution normalized
+# figure distribution normalized
 
 ```{r normalized_plot}
 prot_plot <- plot_abundance_distribution(proteome_data = normalized_data,
@@ -136,7 +136,7 @@ ploft_diff_number <- generate_differential_barplots(differential_results,
 ploft_diff_number
 ```
 
-# Test vulcano plot
+# vulcano plot
 
 ```{r vulcano_plot}
 generate_volcano_plots_protein<-generate_volcano_plots(differential_results, 
@@ -177,7 +177,7 @@ pca_diff_pep <- pca_differential_analysis_plot(differential_analysis = different
 pca_diff_pep
 ```
 
-# TEST enrichement
+# enrichement
 
 ```{r enrichment}
 enrichemnt_results <- perform_enrichment_analysis(differential_results = differential_results, 
@@ -205,13 +205,13 @@ plots_terms <- enrichment_figure(enr_df = enrichemnt_results,
 plots_terms
 ```
 
-# TEST UNIVERSE ENRICHMENT
+# UNIVERSE ENRICHMENT
 
 ```{r universe_enrichment}
 # TODO: add universe enrichment
 ```
 
-# TEST network string
+# network string
 
 ```{r string network}
 
@@ -222,7 +222,7 @@ strindb_res
 
 ```
 
-# TEST KINASE TREE
+# KINASE TREE
 
 ```{r kinase_tree}
 kinase_res <- kinase_tree(proteome_data = normalized_data, 
