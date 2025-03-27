@@ -137,7 +137,7 @@ save_abundance_tables <- function(proteome_data, dirOutput="results_ProTN", subf
 #'                                  differential_results = differential_results_example,
 #'                                  dirOutput = "results_directory")
 #' }
-#' 
+#' @export
 save_differential_analysis_table <- function(proteome_data, differential_results, 
                                              dirOutput="results_ProTN", subfolder="table",
                                              phospho_ctrl = FALSE){

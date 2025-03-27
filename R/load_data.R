@@ -1,3 +1,35 @@
+#' Extract case study
+#'
+#' @param path_phospho Character; path where extract case study
+#' @param path_proteome Character; path where extract case study
+#' @examples
+#' \dontrun{
+#' extract_example(path_proteome = tempdir())
+#' }
+#' @import utils
+#' @import stringr
+#' @export
+extract_example = function(path_phospho = NULL, 
+                           path_proteome = NULL) {
+  if(!is.null(path_phospho)){
+    message("Extracting phosphoproteome example...")
+    dir<-path_phospho
+    phospho_zip <- system.file("extdata", "case_study_phospho.zip", package = "proTN")
+    unzip(phospho_zip, exdir = path_phospho)  
+    message(paste0("Phospho-proteome example saved in: ",normalizePath(dir),"/case_study_phospho"))
+  }
+  if(!is.null(path_proteome)){
+    message("Extracting proteome example...")
+    dir<-path_proteome
+    proteome_zip <- system.file("extdata", "case_study_proteomics.zip", package = "proTN")
+    unzip(proteome_zip, exdir = path_proteome)
+    message(paste0("Proteome example saved in: ",normalizePath(dir),"/case_study_proteomics"))
+  }
+  if(is.null(path_phospho) & is.null(path_proteome)){
+    stop("Missing path. Provide at least one path")
+  }
+}
+
 #' Read Proteomics Data
 #'
 #' This function reads proteomics data from files based on the specified software (Proteome Discoverer or MaxQuant). 

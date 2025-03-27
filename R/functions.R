@@ -16,6 +16,7 @@ colour_vec<-c("dodgerblue2", "#E31A1C", "green4", "#6A3D9A","#FF7F00",
               "#bdffd0","#d6d2ff","#9fb282","#a5d8ff","#c9a395","#9bfff7","#ffcbce","#70b6ca","#faffdd","#88b3bc",
               "#d6ffdf","#a3e5ff","#b1ac8f","#ccffff","#b4bb9f","#7eb7a5","#c5dbc3","#a8b9ff","#74dfbc","#f2ace7")
 
+
 ### The function enrichment_test performs enrichment analysis starting from 3 vectors of gene names: input, annotation and background (the background is intended as the universe and, by default, is also used to filter gene names in the input and annotation) ----  
 
 
