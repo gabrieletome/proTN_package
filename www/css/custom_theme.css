@@ -1,0 +1,477 @@
+/*############################################################################*/
+/* ProTN: an integrative pipeline for complete analysis of proteomics         */ 
+/* data from mass spectrometry                                                */
+/* Laboratory of RNA and Disease Data Science, University of Trento           */
+/* Developer: Gabriele Tomè                                                   */
+/* Issue at: https://github.com/TebaldiLab/ProTN/issues                       */
+/* PI: Dr. Toma Tebaldi, PhD                                                  */
+/*############################################################################*/
+.skin-black .main-header>.logo {
+  background-color: #222d32;
+  border-right: 0px;
+  
+}
+
+.skin-black .main-header .navbar {
+  background-color: #008752;
+}
+
+.skin-black .main-header .navbar>.sidebar-toggle {
+  border-right: 1px solid #005835;
+}
+
+.main-sidebar {
+  padding-top: 70px;
+}
+
+.col-sm-8 {
+  width: 100%;
+}
+
+img.image-thumb {
+  width: 600px;
+}
+
+hr {
+  width: 100%;
+  border-top: 3px solid #000000;
+  height: 10px;
+	border: 0;
+	box-shadow: 0 10px 10px -10px #8c8b8b inset;
+}
+
+.shiny-material-button {
+  margin-top: 0px;
+}
+
+.waves-effect {
+  margin-right: 20px;
+}
+
+.navbar-static-top {
+  line-height: normal;
+  height: auto;
+}
+
+.shiny-input-container > .shiny-input-container-inline {
+  width: 100%;
+}
+
+.shiny-input-container {
+  width: 100%;
+}
+
+.shiny-input-container:not(.shiny-input-container-inline){
+    width: 100%;
+
+}
+
+ul {
+  list-style-type: disc;
+}
+
+.row {
+  display: flex;
+}
+
+#help_btn1, #help_btn2,
+#help_btn3, #help_btn4,
+#help_btn5, #help_btn6,
+#help_btn7, #help_btn8,
+#help_btn9, #help_btn10,
+#help_btn11, #help_btn12,
+#help_btn13, #help_btn14,
+#help_btn15, #help_btn16,
+#help_btn17, #help_btn18,
+#help_btn19, #help_btn20,
+#help_btn21, #help_btn22, 
+#help_btn23, 
+#help_btn1_P, #help_btn2_P,
+#help_btn3_P, #help_btn4_P,
+#help_btn5_P, #help_btn6_P,
+#help_btn7_P, #help_btn8_P,
+#help_btn9_P, #help_btn10_P,
+#help_btn11_P, #help_btn12_P,
+#help_btn13_P, #help_btn14_P,
+#help_btn15_P, #help_btn16_P,
+#help_btn17_P, #help_btn18_P,
+#help_btn19_P, #help_btn20_P,
+#help_btn21_P, #help_btn22_P, 
+#help_btn23_P, #help_btn24_P,
+#help_btn25_P, #help_btn26_P,
+#help_btn27_P, #help_btn28_P,
+#help_btn29_P, #help_btn30_P, 
+#help_btn31_P {
+  border-radius: 17px;
+  padding: revert;
+  margin: 14px;
+  max-width: max-content;
+
+}
+
+#shiny-notification-panel {
+ position:fixed;
+ width: 350px;
+ padding: 10px;
+}
+
+li {
+  display: list-item;
+  list-style-type: disc;
+  padding-left: 10px;
+}
+
+li.browser-default {
+  display: list-item;
+  list-style-type: disc;
+  padding-left: 10px;
+}
+
+h2 {
+  font-size: 30px;
+}
+
+h3 {
+  font-size: 24px;
+  color: #008752 !important;
+}
+
+h4 {
+  font-size: 18px;
+  color: #008752 !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: el messiri;
+  font-weight: bold;
+  margin: 2.3733333333rem 0 0 0;
+  color: rgb(0, 120, 174);
+}
+
+code {
+  color: rgb(0, 120, 174);
+}
+
+.collapsible-header{
+  flex-wrap: wrap;
+  padding-left: 1rem !important; 
+  padding-right: 1rem !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  border-radius: 16px;
+}
+
+.collapsible-body{
+  background-color: #fff;
+  border-radius: 16px;
+}
+
+#collapse_ul{
+    padding-left: unset;
+    list-style-type: none;
+    border-radius: 16px;
+}
+
+#collapse_li{
+  padding-left: unset;
+  display: block;
+  border-radius: 16px;
+}
+
+#plus_elem{
+  padding-top: 2.5rem;
+  padding-left: 2rem;
+  color: rgb(0, 120, 174);
+}
+
+#linesubtitle{
+  border-top: 3px solid;
+  color: rgb(0, 120, 174);
+  margin-top: 0;
+}
+
+p {
+  font-size: 16px;
+}
+
+#logo_UNITN {
+  width: 90%;
+  max-width: 350px;
+  margin-right: 40px;
+}
+
+#logo_RDDS {
+  width: 90%;
+  max-width: 200px;
+  margin-right: 40px;
+}
+
+#logo_RDDS_footer {
+  width: 5%;
+  max-width: 30px;
+}
+
+.sidebar-collapse #logo_protn {
+  content: url("images/logo_black.png");
+  max-height: -webkit-fill-available;
+  vertical-align: middle;
+  max-width: 50px;
+}
+
+.sidebar-collapse .logo {
+  padding: 0px;
+}
+
+#logo_protn {
+  content: url("images/logo_scritta_black.png");
+  max-height: -webkit-fill-available;
+  vertical-align: bottom;
+}
+
+.content-wrapper{
+  background-image: url("images/background.svg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+.btn_example{
+    background-color: transparent;
+    color: #039be5;
+    font-style: italic;
+    text-decoration: underline;
+    font-family: math;
+}
+
+.card {
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  max-width: 300px;
+  margin: auto;
+  text-align: center;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.title {
+  color: grey;
+  font-size: 18px;
+}
+
+button {
+  border: none;
+  outline: 0;
+  display: inline-block;
+  padding: 8px;
+  color: white;
+  background-color: #000;
+  text-align: center;
+  cursor: pointer;
+/*  width: 100%; */
+  font-size: 18px;
+}
+
+a {
+  text-decoration: none;
+  font-size: 16px;
+  color: black;
+}
+
+.fa {
+  text-decoration: none;
+  font-size: 22px;
+  display: inline-block;
+  font: normal normal normal 22px/1 FontAwesome;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+}
+
+button:hover, a:hover {
+  opacity: 0.7;
+}
+
+
+#loadmessage {
+  position:fixed; z-index:8; top:50%; left:50%; padding:10px;
+  text-align:center; font-weight:bold; color:#000000; background-color:#CCFF66;
+}
+  
+.cover_hide {
+  visibility: hidden;
+}
+
+.cover_run {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #BFBFBF;
+  opacity: .5;
+  overflow: hidden;
+  z-index: 9;
+  pointer-events: none;
+  
+}
+
+.prevent_click{
+  position:fixed; 
+  z-index:9;
+  width:100%;
+  height:100vh;
+  background-color: transparent;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.loader {
+  position:fixed; 
+  z-index:8; 
+  border:16px solid #404040;
+  border-top: 16px solid #337ab7; 
+  border-radius: 50%;
+  width: 120px; 
+  height: 120px; 
+  top:45%; 
+  left:45%;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.form-control {
+  border-radius: 10px;
+}
+
+footer {
+  position:fixed;
+  bottom:0;
+  width:100%;
+  height:5%;
+  max-height:50px;   /* Height of the footer */
+  color: white;
+  padding: 10px;
+  background-color: #222d32;
+  z-index: 1000;
+}
+
+
+.footer-col{
+  float: left;
+  width: 50%;
+}
+
+/* Clear floats after the columns */
+.footer-row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+@media screen and (max-width: 600px) {
+  .footer-col {
+    width: 100%;
+  }
+}
+
+.partner-col-1{
+  width: 35%;
+  display: flex;
+  align-items: center;
+}
+
+.partner-col-2{
+  width: 65%;
+}
+
+.partner-row{
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+}
+
+#modal_preview_output_ProTN, #modal_preview_case_study_ProTN, #modal_preview_output_PhosProTN, #modal_preview_case_study_PhosProTN, #modal_peptide_Example, #modal_protein_Example, 
+#modal_pep_Example_phos_PD, #modal_prot_Example_phos_PD, #modal_pep_Example_phos_PD_2, #modal_prot_Example_phos_PD_2, #modal_PSM_Example_phos_PD_2, #modal_evidence_Example_phos_MQ, #modal_evidence_Example_phos_MQ_2{
+  width: auto;
+  max-height: 90%;
+}
+
+#modal_preview_output_ProTN div.modal-dialog, 
+#modal_preview_case_study_ProTN div.modal-dialog, 
+#modal_preview_output_PhosProTN div.modal-dialog,
+#modal_preview_case_study_PhosProTN  div.modal-dialog,
+#modal_peptide_Example div.modal-dialog,
+#modal_protein_Example div.modal-dialog, 
+#modal_pep_Example_phos_PD div.modal-dialog, #modal_prot_Example_phos_PD div.modal-dialog, #modal_pep_Example_phos_PD_2 div.modal-dialog, #modal_prot_Example_phos_PD_2 div.modal-dialog, #modal_PSM_Example_phos_PD_2 div.modal-dialog, #modal_evidence_Example_phos_MQ div.modal-dialog, #modal_evidence_Example_phos_MQ_2 div.modal-dialog {
+  width: auto;
+  margin: 0px;
+}
+
+#modal_preview_output_ProTN div.modal-dialog div.modal-content div.modal-header,
+#modal_preview_case_study_ProTN div.modal-dialog div.modal-content div.modal-header,
+#modal_preview_output_PhosProTN div.modal-dialog div.modal-content div.modal-header,
+#modal_preview_case_study_PhosProTN  div.modal-dialog div.modal-content div.modal-header{
+  padding-top: 0px;
+  padding-bottom: 0px;
+}
+
+#modal_preview_output_ProTN div.modal-dialog div.modal-content div.modal-body,
+#modal_preview_case_study_ProTN div.modal-dialog div.modal-content div.modal-body,
+#modal_preview_output_PhosProTN div.modal-dialog div.modal-content div.modal-body,
+#modal_preview_case_study_PhosProTN div.modal-dialog div.modal-content div.modal-body{
+  padding-right: 0px;
+  padding-left: 0px;
+}
+
+#modal_preview_output_ProTN div.modal-dialog div.modal-content ,
+#modal_preview_case_study_ProTN div.modal-dialog div.modal-content,
+#modal_preview_output_PhosProTN div.modal-dialog div.modal-content,
+#modal_preview_case_study_PhosProTN div.modal-dialog div.modal-content{
+  padding-right: 0px;
+  padding-left: 0px;
+}
+
+#preview_results #content,
+#preview_results_CS #content,
+#preview_results_phos #content,
+#preview_results_phos_CS #content{
+  max-width: max-content;
+}
+
+#preview_results,#preview_results_CS, #preview_results_phos, #preview_results_phos_CS, #modal_peptide_Example, #modal_protein_Example, 
+#modal_pep_Example_phos_PD, #modal_prot_Example_phos_PD, #modal_pep_Example_phos_PD_2, #modal_prot_Example_phos_PD_2, #modal_PSM_Example_phos_PD_2, #modal_evidence_Example_phos_MQ, #modal_evidence_Example_phos_MQ_2 {
+    height: 800px;
+    max-height: 1200px;
+}
+
+#preview_results img.image-thumb, #preview_results_CS img.image-thumb, #preview_results_phos img.image-thumb, #preview_results_phos_CS img.image-thumb {
+  width: 60%;
+}
+
+#download_report, #download_report_CS, #download_report_PhosProTN, #download_report_PhosProTN_CS {
+  background-color: #9F2042;
+  width: max-content;
+  margin-right: 0%;
+  margin-left: 40%;
+  max-width: 30%;
+  margin-bottom: 15px;
+}
+
+div.modal-footer button.btn {
+    width: max-content;
+}
+
+#preview_output_ProTN, #case_study_ProTN, #report_phos, #case_study_phos{
+    background-color: rgb(0, 120, 174);
+    font-weight: bold;
+    min-height: 50px;
+}
+
+.dataTables_scrollBody {
+    transform:rotateX(180deg);
+}
+.dataTables_scrollBody table {
+    transform:rotateX(180deg);
+}

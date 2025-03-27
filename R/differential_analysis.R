@@ -114,11 +114,11 @@ differential_analysis <- function(proteome_data, formule_contrast,
     contro_list<-c(contro_list,
                    str_c(str_c("(", stri_replace_all_regex(formule_contrast, 
                                                                     str_c("\\b",df$phospho,"\\b"), 
-                                                                    str_c(df$phospho, "_phospho"), vectorize = FALSE), ")"),
+                                                                    str_c(df$phospho, "_phospho"), vectorize_all = FALSE), ")"),
                          "-",
                          str_c("(", stri_replace_all_regex(formule_contrast, 
                                                                     str_c("\\b",df$phospho,"\\b"), 
-                                                                    str_c(df$phospho, "_proteome"), vectorize = FALSE), ")"))
+                                                                    str_c(df$phospho, "_proteome"), vectorize_all = FALSE), ")"))
     )
     names(contro_list) <- make.names(c(str_c(df$phospho,"_Phospho_CTRL"), names(formule_contrast)), unique = T)
     

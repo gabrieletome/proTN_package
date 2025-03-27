@@ -1,0 +1,1133 @@
+<!--
+################################################################################
+# ProTN: an integrative pipeline for complete analysis of proteomics           # 
+# data from mass spectrometry                                                  #
+# Laboratory of RNA and Disease Data Science, University of Trento             #
+# Developer: Gabriele Tomè                                                     #
+# Issue at: https://github.com/TebaldiLab/ProTN/issues                         #
+# PI: Dr. Toma Tebaldi, PhD                                                    #
+################################################################################
+-->
+<img src="images/logo_scritta.svg" width="25%" style="display:block;margin-left:auto;margin-right:auto">
+<h4>PhosProTN is an integrative pipeline for flexible analysis and informative visualization of phosphoproteomic data from Mass
+Spectrometry. It perform a complete analysis of the raw files from
+	<a
+		href="https://www.thermofisher.com/it/en/home/industrial/mass-spectrometry/liquid-chromatography-mass-spectrometry-lc-ms/lc-ms-software/multi-omics-data-analysis/proteome-discoverer-software.html">Proteome
+		Discoverer</a> (PD) or <a href="https://maxquant.org/">MaxQuant</a>
+	(MQ),two of the most widely used platforms analyzing raw MS spectra.
+</h4>
+<div id="workflow-of-protn" class="section level2">
+	<ul id="collapse_ul" class="collapsible">
+		<li id="collapse_li" class="active">
+			<div class="collapsible-header">
+				<div style="width: 95%;">
+					<h2>1. Workflow of PhosProTN</h2>
+					<hr id="linesubtitle">
+				</div>
+				<i id="plus_elem" class="fa fa-plus"></i>
+			</div>
+			<div class="collapsible-body">
+				<p>The ProTN workflow is divided into preprocessing, differential analysis and biological interpretation. During
+				preprocessing, input data are filtered, imputed, normalized, and optionally batch-corrected. Next, differential analysis
+				is performed in parallel at peptide and protein resolution, based on users’ defined comparisons and considering compled
+				designs. Finally, biological interpretation of differentially expressed proteins is performed, including functional
+				enrichment analysis, and detection of communities in protein-protein interaction networks, and kinome tree perturbation
+				analysis.
+				</p>
+
+				<img src="images/Workflow_PhosProTN.svg" width="100%" alt="">
+				<div id="set-settings-for-the-execution-and-read-the-raw-data-from-loaded-files" class="section level3">
+					<h3>01. Define analysis settings and load input data files
+					</h3>
+					<p>PhosProTN analyse the results of Proteome Discoverer and MaxQuant. The parameters and files
+						required
+						to run PhosProTN are described in section <a
+							href="#parameters-required-before-the-execution-phos">2.
+							Details on the input parameters and
+							files</a>.
+					</p>
+					<ul>
+						<li>
+							<p><code>Analysis title</code>: title of the experiment. It will
+								be the title of the web page report.
+							</p>
+						</li>
+						<li>
+							<p><code>Identification software</code>: determine with software was use
+								to identify peptides and proteins. <strong>PD</strong> for Protein
+								Discoverer, <strong>MQ</strong> for MaxQuant.
+							</p>
+						</li>
+						<li>
+							<p><strong>Design for the comparison file</strong>: Excel file containing the formulas of
+								the contrast comparison you want to analyse. <button id="preview_design_phos"
+									type="button" class="btn_example" data-toggle="modal"
+									data-target="#modal_Design_Example_phos">[Example of Design file
+									HERE...]</button> The table can have 3 columns:</p>
+							<ul>
+								<li><strong>Formule</strong> column (<code>REQUIRED</code>): The formulas need to follow
+									the syntax of <a href="https://bioinf.wehi.edu.au/limma/">Limma</a>.
+									<code>AT LEAST 1 FORMULA IS REQUIRED</code>.</li>
+								<li><strong>Name</strong> column (<code>OPTIONAL</code>): personalized name assign to
+									the comparison.</li>
+								<li><strong>Color</strong> columns (<code>OPTIONAL</code>): define a color for the
+									condition in the graphs. If not present use the default palette.</li>
+							</ul>
+						</li>
+					</ul>
+					<ul>
+						<li><strong>Required for Proteome Discoverer</strong>:<ul>
+								<li>
+									<p><strong>PROTEOMIC files:</strong></p>
+									<ul>
+										<li>
+											<p><code>Sample Annotation file</code>: file with the information about the
+												samples and the correlation between replicate ID and condition of the
+												proteomic (WARNING: Condition name MUST contain at least 1 character!).
+												The <strong>Sample_Annotation</strong> file is an Excel file with the
+												following column: <button id="preview_input_phos_PD"
+									type="button" class="btn_example" data-toggle="modal"
+									data-target="#modal_input_Example_phos_PD">[Example of Sample Annotation file
+									HERE...]</button></p>
+											<ul>
+												<li><strong>Condition</strong> column (<code>REQUIRED</code>): define
+													the condition of each sample that divide the samples in groups. The
+													conditions need to be the same of the the Contrast Design and the
+													same of the phospho-proteomics. (WARNING: Condition name MUST
+													contain at least 1 character!)</li>
+												<li><strong>Color</strong> columns (<code>OPTIONAL</code>): define a
+													color for the samples in the graphs. If not present use a default
+													palette.</li>
+												<li><strong>MS_batch</strong> columns: define the groups of batch in the
+													samples. <code>REQUIRED FOR BATCH EFFECT CORRECTION</code>.</li>
+												<li><strong>Sample</strong> column: define the names for the samples. In
+													case of <strong>PD</strong> files use the <em>Sample_Annotation</em>
+													file obtained from PD, the <strong>Sample</strong> column in
+													optional, if is not present the software extract the names for the
+													<strong>File Name</strong> column.</li>
+											</ul>
+										</li>
+										<li>
+											<p><code>Peptides file</code>: raw file of peptides.<button id="preview_pep_phos_PD"
+									type="button" class="btn_example" data-toggle="modal"
+									data-target="#modal_pep_Example_phos_PD">[Example of Peptide file
+									HERE...]</button></p>
+										</li>
+										<li>
+											<p><code>Proteins file</code>: raw file of protein groups.<button id="preview_prot_phos_PD"
+									type="button" class="btn_example" data-toggle="modal"
+									data-target="#modal_prot_Example_phos_PD">[Example of Protein file
+									HERE...]</button></p>
+										</li>
+									</ul>
+								</li>
+								<li>
+									<p><strong>PHOSPHO-PROTEOMIC files:</strong></p>
+									<ul>
+										<li>
+											<p><code>Sample Annotation file</code>: file with the information about the
+												samples and the correlation between replicate ID and condition of the
+												phospho-proteomics (WARNING: Condition name MUST contain at least 1
+												character!). The <strong>Sample_Annotation</strong> file is an Excel
+												file with the following column: <button id="preview_input_phos_PD_2"
+									type="button" class="btn_example" data-toggle="modal"
+									data-target="#modal_input_Example_phos_PD_2">[Example of Sample Annotation file
+									HERE...]</button></p>
+											<ul>
+												<li><strong>Condition</strong> column (<code>REQUIRED</code>): define
+													the condition of each sample that divide the samples in groups. The
+													conditions need to be the same of the the Contrast Design and the
+													same of the proteomics. (WARNING: Condition name MUST contain at
+													least 1 character!)</li>
+												<li><strong>Color</strong> columns (<code>OPTIONAL</code>): define a
+													color for the samples in the graphs. If not present use a default
+													palette.</li>
+												<li><strong>MS_batch</strong> columns: define the groups of batch in the
+													samples. <code>REQUIRED FOR BATCH EFFECT CORRECTION</code>.</li>
+												<li><strong>Sample</strong> column: define the names for the samples. In
+													case of <strong>PD</strong> files use the <em>Sample_Annotation</em>
+													file obtained from PD, the <strong>Sample</strong> column in
+													optional, if is not present the software extract the names for the
+													<strong>File Name</strong> column.</li>
+											</ul>
+										</li>
+										<li>
+											<p><code>Peptides file</code>: raw file of peptides.<button id="preview_pep_phos_PD_2"
+									type="button" class="btn_example" data-toggle="modal"
+									data-target="#modal_pep_Example_phos_PD_2">[Example of Peptide file
+									HERE...]</button></p>
+										</li>
+										<li>
+											<p><code>Proteins file</code>: raw file of protein groups.<button id="preview_prot_phos_PD_2"
+									type="button" class="btn_example" data-toggle="modal"
+									data-target="#modal_prot_Example_phos_PD_2">[Example of Protein file
+									HERE...]</button></p>
+										</li>
+										<li>
+											<p><code>PSM file</code>: raw file of the PSM obtained from PD. It is
+												required to overcome the uncertain phosphorilation site identification.<button id="preview_PSM_phos_PD_2"
+									type="button" class="btn_example" data-toggle="modal"
+									data-target="#modal_PSM_Example_phos_PD_2">[Example of PSM file
+									HERE...]</button>
+											</p>
+										</li>
+									</ul>
+								</li>
+							</ul>
+						</li>
+						<li><strong>File Required for MaxQuant</strong>:<ul>
+								<li>
+									<p><strong>PROTEOMIC files:</strong></p>
+									<ul>
+										<li>
+											<p><code>Sample Annotation file</code>: file with the information about the
+												samples and the correlation between replicate ID and condition of the
+												proteomic (WARNING: Condition name MUST contain at least 1 character!).
+												The <strong>Sample_Annotation</strong> file is an Excel file with the
+												following column: <button id="preview_input_phos_MQ"
+									type="button" class="btn_example" data-toggle="modal"
+									data-target="#modal_input_Example_phos_MQ">[Example of Sample Annotation file
+									HERE...]</button></p>
+											<ul>
+												<li><strong>Condition</strong> column (<code>REQUIRED</code>): define
+													the condition of each sample that divide the samples in groups. The
+													conditions need to be the same of the the Contrast Design and the
+													same of the phospho-proteomics. (WARNING: Condition name MUST
+													contain at least 1 character!)</li>
+												<li><strong>Sample</strong> column (<code>REQUIRED</code>): define the
+													names for the samples.</li><strong><code>ATTENTION</code></strong>
+												<strong>: SAMPLE NAME MUST BE EQUAL TO THE NAME INSERTED IN MAXQUANT
+													(name of the column in peptide file).</strong>
+												<li><strong>Color</strong> columns (<code>OPTIONAL</code>): define a
+													color for the samples in the graphs. If not present use a default
+													palette.</li>
+												<li><strong>MS_batch</strong> columns: define the groups of batch in the
+													samples. <code>REQUIRED FOR BATCH EFFECT CORRECTION</code>.</li>
+											</ul>
+										</li>
+										<li>
+											<p><code>Evidence file</code>: raw file of peptides. The file required is
+												the <strong>evidence.txt</strong> file. <button id="preview_evidence_phos_MQ"
+									type="button" class="btn_example" data-toggle="modal"
+									data-target="#modal_evidence_Example_phos_MQ">[Example of Evidence file
+									HERE...]</button></p>
+										</li>
+									</ul>
+								</li>
+								<li>
+									<p><strong>PHOSPHO-PROTEOMIC files:</strong></p>
+									<ul>
+										<li>
+											<p><code>Sample Annotation file</code>: file with the information about the
+												samples and the correlation between replicate ID and condition of the
+												phospho-proteomics (WARNING: Condition name MUST contain at least 1
+												character!). The <strong>Sample_Annotation</strong> file is an Excel
+												file with the following column: <button id="preview_input_phos_MQ_2"
+									type="button" class="btn_example" data-toggle="modal"
+									data-target="#modal_input_Example_phos_MQ_2">[Example of Sample Annotation file
+									HERE...]</button></p>
+											<ul>
+												<li><strong>Condition</strong> column (<code>REQUIRED</code>): define
+													the condition of each sample that divide the samples in groups. The
+													conditions need to be the same of the the Contrast Design and the
+													same of the proteomics. (WARNING: Condition name MUST contain at
+													least 1 character!)</li>
+												<li><strong>Sample</strong> column (<code>REQUIRED</code>): define the
+													names for the samples.</li><strong><code>ATTENTION</code></strong>
+												<strong>: SAMPLE NAME MUST BE EQUAL TO THE NAME INSERTED IN MAXQUANT
+													(name of the column in peptide file).</strong>
+												<li><strong>Color</strong> columns (<code>OPTIONAL</code>): define a
+													color for the samples in the graphs. If not present use a default
+													palette.</li>
+												<li><strong>MS_batch</strong> columns: define the groups of batch in the
+													samples. <code>REQUIRED FOR BATCH EFFECT CORRECTION</code>.</li>
+											</ul>
+										</li>
+										<li>
+											<p><code>Evidence file</code>: raw file of peptides. The file required is
+												the <strong>evidence.txt</strong> file. <button id="preview_evidence_phos_MQ_2"
+									type="button" class="btn_example" data-toggle="modal"
+									data-target="#modal_evidence_Example_phos_MQ_2">[Example of Evidence file
+									HERE...]</button></p>
+										</li>
+									</ul>
+								</li>
+							</ul>
+						</li>
+					</ul>
+				</div>
+				<div id="normalization-of-the-intensities" class="section level3">
+					<h3>02. Normalization and imputation of the intensities</h3>
+					<p>Intensities are log2 transformed and normalized with DEqMS <span class="citation">(Zhu
+							2022)</span>. At the peptide level, the normalization is performed with the function equalMedianNormalization,
+						which normalizes
+						intensity distributions in samples so that they have median equal to 0.
+					</p>
+					<p>At the protein level, this operation is executed by the function medianSweeping, that applies the same median
+						normalization
+						used for peptides, but also summarizes peptide intensities into protein relative abundances by the median sweeping
+						method.
+					</p>
+					<p>The principal method is based on the PhosR package <span class="citation">(Kim et
+							al. 2021)</span> that performs a complex and well-balanced imputation of the data based on the association
+						between replicates and
+						conditions. As a backup method, ProTN uses a Gaussian round imputation, for condition with only 1 replicate.
+					</p>
+					<img src="images/figures/pca_proteins.png" width="49%" style="margin-left:auto;margin-right:auto" />
+					<img src="images/figures/mds_proteins.png" width="49%" style="margin-left:auto;margin-right:auto" />
+
+				</div>
+				<div id="statistical-differential-analysis" class="section level3">
+					<h3>03. Differential analysis</h3>
+					<p>Differential analysis is applied to both proteins and peptides, to identify significant differences. Two slightly
+						different methodologies are applied: the DEqMS package <span class="citation">(Zhu
+							2022)</span>,is used for proteins. DEqMS is developed on top of Limma, but the method estimates different prior
+						variances for
+						proteins quantified by different numbers of PSMs/peptides per protein, therefore achieving better accuracy.For
+						single
+						peptides, the Limma package is used
+						<span class="citation">(Ritchie et al. 2015)</span>.
+					</p>
+					<p>Limma and DEqMS calculate differentially expressed peptides and proteins (DEPs) for each comparison specified in the
+						design file parameter. Each peptide or protein can be selected as differential based on different parameters: the
+						log2
+						Fold Change, the P.Value, the adjusted P.Value and the log2 expression. In ProTN, a protein/peptide is significant
+						if
+						passing thresholds on these parameters, set by the user. A protein/peptide for each comparison can be Up-regulated
+						or
+						Down-regulated. It is Up-regulated if:
+					</p>
+					<ul>
+						<li>
+							<p>the log2 FC is higher than the Fold Change threshold (FC &gt;
+								Log2 FC thr),
+							</p>
+						</li>
+						<li>
+							<p>the Adj.P.Value or P.Value is lower than the threshold (P.Value &lt; P.Value
+								thr),
+							</p>
+						</li>
+						<li>
+							<p>the log2 expression is higher than the threshold (log2 expression
+								&gt; Signal log2 expr thr).
+							</p>
+						</li>
+					</ul>
+					<p>It is Down-regulated if:</p>
+					<ul>
+						<li>
+							<p>the log2 FC is lower of the Fold Change threshold (FC &lt; -Log2
+								FC thr),
+							</p>
+						</li>
+						<li>
+							<p>the Adj.P.Value or P.Value is lower than the threshold (P.Value &lt; P.Value
+								thr),
+							</p>
+						</li>
+						<li>
+							<p>the log2 expression is higher than the threshold (log2 expression
+								&gt; Signal log2 expr thr).
+							</p>
+						</li>
+					</ul>
+					<p>In the output, for each comparison, this distinction is reported in
+						the “<em>class</em>” column, which assumes value “+” if is up-regulated,
+						“-” if down-regulated and “=” if it is not significant.
+					</p>
+					<p>Various figures are generated, first a bar plot that graphically
+						represents the DEPs identified. Followed by comparison-specific volcano
+						plots.
+					</p>
+					<img src="images/figures/DE_protein_barplot.png" width="49%"
+						style="margin-left:auto;margin-right:auto" />
+					<img src="images/figures/volcano_plot.png" width="49%" style="margin-left:auto;margin-right:auto" />
+				</div>
+				<div id="report-creation-and-download-of-the-results" class="section level3">
+					<h3>04. Report creation and download of the results</h3>
+					<p>The results are summarized in a web-page HTML report. Other than
+						this, the experiment is described by a large number of files, a
+						description of each file generated can be found in section <a
+							href="#details-on-the-output-files-phos">3. Details on the output files</a>.
+						All the files are group in a <em>zip</em> file and downloaded.
+					</p>
+				</div>
+				<h2>ADDITIONAL STEPS:</h2>
+				<div id="batch-effect-correction" class="section level3">
+					<h3>B1. Batch Effect correction</h3>
+					<p>If required by the experiment, a batch correction step can be applyed
+						using <a href="https://www.bioconductor.org/packages/release/bioc/html/proBatch.html"
+							style="font-size: 11pt;">proBatch</a> <span class="citation">(Cuklina et
+							al. 2018)</span>. The batches need to be defined in the
+						<strong>Sample_Annotation</strong> file where column <strong>MS_batch</strong> is
+						required.
+					</p>
+					<img src="images/figures/protn_report.html(screen).png" width="75%"
+						style="display:block;margin-left:auto;margin-right:auto" />
+
+				</div>
+				<div id="enrichment-analysis-of-the-differentially-expressed-proteins" class="section level3">
+					<h3>E1. Enrichment analysis of the Differentially Expressed
+						Proteins
+					</h3>
+					<div style="display: flex;">
+						<p>The biological interpretation of the Differentially Expressed
+							Proteins starts with the enrichment step. To execute this analysis,
+							ProTN uses <a href="https://maayanlab.cloud/Enrichr/">EnrichR</a> <span class="citation">(Jawaid
+								2022)</span>, a popular tool that searches on a large number of data sets to obtain information about
+							many functional categories.
+							EnrichR organises its hundreds of data sources in 8 sections: Transcription, Pathways, Ontologies,
+							Diseases/Drugs, Cell
+							Types, Misc, Legacy, and Crowd.
+						</p>
+				
+						<p><a href="https://maayanlab.cloud/Enrichr/"><img src="images/enrichr_logo.png" width="200px" alt="" /></a></p>
+					</div>
+					<p>Each comparison defined in the differential analysis stage can result in 3 sets of proteins: the Up-regulated
+						(called
+						Up), the Down-regulated (called Down), and the merge of the two (called all). ProTN provides for each term
+						statistical
+						parameters like P.Value, fdr, odds ratio, overlap size.
+					</p>
+					<p>ProTN creates an RData of the complete enrichment data frame, allowing the user an easy import in R to perform
+						further
+						analysis. ProTN also generates an Excel file, containing only the significantly enriched terms, as defined by
+						user
+						settings.
+					</p>
+					<p>A term to be significative need to have:</p>
+					<ul>
+						<li>
+							<p>a Fdr or P.Value lower of P.Value thr for enrichment (P.Value &lt;
+								P.Value thr for enrichment),
+							</p>
+						</li>
+						<li>
+							<p>an Overlap Size higher than Overlap size thr for enrichment
+								(Overlap Size &gt; Overlap size thr for enrichment).
+							</p>
+						</li>
+					</ul>
+					<p>ProTN displays top significant enrichments based on specific annotation datasets or keywords selected by the
+						user.
+					</p>
+					<img src="images/figures/enrichment.png" width="50%" style="display:block;margin-left:auto;margin-right:auto" />
+					<h4>E1.1. Enrichment analysis of the whole set of proteins discovered by the experiment</h4>
+					<p>In same cases can be usefull have the enrichment of the whole proteome discovered by the
+						experiment.
+						For example it can be used as negative control of the differentially expressed proteins. So,
+						the entire proteome is analysed with EnrichR, and saved in an RData and in an Excel file.
+						Also, as before, 4 plots can be generated, in this case adding as last dot column the
+						negative control provided by the whole proteome.</p>
+					<p>Additional details on the output can be found in section <a href="#details-on-the-output-files">4. Details on the
+							output
+							files</a>.
+					</p>
+				</div>
+				<div id="kinase-tree-analysis" class="section level3">
+					<h3>K1. Activity kinase tree analysis of the Differentially Expressed Phosphosite
+					</h3>
+					<div style="display: flex;">
+						<p>In phospho-proteomic it extremely useful
+							to study the activation status of the kinase based on the differentially expressed
+							substrate idenfied by the differential analysis.
+							For each comparison, PhosProTN predicts the activation state of the kinases using PhosR
+							<span class="citation">(Kim et al. 2021)</span>. PhosR provides a kinase-substrate
+							relationship
+							score, and on that it prioritises potential kinases that could be responsible for the
+							phosphorylation
+							change of phosphosite on the basis of kinase recognition motif and phosphoproteomic
+							dynamics.
+						</p>
+						<p><a href="http://phanstiel-lab.med.unc.edu/CORAL/"><img src="images/coral-logo-black.png"
+									width="200px" alt="" /></a></p>
+					</div>
+					<p>The activity score provide by PhosR is used to generated a graphical versione of the human kinome
+						tree using
+						<a href="http://phanstiel-lab.med.unc.edu/CORAL/">CORAL</a> <span class="citation">(Metz K.S. et
+							al. 2018)</span>,
+						a web shiny app for visualizing both quantitative and qualitative data. It generates
+						high-resolution scalable vector graphic files suitable for publication
+						without the need for refinement in graphic editing software.
+					</p>
+					<img src="images/figures/TA_kinase_Tree_CORAL-cropped.svg" width="50%"
+						style="display:block;margin-left:auto;margin-right:auto" />
+				</div>
+				<div id="protein-protein-interaction-network-analysis-of-differentially-expressed-proteins"
+					class="section level3">
+					<h3>N1. Protein-Protein Interaction network analysis of Differentially
+						Expressed Phosphosite
+					</h3>
+					<div style="display: flex;">
+						<p>ProTN performs Protein-Protein Interaction (PPI) network analysis on differentially expressed proteins. PPIs are
+							essential in almost all processes of the cell, and crucial for understanding cell physiology in different states.
+							For each comparison, ProTN analyses the interaction between the DEPs
+							using <a href="https://string-db.org/">STRING</a> <span class="citation">(Szklarczyk et al.
+								2021)</span>.
+						</p>
+						<p><a href="https://string-db.org/"><img src="images/string_logo_2015.png" width="200"
+									alt=""></a></p>
+					</div>
+					<p>The species-specific database is retrieved from STRING server, an
+						accurate analysis discover all the interactions and an iGraph <span class="citation">(Csardi and
+							Nepusz 2006)</span> network is generated.
+						Later, the proteins are clustered via iGraph function which identify
+						dense subgraph by optimizing modularity score.
+					</p>
+					<p>Since the network can vary a lot on composition, two ggplot layout
+						are used: Fruchterman-Reingold algorithm and the Kamada-Kawai
+						algorithm.
+					</p>
+					<img src="images/figures/Risorsa 3.svg" width="75%"
+						style="display:block;margin-left:auto;margin-right:auto" />
+				</div>
+			</div>
+		</li>
+	</ul>
+</div>
+<div id="parameters-required-before-the-execution-phos" class="section level2">
+	<ul id="collapse_ul" class="collapsible">
+		<li id="collapse_li">
+			<div class="collapsible-header">
+				<div style="width: 95%;">
+					<h2>2. Details on the input parameters and files</h2>
+					<hr id="linesubtitle">
+				</div>
+				<i id="plus_elem" class="fa fa-plus"></i>
+			</div>
+			<div class="collapsible-body">
+				<!--TODO: ADD DIA analysis-->
+				<ul>
+					<li>
+						<p><code>Title of Analysis</code>: title of the experiment. It will
+							be the title of the web page report.
+						</p>
+					</li>
+					<li>
+						<p><code>Brief Description</code>: description of the current
+							experiment. It is the first paragraph of the report.
+						</p>
+					</li>
+					<li>
+						<p><code>Software Analyzer</code>: determine with software was use
+							to identify peptides and proteins. <strong>PD</strong> for Protein
+							Discoverer, <strong>MQ</strong> for MaxQuant.
+						</p>
+					</li>
+					<li>
+						<code>Required for Proteome Discoverer:</code>
+						<ul>
+							<li>
+								<strong>PROTEOMIC files:</strong>
+								<ul>
+									<li>
+										<p><code>Sample Annotation file</code>: file with the information about the
+											samples and the correlation between replicate ID and condition of the
+											proteomic (WARNING: Condition name MUST contain at least 1 character!). The
+											<strong>Sample_Annotation</strong> file is an Excel file with the following
+											column
+											<button id="preview_input_phos" type="button" class="btn_example"
+												data-toggle="modal" data-target="#modal_Input_Example_phos">[Example of
+												an Sample_Annotation file
+												HERE...]</button>:
+										</p>
+										<ul>
+											<li><strong>Condition</strong> column (<code>REQUIRED</code>): define
+												the condition of each sample that divide the samples in groups. The
+												conditions need to be the same of the the Contrast Design and the same
+												of the phospho-proteomics. (WARNING: Condition name MUST contain at
+												least 1 character!)
+											</li>
+											<li><strong>Color</strong> columns (<code>OPTIONAL</code>): define a
+												color for the samples in the graphs. If not present use a default
+												palette.
+											</li>
+											<li><strong>MS_batch</strong> columns: define the groups of batch in the
+												samples. <code>REQUIRED FOR BATCH EFFECT CORRECTION</code>.
+											</li>
+											<li>
+												<strong>Sample</strong> column: define the names for the samples.
+												In case of <strong>PD</strong> files use the <em>Sample_Annotation</em>
+												file
+												obtained from PD, the <strong>Sample</strong>
+												column in optional, if is not present the software extract the names for
+												the <strong>File Name</strong> column.
+											</li>
+										</ul>
+									</li>
+									<li>
+										<p><code>Peptides file</code>: raw file of peptides.
+										</p>
+									</li>
+									<li>
+										<p><code>Proteins file</code>: raw file of protein groups.
+										</p>
+									</li>
+								</ul>
+							</li>
+							<li>
+								<strong>PHOSPHO-PROTEOMIC files:</strong>
+								<ul>
+									<li>
+										<p><code>Sample Annotation file</code>: file with the information about the
+											samples and the correlation between replicate ID and condition of the
+											phospho-proteomics (WARNING: Condition name MUST contain at least 1
+											character!). The
+											<strong>Sample_Annotation</strong> file is an Excel file with the following
+											column
+											<button id="preview_input_phos" type="button" class="btn_example"
+												data-toggle="modal" data-target="#modal_Input_Example_phos">[Example of
+												an Sample_Annotation file
+												HERE...]</button>:
+										</p>
+										<ul>
+											<li><strong>Condition</strong> column (<code>REQUIRED</code>): define
+												the condition of each sample that divide the samples in groups. The
+												conditions need to be the same of the the Contrast Design and the same
+												of the proteomics. (WARNING: Condition name MUST contain at least 1
+												character!)
+											</li>
+											<li><strong>Color</strong> columns (<code>OPTIONAL</code>): define a
+												color for the samples in the graphs. If not present use a default
+												palette.
+											</li>
+											<li><strong>MS_batch</strong> columns: define the groups of batch in the
+												samples. <code>REQUIRED FOR BATCH EFFECT CORRECTION</code>.
+											</li>
+											<li>
+												<strong>Sample</strong> column: define the names for the samples.
+												In case of <strong>PD</strong> files use the <em>Sample_Annotation</em>
+												file
+												obtained from PD, the <strong>Sample</strong>
+												column in optional, if is not present the software extract the names for
+												the <strong>File Name</strong> column.
+											</li>
+										</ul>
+									</li>
+									<li>
+										<p><code>Peptides file</code>: raw file of peptides.
+										</p>
+									</li>
+									<li>
+										<p><code>Proteins file</code>: raw file of protein groups.
+										</p>
+									</li>
+									<li>
+										<p><code>PSM file</code>: raw file of the PSM obtained
+											from PD. It is required to overcome the uncertain phosphorilation site
+											identification.
+										</p>
+									</li>
+
+								</ul>
+							</li>
+						</ul>
+					</li>
+					<li>
+						File Required for MaxQuant:
+						<ul>
+							<li>
+								<strong>PROTEOMIC files:</strong>
+								<ul>
+									<li>
+										<p><code>Sample Annotation file</code>: file with the information about the
+											samples and the correlation between replicate ID and condition of the
+											proteomic (WARNING: Condition name MUST contain at least 1 character!). The
+											<strong>Sample_Annotation</strong> file is an Excel file with the following
+											column
+											<button id="preview_input_phos" type="button" class="btn_example"
+												data-toggle="modal" data-target="#modal_Input_Example_phos">[Example of
+												an
+												Sample_Annotation file
+												HERE...]</button>:
+										</p>
+										<ul>
+											<li><strong>Condition</strong> column (<code>REQUIRED</code>): define
+												the condition of each sample that divide the samples in groups. The
+												conditions need to be the same of the the Contrast Design and the same
+												of the phospho-proteomics. (WARNING: Condition name MUST contain at
+												least 1 character!)
+											</li>
+											<li>
+												<strong>Sample</strong> column (<code>REQUIRED</code>): define the names
+												for the samples.<strong><code>ATTENTION</code></strong> <strong>: SAMPLE
+													NAME MUST BE EQUAL TO THE NAME INSERTED IN MAXQUANT (name of the
+													column in peptide file).</strong>
+											</li>
+											<li><strong>Color</strong> columns (<code>OPTIONAL</code>): define a
+												color for the samples in the graphs. If not present use a default
+												palette.
+											</li>
+											<li><strong>MS_batch</strong> columns: define the groups of batch in the
+												samples. <code>REQUIRED FOR BATCH EFFECT CORRECTION</code>.
+											</li>
+										</ul>
+									</li>
+									<li>
+										<p><code>Evidence file</code>: raw file of peptides. The file required is the
+											<strong>evidence.txt</strong> file.
+										</p>
+									</li>
+
+								</ul>
+							</li>
+							<li>
+								<strong>PHOSPHO-PROTEOMIC files:</strong>
+								<ul>
+									<li>
+										<p><code>Sample Annotation file</code>: file with the information about the
+											samples and the correlation between replicate ID and condition of the
+											phospho-proteomics (WARNING: Condition name MUST contain at least 1
+											character!). The
+											<strong>Sample_Annotation</strong> file is an Excel file with the following
+											column
+											<button id="preview_input_phos" type="button" class="btn_example"
+												data-toggle="modal" data-target="#modal_Input_Example_phos">[Example of
+												an
+												Sample_Annotation file
+												HERE...]</button>:
+										</p>
+										<ul>
+											<li><strong>Condition</strong> column (<code>REQUIRED</code>): define
+												the condition of each sample that divide the samples in groups. The
+												conditions need to be the same of the the Contrast Design and the same
+												of the proteomics. (WARNING: Condition name MUST contain at least 1
+												character!)
+											</li>
+											<li>
+												<strong>Sample</strong> column (<code>REQUIRED</code>): define the names
+												for the samples.<strong><code>ATTENTION</code></strong> <strong>: SAMPLE
+													NAME MUST BE EQUAL TO THE NAME INSERTED IN MAXQUANT (name of the
+													column in peptide file).</strong>
+											</li>
+											<li><strong>Color</strong> columns (<code>OPTIONAL</code>): define a
+												color for the samples in the graphs. If not present use a default
+												palette.
+											</li>
+											<li><strong>MS_batch</strong> columns: define the groups of batch in the
+												samples. <code>REQUIRED FOR BATCH EFFECT CORRECTION</code>.
+											</li>
+										</ul>
+									</li>
+									<li>
+										<p><code>Evidence file</code>: raw file of peptides. The file required is the
+											<strong>evidence.txt</strong> file
+										</p>
+									</li>
+								</ul>
+							</li>
+						</ul>
+					</li>
+					<li>
+						<p><code>Design for the comparison file</code>: Excel file
+							containing the formulas of the contrast comparison you want to analyse.
+							The table can have 3 columns <button id="preview_design_phos" type="button"
+								class="btn_example" data-toggle="modal"
+								data-target="#modal_Design_Example_phos">[Example of Design file
+								HERE...]</button>:
+						</p>
+						<ul>
+							<li><strong>Formule</strong> column (<code>REQUIRED</code>): The
+								formulas need to follow the syntax of <a
+									href="https://bioinf.wehi.edu.au/limma/">Limma</a>.
+								<code>AT LEAST 1 FORMULA IS REQUIRED</code>.
+							</li>
+							<li><strong>Name</strong> column (<code>OPTIONAL</code>): personalized
+								name assign to the comparison.
+							</li>
+							<li><strong>Color</strong> columns (<code>OPTIONAL</code>): define a
+								color for the condition in the graphs. If not present use the default
+								palette.
+							</li>
+						</ul>
+					</li>
+					<li>
+						<p><code>OPTIONAL</code>:</p>
+						<ul>
+							<li>
+								<p><strong>Signal log2 expr thr</strong>: signal log2 expression
+									threshold for the differential analysis. <em>DEFAULT:</em> DEPs if
+									<code>Signal log2 expression threshold &gt; -∞</code> (No Limit,
+									represent by value “inf” in the cell)
+								</p>
+							</li>
+							<li>
+								<p><strong>Log2 FC thr</strong>: Fold Change threshold for the
+									differential analysis. <em>DEFAULT:</em> DEPs if
+									<code>log2 Fold Change threshold = 0.75</code> (Up-regulated &gt; 0.75,
+									Down-regulated &lt; -0.75)
+								</p>
+							</li>
+							<li>
+								<p><strong>P.Value thr</strong>: p.value threshold for the
+									differential analysis. <em>DEFAULT:</em> DEPs if
+									<code>P value threshold &lt; 0.05</code>
+								</p>
+							</li>
+							<li>
+								<p><strong>Batch Correction</strong>: execution of the batch effect
+									correction performed by <a
+										href="https://www.bioconductor.org/packages/release/bioc/html/proBatch.html">proBatch</a>.
+									<span class="citation">(Cuklina et al. 2018)</span>.
+									(<strong>TRUE</strong> or <strong>FALSE</strong>). If
+									<strong>TRUE</strong>, column <strong>MS_batch</strong> required in
+									<strong>Sample_Annotation</strong> file.
+								</p>
+							</li>
+							<li>
+								<p><strong>Control Boxplot proteins</strong>: list of proteins used as
+									control of the intensities. For each protein a boxplot is generated
+									comparing the mean of the intensities group by condition.
+								</p>
+							</li>
+							<li>
+								<p><strong>Execute PPI network STRINGdb</strong>: boolean value for the
+									execution of the network analysis. (<strong>TRUE</strong> or
+									<strong>FALSE</strong>)
+								</p>
+							</li>
+							<li>
+								<p><strong>Execute Enrichment</strong>: boolean value for the
+									execution of the enrichment step. (<strong>TRUE</strong> or
+									<strong>FALSE</strong>)
+								</p>
+								<ul>
+									<li>
+										<p><strong>Execute of Whole universe Enrichment</strong>: boolean value for the
+											execution of the enrichment step on the whole set of proteins of the
+											experiment. (<strong>TRUE</strong> or
+											<strong>FALSE</strong>)
+										</p>
+									</li>
+									<li>
+										<p><strong>Draw the kinase trees</strong>: boolean value for the
+											execution of the kinase tree analysis for each comparison.
+											(<strong>TRUE</strong> or
+											<strong>FALSE</strong>)
+										</p>
+									</li>
+									<li>
+										<p><strong>P.Value thr for enrichment</strong>: p.value threshold of the
+											enriched terms. <strong>DEFAULT:</strong> Term is significant if
+											<code>P Value threshold for Enrichment &lt; 0.05</code>
+										</p>
+									</li>
+									<li>
+										<p><strong>Overlap size thr for enrichment</strong>: Overlap size
+											threshold. The overlap size is the number of DEPs discovered in the
+											enriched terms. <strong>DEFAULT:</strong> Term is significant if
+											<code>Minimum number of overlap genes with enriched terms &gt; 5</code>
+										</p>
+									</li>
+									<li>
+										<p><strong>Terms to search</strong>: key-word that you
+											want to search in the results of EnrichR and visualize in a plot (EX: MYC,
+											C-MYC, Senescence,…).
+										</p>
+									</li>
+									<li>
+										<p><strong>DB to analyse</strong>: datasets
+											that you want to see in your plots (EX: ChEA_2016, KEGG_2021_Human,
+											BioPlanet_2019, GO_Biological_Process_2021,…), using the same name that
+											you can find in EnrichR and visualize in a plot .
+										</p>
+									</li>
+								</ul>
+							</li>
+
+						</ul>
+			</div>
+		</li>
+	</ul>
+</div>
+<div id="example-case-study---proteomics-of-mcf7-cells" class="section level2">
+	<ul id="collapse_ul" class="collapsible">
+		<li id="collapse_li">
+			<div class="collapsible-header">
+				<div style="width: 95%;">
+					<h2>3. Example case study - Phosphoproteomics from Steger et al. (2016)</h2>
+					<hr id="linesubtitle">
+				</div>
+				<i id="plus_elem" class="fa fa-plus"></i>
+			</div>
+			<div class="collapsible-body">
+				<p><code>Phosphoproteomics reveals that Parkinson's disease kinase LRRK2 regulates a subset of Rab GTPases</code></p>
+				<p>PRIDE: <a
+						href="https://www.ebi.ac.uk/pride/archive/projects/PXD003071">PXD003071</a>.
+				<p>Des: Steger M, Tonelli F, Ito G, Davies P, Trost M, Vetter M, Wachter S, Lorentzen E, Duddy G, Wilson S, Baptista MA, Fiske BK, Fell MJ, Morrow JA, Reith AD, Alessi DR, Mann M. Phosphoproteomics reveals that Parkinson's disease kinase LRRK2 regulates a subset of Rab GTPases. Elife. 2016 Jan 29;5.</p>
+				<p>Its execution is performed clicking the button <strong>Case Study Example</strong>.</p>
+				<div class="flexfill-container flexfill-container-row" style="display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:row;-ms-flex-direction:row;flex-direction:row;width:100%;height:100%;">
+                    <div class="flexfill-item" style="position:relative;-webkit-flex:1;-ms-flex:1;flex:1;width:100%;height:40px;">
+                      <div class="flexfill-item-inner" style="position:absolute;top:0;left:0;right:0;bottom:0;">
+				<a id="phospho_case_Study_MQ" class="btn btn-default shiny-download-link shiny-bound-output" href="CS/phospho.zip" target="_blank" download="CS/phospho.zip" aria-live="polite">
+                        <i class="fas fa-download" role="presentation" aria-label="download icon" aria-hidden="true"></i>
+                        Download Case Study MaxQuant...
+                      </a>
+                      </div>
+                    </div>
+                    <div class="flexfill-item" style="position:relative;-webkit-flex:1;-ms-flex:1;flex:1;width:100%;height:100%;">
+                      <div class="flexfill-item-inner" style="position:absolute;top:0;left:0;right:0;bottom:0;">
+        <a id="phospho_case_Study_PD" class="btn btn-default shiny-download-link shiny-bound-output" href="CS/phospho_PD.zip" target="_blank" download="CS/phospho_PD.zip" aria-live="polite">
+                        <i class="fas fa-download" role="presentation" aria-label="download icon" aria-hidden="true"></i>
+                        Download Case Study Proteome Discoverer...
+                      </a>
+                      </div>
+                    </div>
+                  </div>
+			</div>
+		</li>
+	</ul>
+</div>
+
+<div id="details-on-the-output-files-phos" class="section level2">
+	<ul id="collapse_ul" class="collapsible">
+		<li id="collapse_li">
+			<div class="collapsible-header">
+				<div style="width: 95%;">
+					<h2>4. Details on the output files</h2>
+					<hr id="linesubtitle">
+				</div>
+				<i id="plus_elem" class="fa fa-plus"></i>
+			</div>
+			<div class="collapsible-body">
+				<ul>
+					<li><code>report.html</code>: complete report of the analysis with all pics and results of the
+						enrichment.</li>
+					<li><strong>Data folder</strong>
+						<ul>
+							<li><code>protn_env.RData</code>: RData object containing the essential
+								variables and data for additional analyses in R. The variables are:
+								<ul>
+									<li><em>c_anno</em>: dataframe with the description of the samples;</li>
+									<li><em>dat_gene</em>: dataframe with the protein normalized
+										abundances;</li>
+									<li><em>dat_pep</em>: dataframe with the peptide normalized
+										abundances;</li>
+									<li><em>psm_peptide_table</em>: descriptive dataframe of the
+										peptides;</li>
+									<li><em>deps_l_df</em>: dataframe of differential expressed
+										proteins;</li>
+									<li><em>deps_pep_l_df</em>: dataframe of differential expressed
+										peptides;</li>
+									<li><em>expr_avgse_df</em>: dataframe with average, standard error and
+										covariance for each condition based on protein abundances;</li>
+									<li><em>expr_avgse_pep_df</em>: dataframe with average, standard error
+										and covariance for each condition based on peptide abundances;</li>
+									<li><em>formule_contrast</em>: design for the differential
+										analysis;</li>
+									<li>Settings: <em>colour_vec</em>: color list for the plot, <em>bf</em>:
+										family text, <em>bs</em>: base text size;</li>
+									<li>Thresholds: <em>fc_thr</em>: Fold Change threshold,
+										<em>pval_thr</em>: P.value threshold, <em>pval_enrich_thr</em>: P.value
+										threshold for Enrichment, <em>overlap_size_enrich_thr</em>: Overlap size
+										threshold for enrichment.
+									</li>
+								</ul>
+							</li>
+							<li><code>enrichment_DE.RData</code>: RData object containing enrichment
+								results based on differentially expressed proteins</li>
+						</ul>
+					</li>
+					<li><strong>Tables folder</strong>
+						<ul>
+							<li><code>normalised_abundances.xlsx</code>: excel file containing
+								abundance values generated by proTN. abundances are log2 transformed,
+								normalized, imputed (and batch corrected). The file is organized in the
+								following sheets:
+								<ul>
+									<li><strong>protein_per_sample</strong>: protein abundances per
+										sample.</li>
+									<li><strong>peptide_per_sample</strong>: peptide abundances per
+										sample.</li>
+									<li><strong>protein_per_condition</strong>: protein abundances per
+										condition (average &amp; standard deviation), as defined in the Sample
+										Annotation.</li>
+									<li><strong>peptide_per_condition</strong>: peptide abundances per
+										condition (average &amp; standard deviation), as defined in the Sample
+										Annotation.</li>
+								</ul>
+							</li>
+							<li><code>differential_expression.xlsx</code>: excel file containing the
+								results of differential analysis, according to the contrasts defined in
+								the Design file. The file is organized in the following sheets:
+								<ul>
+									<li><strong>protein_DE</strong>: protein differential expression results
+										protein abundances per sample.</li>
+									<li><strong>peptide_DE</strong>: peptide differential expression
+										results. Annotation columns:</li>
+									<li><strong>Accession</strong>: protein UniprotID</li>
+									<li><strong>Description</strong>: protein description</li>
+									<li><strong>GeneName</strong>: Gene Symbol</li>
+									<li><strong>Peptide_Sequence</strong>: peptide sequence</li>
+									<li><strong>Peptide_Modifications</strong>: peptide modifications</li>
+									<li><strong>Peptide_Position</strong>: start and end position of the
+										peptide within the protein sequence, defined UniprotID</li>
+									<li><strong>Peptide_Tryptic</strong>: peptide tryptic digestion status
+										(fully tryptic, N-semi tryptic, C-semi tryptic, non tryptic)</li>
+									<li>Columns for each contrast:</li>
+									<li><strong>class</strong>: defined according to the fold change,
+										p-value and abundance thresholds specified in the input</li>
+									<li><em>+</em> up-regulated protein/peptide</li>
+									<li><em>-</em> down-regulated protein/peptide</li>
+									<li><em>=</em> invariant protein/peptide</li>
+									<li><strong>log2_FC</strong>: protein/peptide log2 transformed fold
+										change</li>
+									<li><strong>p_val</strong>: protein/peptide contrast p-value</li>
+									<li><strong>p_adj</strong>: protein/peptide adjusted p-value (FDR after
+										BH correction)</li>
+									<li><strong>log2_expr</strong>: protein/peptide log2 average
+										abundance</li>
+								</ul>
+							</li>
+							<li><code>enrichment_DE.xlsx</code>: excel file containing a selection
+								of enrichment results starting from differentially expressed proteins.
+								Terms are selected according to significance thresholds specified in the
+								input (Default: adj.P.Value &lt; 0.05, Overlap Size &gt;= 5)</li>
+						</ul>
+					</li>
+					<li><strong>Figures folder</strong>
+						<ul>
+							<li><code>PCA_MDS</code> directory: Directory containing
+								(Multidimensional scaling) and PCA (Principal component analysis) plots
+								of samples.
+								<ul>
+									<li><strong>mds_proteins.pdf</strong>: MDS, based on protein
+										abundances.</li>
+									<li><strong>mds_peptides.pdf</strong>: MDS of the samples by
+										peptides.</li>
+									<li><strong>pca_protein.pdf</strong>: PCA of the samples by
+										proteins.</li>
+									<li><strong>pca_peptides.pdf</strong>: PCA of the samples by
+										peptides.</li>
+									<li><strong>DE_mds_protein.pdf</strong>: MDS based on differentially
+										expressed proteins.</li>
+									<li><strong>DE_mds_peptide.pdf</strong>: MDS based on differentially
+										expressed peptides.</li>
+									<li><strong>DE_pca_protein.pdf</strong>: PCA based on differentially
+										expressed proteins.</li>
+									<li><strong>DE_pca_peptide.pdf</strong>: PCA based on differentially
+										expressed peptides.</li>
+								</ul>
+							</li>
+							<li><code>Expression</code> directory: Directory containing figures
+								related to expression analyses.
+								<ul>
+									<li><strong>selected_protein_plot.pdf</strong>: plot displaying the
+										abundances of selected proteins</li>
+									<li><strong>DE_protein_barplot.pdf</strong>: number of differentially
+										expressed proteins found in each contrast.</li>
+									<li><strong>DE_peptide_barplot.pdf</strong>: number of differentially
+										expressed peptides found in each contrast.</li>
+								</ul>
+							</li>
+							<li><code>Enrichment</code> directory: Directory containing figures from
+								functional annotation enrichment analysi
+								<ul>
+									<li><strong>enr_updown_keysources.pdf</strong>: dot plot of top enriched
+										terms based on differentially expressed proteins, divided in up- and
+										down-regulated. Terms are filtered for key source datasets selected in
+										the advanced options.</li>
+									<li><strong>enr_updown_keywords.pdf</strong>: dot plot of top enriched
+										terms based on differentially expressed proteins, divided in up- and
+										down-regulated. Terms are filtered for keywords defined in the advanced
+										options.</li>
+									<li><strong>enr_DE_keysources.pdf</strong>: dot plot of top enriched
+										terms based on differentially expressed proteins. Terms are filtered for
+										key source datasets selected in the advanced options.</li>
+									<li><strong>enr_DE_keywords.pdf</strong>: dot plot of top enriched terms
+										based on differentially expressed proteins. Terms are filtered for
+										keywords defined in the advanced options.</li>
+								</ul>
+							</li>
+							<li><code>Network</code> directory: Directory with figures from network
+								analysis of differentially expressed proteins, based on STRINGdb
+								protein-protein interactions. For each contrast, two files are
+								generated:
+								<ul>
+									<li><strong>communities_sizes.pdf</strong>: histogram representing the
+										number of protein in each network community.</li>
+									<li><strong>ppi_network.pdf</strong>: network representation in two
+										layouts: Fruchterman Reingold (<em>fr</em>) and Kamada Kawai
+										(<em>kk</em>).</li>
+								</ul>
+							</li>
+							<li>
+    						<code>KinaseTree</code> directory: figures and files with the kinase activity trees generated
+    						with PhosR and CORAL. For each deasign there are two files:
+    						<ul>
+    							<li>
+    								<code>TXT file</code>: text table with the identified actifity of each kinase.
+    							</li>
+    							<li>
+    								<code>SVG file</code>: vectorail image of the kinase tree generated with CORAL.
+    							</li>
+    						</ul>
+    					</li>
+						</ul>
+					</li>
+				</ul>
+			</div>
+		</li>
+	</ul>
+</div>
+<hr id="linesubtitle">
+<div id="refs" class="references csl-bib-body hanging-indent">
+	<div id="ref-igraph" class="csl-entry">
+		Csardi, Gabor, and Tamas Nepusz. 2006. <span>“The Igraph Software
+			Package for Complex Network Research”</span> Complex Systems: 1695. <a
+			href="https://igraph.org">https://igraph.org</a>.
+	</div>
+	<br>
+	<div id="ref-proBatch" class="csl-entry">
+		Cuklina, Jelena, Chloe H. Lee, Evan G. Willams, Ben Collins, Tatjana
+		Sajic, Patrick Pedrioli, Maria Rodriguez-Martinez, and Ruedi Aebersold.
+		2018. <span>“Computational Challenges in Biomarker Discovery from
+			High-Throughput Proteomic Data.”</span> <a
+			href="https://doi.org/10.3929/ethz-b-000307772">https://doi.org/10.3929/ethz-b-000307772</a>.
+	</div>
+	<br>
+	<div id="ref-enrichR" class="csl-entry">
+		Jawaid, Wajid. 2022. <span>“enrichR: Provides an r Interface to
+			’Enrichr’.”</span> <a
+			href="https://CRAN.R-project.org/package=enrichR">https://CRAN.R-project.org/package=enrichR</a>.
+	</div>
+	<br>
+	<div id="ref-PhosR" class="csl-entry">
+		Kim, Hani Jieun, Taiyun Kim, Nolan J Hoffman, Di Xiao, David E James,
+		Sean J Humphrey, and Pengyi Yang. 2021. <span>“PhosR Enables Processing
+			and Functional Analysis of Phosphoproteomic Data”</span> 34. <a
+			href="https://doi.org/10.1016/j.celrep.2021.108771">https://doi.org/10.1016/j.celrep.2021.108771</a>.
+	</div>
+	<br>
+	<div id="ref-limma" class="csl-entry">
+		Ritchie, Matthew E, Belinda Phipson, Di Wu, Yifang Hu, Charity W Law,
+		Wei Shi, and Gordon K Smyth. 2015.
+		<span>“<span></span>Limma<span></span> Powers Differential Expression
+			Analyses for <span></span>RNA<span></span>-Sequencing and Microarray
+			Studies”</span> 43: e47. <a
+			href="https://doi.org/10.1093/nar/gkv007">https://doi.org/10.1093/nar/gkv007</a>.
+	</div>
+	<br>
+	<div id="ref-coral" class="csl-entry">
+		Kathleen S. Metz, Erika M. Deoudes, Matthew E. Berginski, Ivan Jimenez-Ruiz,
+		Bulent Arman Aksoy, Jeff Hammerbacher, Shawn M. Gomez and Douglas H. Phanstie. 2018.
+		<span>Coral: Clear and Customizable Visualization of Human Kinome Data</span>
+		<span>Cell Systems</span>Volume 7, Issue 3, 347-350
+		<a href="https://doi.org/10.1016/j.cels.2018.07.001">https://doi.org/10.1016/j.cels.2018.07.001</a>.
+	</div>
+	<br>
+	<div id="ref-STRINGdb" class="csl-entry">
+		Szklarczyk, Damian, Annika L Gable, Katerina C Nastou, David Lyon,
+		Rebecca Kirsch, Sampo Pyysalo, Nadezhda T Doncheva, et al. 2021.
+		<span>“The STRING Database in 2021: Customizable Protein-Protein
+			Networks, and Functional Characterization of User-Uploaded
+			Gene/Measurement Sets.”</span> 49.
+	</div>
+	<br>
+	<div id="ref-DEqMS" class="csl-entry">
+		Zhu, Yafeng. 2022. <span>“DEqMS: A Tool to Perform Statistical Analysis
+			of Differential Protein Expression for Quantitative Proteomics
+			Data.”</span>
+	</div>
+</div>
