@@ -40,6 +40,8 @@
 #' @importFrom plyr ldply
 #' @importFrom tidyr separate_rows
 #' @importFrom dplyr summarise rename select arrange group_by ungroup mutate left_join
+#' @importFrom curl has_internet
+#' @importFrom httr GET POST status_code http_status use_proxy
 #'
 #' @examples
 #' \dontrun{
@@ -53,7 +55,8 @@ perform_enrichment_analysis <- function(differential_results, dirOutput="results
                                         overlap_size_enrich_thr=5, enrichR_custom_DB=FALSE, enrich_filter_DBs=NULL,
                                         phospho_ctrl = FALSE) {
   
-  library(enrichR)
+  source("R/enrichR/functions.R")
+  set_enrichR()
   if(("protein_results_long" %in% names(differential_results))){
     phospho_with_proteome = FALSE
     diff_dt <- differential_results$protein_results_long

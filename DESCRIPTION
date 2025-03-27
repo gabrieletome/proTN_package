@@ -47,4 +47,6 @@ Imports:
 	jsonlite (>= 1.8.8),
 	parallel (>= 1.36.0),
 	rsvg (>= 2.6.0),
-	tibble (>= 3.2.1)
+	tibble (>= 3.2.1),
+	curl (>= 5.2.1),
+	httr (>= 1.4.7)
