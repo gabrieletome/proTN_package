@@ -12,30 +12,24 @@ output:
 
 # Tester PhosProTN package
 
-```{r set_dir, warning=F, message=FALSE, results='hide'}
-# setwd("/home/gabriele/Desktop/UNITN/proTN_package/")
-outputdir = "results_phospho"
-```
-
 ```{r setup}
 library(proTN)
-extract_example(path_phospho = "/home/gabriele/Desktop/UNITN/data/phospho", 
-                path_proteome = "/home/gabriele/Desktop/UNITN/data/proteome")
-outputdir="/home/gabriele/Desktop/UNITN/data/proteome"
+extract_example(path_phospho = "./phospho")
+outputdir="./phospho"
 ```
 # Test proteomics pipeline
 
 ```{r read_proteomics_MQ, eval=FALSE}
 
 proteome_data <- read_phosphoproteomics(software = "MQ",
-                                        folder = "inst/extdata/case_study_phospho/txt_Phospho", 
+                                        folder = "./phospho/case_study_phospho/txt_Phospho", 
                                         peptide_filename = "evidence",
                                         phospho_thr = 0.75)
 ```
 
 ```{r read_proteomics_PD}
 proteome_data <- read_phosphoproteomics(software = "PD",
-                                        folder = "inst/extdata/PD/phospho",
+                                        folder = "./data/PD/phospho",
                                         annotation_filename = "INPUT",
                                         proteinGroup_filename = "PROT.xlsx")
 ```
@@ -121,7 +115,7 @@ prot_boxplot
 # Differential analysis
 
 ```{r differential_analysis}
-formule_contrast <- list("A2016vsWT"="A2016T-WT")
+formule_contrast <- list("A2016vsWT"="A2016T-wt")
 
 differential_results <- differential_analysis(proteome_data = normalized_data, 
                                               formule_contrast = formule_contrast, 
