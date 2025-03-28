@@ -16,14 +16,12 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(proTN)
-extract_example(path_phospho = "/home/gabriele/Desktop/UNITN/data/phospho", 
-                path_proteome = "/home/gabriele/Desktop/UNITN/data/proteome")
-outputdir="/home/gabriele/Desktop/UNITN/data/proteome"
+extract_example(path_proteome = tempdir())
 ```
 
 ```{r read_proteomics_MQ}
 proteome_data <- read_proteomics(software = "MQ",
-                                 folder = "/home/gabriele/Desktop/UNITN/data/proteome/case_study_proteomics/case_study_1",
+                                 folder = paste0(tempdir(),"/case_study_proteomics/case_study_1"),
                                  peptide_filename = "evidence")
 ```
 
@@ -50,7 +48,7 @@ normalized_data <- normalization_ProTN(proteome_data = imputed_data)
 
 # Exporter
 
-```{r exporter}
+```{r exporter, eval=FALSE}
 save_abundance_tables(proteome_data = normalized_data, 
                       dirOutput=outputdir)
 ```
@@ -89,7 +87,6 @@ pep_mds$plot
 # List protein boxplot
 
 ```{r boxplot_protein}
-# TODO: check warning
 prot_boxplot <- plot_selected_proteins(proteome_data = normalized_data,
                                        list_protein = c("Aaas","Aacs"))
 prot_boxplot$plot
@@ -108,10 +105,6 @@ differential_results <- differential_analysis(proteome_data = normalized_data,
                                               pval_thr=0.05,
                                               signal_thr=0)
 
-save_differential_analysis_table(proteome_data = normalized_data,
-                                 differential_results = differential_results,
-                                 dirOutput=outputdir)
-
 ploft_diff_number <- generate_differential_barplots(differential_results,
                                                     data_type="protein")
 ploft_diff_number$plot
@@ -119,6 +112,12 @@ ploft_diff_number$plot
 ploft_diff_number <- generate_differential_barplots(differential_results,
                                                     data_type="peptide")
 ploft_diff_number$plot
+```
+
+```{r exporter_differential, eval=FALSE}
+save_differential_analysis_table(proteome_data = normalized_data,
+                                 differential_results = differential_results,
+                                 dirOutput=outputdir)
 ```
 
 # Vulcano plot
@@ -162,4 +161,41 @@ pca_diff_pep <- pca_differential_analysis_plot(differential_analysis = different
                                                proteome_data = normalized_data,
                                                type = "peptide")
 pca_diff_pep$plot
+```
+
+# Enrichement
+
+```{r enrichment, eval=FALSE}
+enrichemnt_results <- perform_enrichment_analysis(differential_results = differential_results,
+                                                  enrichR_custom_DB = T,
+                                                  enrich_filter_DBs=c("Human_Gene_Atlas","BioPlanet_2019","KEGG_2021_Human",
+                                                                      "Reactome_2022","ChEA_2022"),
+                                                  dirOutput=outputdir)
+
+plots_all <- enrichment_figure(enr_df = enrichemnt_results,
+                               category = c("all"),
+                               save=F)
+plots_all
+
+plots_down <- enrichment_figure(enr_df = enrichemnt_results,
+                                category = c("down","up"),
+                                save=F)
+plots_down
+
+plots_terms <- enrichment_figure(enr_df = enrichemnt_results,
+                                 category = c("down","up"),
+                                 save=F,
+                                 enrich_filter_term = c("cell","pathways"))
+plots_terms
+```
+
+# String DB network
+
+```{r string network, eval=FALSE}
+
+strindb_res <- STRINGdb_network(differential_results = differential_results,
+                                species="Homo sapiens", 
+                                dirOutput=outputdir)
+strindb_res  
+
 ```

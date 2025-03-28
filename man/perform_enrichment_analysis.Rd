@@ -69,5 +69,4 @@ The function generates two types of output files:
 perform_enrichment_analysis(differential_results = differential_results_example,
                             dirOutput = "results_directory")
 }
-
 }

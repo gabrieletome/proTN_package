@@ -61,5 +61,4 @@ if the \code{save} parameter is set to TRUE.
 \dontrun{
 plotlist <- enrichment_figure(enr_df = enr_results, category = c("all"), save = TRUE)
 }
-
 }

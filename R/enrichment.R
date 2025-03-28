@@ -48,7 +48,7 @@
 #' perform_enrichment_analysis(differential_results = differential_results_example,
 #'                             dirOutput = "results_directory")
 #' }
-#' 
+#' @export
 perform_enrichment_analysis <- function(differential_results, dirOutput="results_ProTN", 
                                         subfold_Tab="table", subfold_Dat="rdata",
                                         pval_fdr_enrich="p_adj", pval_enrich_thr=0.05, 

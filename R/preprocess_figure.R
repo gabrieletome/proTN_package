@@ -60,8 +60,8 @@ generate_abundance_subplot <- function(proteome_data) {
     geom_bar(stat = "identity", width = 0.7, alpha = 0.8) +
     theme_bw() +
     theme(legend.position = "none", axis.title.y = element_blank()) +
-    scale_fill_manual(values = setNames(as.list(c_anno$color), c_anno$sample)) +
-    scale_colour_manual(values = setNames(as.list(c_anno$color), c_anno$sample)) +
+    scale_fill_manual(values = setNames(c_anno$color, c_anno$sample)) +
+    scale_colour_manual(values = setNames(c_anno$color, c_anno$sample)) +
     theme(panel.grid.minor = element_blank(), panel.grid.major.y = element_blank())
   
   return(list("dt" = numeric_df, "plot" = plot))
@@ -171,6 +171,11 @@ plot_abundance_distribution <- function(proteome_data, type) {
     } else{
       c_anno <- copy(proteome_data$c_anno)
     }
+    ordered_samples <- c_anno[order(condition), sample]
+    pg_long_df <- melt(dat, id.vars = "GeneName",
+                       variable.name = "sample", value.name = "log2 normalized abundance")
+    setcolorder(pg_long_df, c("GeneName", "sample", "log2 normalized abundance"))
+    
   } else if(type == "peptide"){
     dat <- copy(proteome_data$dat_pep)
     if(phospho_with_proteome){
@@ -178,14 +183,14 @@ plot_abundance_distribution <- function(proteome_data, type) {
     } else{
       c_anno <- copy(proteome_data$c_anno)
     }
+    ordered_samples <- c_anno[order(condition), sample]
+    pg_long_df <- melt(dat, id.vars = "ID_peptide",
+                       variable.name = "sample", value.name = "log2 normalized abundance")
+    setcolorder(pg_long_df, c("ID_peptide", "sample", "log2 normalized abundance"))
+    
   } else{
     stop("Invalid type parameter. Must be \"protein\" or \"peptide\"")
   }
-  
-  ordered_samples <- c_anno[order(condition), sample]
-  pg_long_df <- melt(dat[, ..ordered_samples], variable.name = "sample", value.name = "log2 normalized abundance")
-  pg_long_df[, id := rep(rownames(dat), length(ordered_samples))]
-  setcolorder(pg_long_df, c("id", "sample", "log2 normalized abundance"))
   
   pg_long_df <- merge(pg_long_df, c_anno, by = "sample", all.x = TRUE)
   
@@ -196,8 +201,8 @@ plot_abundance_distribution <- function(proteome_data, type) {
     geom_boxplot(alpha = 1, fill = "white", width = 0.2, outlier.shape = NA, notch = FALSE) +
     theme_bw() +
     theme(legend.position = "none", axis.title.y = element_blank()) +
-    scale_fill_manual(values = setNames(as.list(c_anno$color), c_anno$sample)) +
-    scale_colour_manual(values = setNames(as.list(c_anno$color), c_anno$sample)) +
+    scale_fill_manual(values = setNames(c_anno$color, c_anno$sample)) +
+    scale_colour_manual(values = setNames(c_anno$color, c_anno$sample)) +
     theme(panel.grid.minor = element_blank(), panel.grid.major.y = element_blank())
   
   return(list("dt" = pg_long_df, "plot" = hs))
@@ -421,7 +426,7 @@ plot_selected_proteins <- function(proteome_data, list_protein) {
       scale_colour_manual(name="condition",values=cc[sort(unique(prot_intensity_long$condition))])+
       theme_bw(base_size = bs) +
       theme(axis.title.x=element_blank(),
-            axis.text.x = element_text(angle = 30, hjust = 1, colour=cc[sort(unique(prot_intensity_long$condition))]),
+            axis.text.x = element_text(angle = 30, hjust = 1),
             panel.grid.major.x=element_blank(),
             panel.grid.minor.y=element_blank(),
             legend.text = element_text(size = 0.7*bs),

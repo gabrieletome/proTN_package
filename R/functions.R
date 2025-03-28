@@ -487,10 +487,10 @@ deps_b2b_lollipop <- function(input_df, # input dataframe
   if("text_col" %in% colnames(plot_df)){
     lp <- lp + geom_text(data = plot_df[plot_df$bb_col==f_left,],
                          aes(x = -(shift*13/10)-x_col, label=text_col, vjust=0),
-                         fontface="italic", size=4, show_guide = F) +
+                         fontface="italic", size=4, show.legend = F) +
       geom_text(data = plot_df[plot_df$bb_col==f_right,],
                 aes(x = (shift*13/10)+x_col, label=text_col, vjust=0),
-                fontface="italic", size=4, show_guide = F)
+                fontface="italic", size=4, show.legend = F)
   }
   
   if("shape_col" %in% colnames(plot_df)){
