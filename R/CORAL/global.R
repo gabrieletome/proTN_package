@@ -17,7 +17,7 @@ source("R/CORAL/R/radiobuttonswithimages.R")
 orig_svginfo = readRDS("R/CORAL/Data/kintree.RDS")
 
 # if you need to up date the data frame read in the new info here
-orig_svginfo$dataframe = data.frame(suppressMessages(read_tsv("R/CORAL/Data/coral_dataframe.tsv")))
+orig_svginfo$dataframe = data.frame(suppressMessages(readr::read_tsv("R/CORAL/Data/coral_dataframe.tsv")))
 
 # remove NAs from subfamilies
 NAs = which(is.na(orig_svginfo$dataframe$kinase.subfamily))
@@ -96,14 +96,14 @@ qualitative_palette_choices <- c('<img src="images/Erika.png">' = 'Erika',
 
 # my qualitative palettes
 Erika = c("#FA6958","#3F9FFC","#FAD53F","#B0E6C2","#B348A1","#2CD1E0","#BEC956","#7C64FF","#C2374A","#70BD93","#FFBB99","#BA97F2")
-Accent = brewer.pal(8,"Accent")
-Dark2 = brewer.pal(8,"Dark2")
-Paired = brewer.pal(12,"Paired")
-Pastel1 = brewer.pal(9,"Pastel1")
-Pastel2 = brewer.pal(8,"Pastel2")
-Set1 = brewer.pal(9,"Set1")
-Set2 = brewer.pal(8,"Set2")
-Set3 = brewer.pal(12,"Set3")
+Accent = RColorBrewer::brewer.pal(8,"Accent")
+Dark2 = RColorBrewer::brewer.pal(8,"Dark2")
+Paired = RColorBrewer::brewer.pal(12,"Paired")
+Pastel1 = RColorBrewer::brewer.pal(9,"Pastel1")
+Pastel2 = RColorBrewer::brewer.pal(8,"Pastel2")
+Set1 = RColorBrewer::brewer.pal(9,"Set1")
+Set2 = RColorBrewer::brewer.pal(8,"Set2")
+Set3 = RColorBrewer::brewer.pal(12,"Set3")
 
 qualpalettes = list(Erika,Accent,Dark2,Paired,Pastel1,Pastel2,Set1,Set2,Set3)
 names(qualpalettes) = c("Erika","Accent","Dark2","Paired","Pastel1","Pastel2","Set1","Set2","Set3")
@@ -134,12 +134,12 @@ sequential_palette_choices <- c(
 
 
 # my sequential palettes
-Greys = brewer.pal(3,"Greys")
-Reds = brewer.pal(3,"Reds")
-Oranges = brewer.pal(3,"Oranges")
-Greens = brewer.pal(3,"Greens")
-Blues = brewer.pal(3,"Blues")
-Purples = brewer.pal(3,"Purples")
+Greys = RColorBrewer::brewer.pal(3,"Greys")
+Reds = RColorBrewer::brewer.pal(3,"Reds")
+Oranges = RColorBrewer::brewer.pal(3,"Oranges")
+Greens = RColorBrewer::brewer.pal(3,"Greens")
+Blues = RColorBrewer::brewer.pal(3,"Blues")
+Purples = RColorBrewer::brewer.pal(3,"Purples")
 
 seqpalettes = list(Greys,Reds,Oranges,Greens,Blues,Purples)
 names(seqpalettes) = c("Greys","Reds","Oranges","Greens","Blues","Purples")
@@ -196,10 +196,10 @@ defaultpalette = colorRampPalette( c(
 ))(12)
 
 # # Default group color palette
-# defaultpalette = colorRampPalette( brewer.pal(11,"Paired"))(11)
+# defaultpalette = colorRampPalette( RColorBrewer::brewer.pal(11,"Paired"))(11)
 
-# pal_divs = row.names(brewer.pal.info[brewer.pal.info[,2]=="div",])
-# pal_seqs = row.names(brewer.pal.info[brewer.pal.info[,2]=="seq",])
-# pal_quals = row.names(brewer.pal.info[brewer.pal.info[,2]=="qual",])
+# pal_divs = row.names(RColorBrewer::brewer.pal.info[RColorBrewer::brewer.pal.info[,2]=="div",])
+# pal_seqs = row.names(RColorBrewer::brewer.pal.info[RColorBrewer::brewer.pal.info[,2]=="seq",])
+# pal_quals = row.names(RColorBrewer::brewer.pal.info[RColorBrewer::brewer.pal.info[,2]=="qual",])
 
 CurrentInfoPage = "About"

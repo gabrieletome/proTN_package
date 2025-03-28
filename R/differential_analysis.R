@@ -127,7 +127,7 @@ differential_analysis <- function(proteome_data, formule_contrast,
     }
     
     message("The following table contains the names and formulas of the contrasts considered for differential expression analysis:\n")
-    message(as.character(contro_list))
+    message(paste(c(names(contro_list)), collapse = "\n"))
     
     deps_pep_df <- limmafnc_dt("PEP", c_anno = c_anno, dat_gene = dat_complete, psm_count_table = psm_count_table, formule_contrast = contro_list,
                                expr_avgse_df = expr_avgse_complete_df, signal_thr = signal_thr, fc_thr = fc_thr, pval_thr = pval_thr, pval_fdr = pval_fdr)
@@ -170,7 +170,7 @@ differential_analysis <- function(proteome_data, formule_contrast,
     }
     
     message("The following table contains the names and formulas of the contrasts considered for differential expression analysis:\n")
-    message(contro_list)
+    message(paste(c(names(contro_list)), collapse = "\n"))
     
     message("Differentiation analysis in progress...")
     dat_gene <- copy(proteome_data$dat_gene)

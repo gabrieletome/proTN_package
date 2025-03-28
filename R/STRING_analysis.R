@@ -31,7 +31,7 @@ STRINGdb_network <- function(differential_results, species="Homo sapiens",
     taxonomy_NCBI <- species
     taxonomy_NCBI <- codtax[name == taxonomy_NCBI, taxid]
   }, error = function(cond){stop(paste0("Species not present in the db. Select one of the following: ",paste(codtax$name,collapse = ",")))})
-  
+  message(paste0("Taxonomy ID: ",taxonomy_NCBI))
   if(("protein_results_long" %in% names(differential_results))){
     phospho_with_proteome = FALSE
     deps_l_df <- copy(differential_results$protein_results_long)
@@ -56,8 +56,9 @@ STRINGdb_network <- function(differential_results, species="Homo sapiens",
   if (length(res$doComp) == 0 | all(res$doComp == FALSE)) {
     stop("Not possible to continue with the STRING network evaluation. No protein up- or down-regulated.")
   } else {
-    dir.create(file.path(dirOutput, subfold_Fig, subfold_net), showWarnings = FALSE)
-    dirOutput_net <- paste(dirOutput, subfold_Fig, subfold_net,sep = "/")
+    dir.create(file.path(dirOutput, subfold_Fig), showWarnings = FALSE)
+    dirOutput_net <- paste(dirOutput, subfold_Fig, sep = "/")
+    message(paste0("Saving in: ",dirOutput_net))
   }
   
   if (!is.null(dirOutput_net)) {

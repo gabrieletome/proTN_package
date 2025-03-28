@@ -200,7 +200,7 @@ enrichment_lollipop <- function(input_df, # input dataframe
     
     geom_segment(aes(x = 0, y = y_col, xend = x_col, yend = y_col))+
     theme_tufte(base_family = "Arial Narrow")+
-    scale_color_manual(values = "grey25", guide = "none")+
+    # scale_color_manual(values = "grey25", guide = "none")+
     theme(axis.title.y = element_blank(),axis.ticks.y= element_blank())+
     xlab(x_col)
   
@@ -223,7 +223,7 @@ enrichment_lollipop <- function(input_df, # input dataframe
   }
   
   if("text_col" %in% colnames(plot_df)){
-    lp <- lp + geom_text(aes(label=text_col, hjust=(-0.5)),fontface="italic", size=3, show_guide = F) +
+    lp <- lp + geom_text(aes(label=text_col, hjust=(-0.5)),fontface="italic", size=3, show.legend = F) +
       scale_x_continuous(expand = expansion(mult = c(.01, .1)))
   }
   
@@ -592,13 +592,13 @@ enrichment_dotmatrix <- function(input_df, # input dataframe
   }
   
   if("color_col" %in% colnames(plot_df)){
-    lp <- lp + aes(colour=color_col) + scale_color_manual(name=color_col, values= color_vec) + guides(color=F) # drop = FALSE
+    lp <- lp + aes(colour=color_col) + scale_color_manual(name=color_col, values= color_vec) + guides(color="none") # drop = FALSE
   }
   
   if("fill_col" %in% colnames(plot_df)){
     cc<-plot_df$color
     names(cc)<-interaction(plot_df$x_col,plot_df$y_col,sep="-",lex.order=TRUE)
-    lp <- lp + aes(fill=interaction(x_col,y_col,sep="-",lex.order=TRUE)) + scale_fill_manual(name="Significant", values= cc) + guides(fill=F) # drop = FALSE
+    lp <- lp + aes(fill=interaction(x_col,y_col,sep="-",lex.order=TRUE)) + scale_fill_manual(name="Significant", values= cc) + guides(fill="none") # drop = FALSE
   }
   
   if("facet_col" %in% colnames(plot_df)){

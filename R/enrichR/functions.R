@@ -23,7 +23,7 @@ set_enrichR <- function() {
     options(enrichR.sites = c("Enrichr", "FlyEnrichr", "WormEnrichr", "YeastEnrichr", "FishEnrichr", "OxEnrichr"))
 
     opts <- .proxyOpts()
-    if (has_internet() || !is.null(opts)) {
+    if (curl::has_internet() || !is.null(opts)) {
         if (getOption("modEnrichR.use")) {
             listEnrichrSites()
         } else {
@@ -80,17 +80,17 @@ getEnrichr <- function(method = "GET", url, ...) {
     tryCatch({
         opts <- .proxyOpts()
         if(is.null(opts)) {
-            x <- if(method == "GET") GET(url = url, ...) else POST(url = url, ...)
+            x <- if(method == "GET") httr::GET(url = url, ...) else httr::POST(url = url, ...)
 	} else {
-            proxy_config <- use_proxy(url = opts['url'], port = as.numeric(opts['port']),
+            proxy_config <- httr::use_proxy(url = opts['url'], port = as.numeric(opts['port']),
                                       username = opts['username'], password = opts['password'],
                                       auth = opts['auth'])
-            x <- if(method == "GET") GET(url = url, proxy_config, ...) else POST(url = url, proxy_config, ...)
+            x <- if(method == "GET") httr::GET(url = url, proxy_config, ...) else httr::POST(url = url, proxy_config, ...)
 	}
         code <- status_code(x)
         if(code != 200) {
             # Error with status code
-            message(http_status(code)$message)
+            message(httr::http_status(code)$message)
         } else {
             # OK/success
             options(enrichR.live = TRUE)
