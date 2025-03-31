@@ -318,7 +318,6 @@ frequencyScoring <- function(sequence.list, frequency.mat) {
 #' @return a ggplot object
 #'
 #'
-#' @importFrom ggplot2 ggplot
 #' @importFrom tidyr spread
 #' @importFrom dplyr count
 #' 
@@ -385,7 +384,6 @@ plotSignalomeMap <- function(signalomes, color) {
 #' @return a graphical plot
 #' 
 #' @importFrom network network
-#' @importFrom RColorBrewer brewer.pal
 #' @importFrom stats cor
 #' @importFrom GGally ggnet2
 #' @import circlize
@@ -490,7 +488,6 @@ plotKinaseNetwork <- function(KSR, predMatrix, threshold = 0.9, color=NULL,
 #'
 #' @return A graphical plot
 #'
-#' @importFrom dendextend labels_colors
 #' @importFrom pcaMethods pca
 #' @importFrom ggpubr ggarrange
 #' @importFrom ggdendro ggdendrogram
@@ -528,7 +525,6 @@ plotQC <- function(mat, grps, labels, panel =
   p
 }
 
-#' @importFrom ggplot2 ggplot geom_bar coord_cartesian ggtitle labs theme aes 
 #' element_text
 quantPlot = function(mat, grps, labels) {
   quant = (1-colSums(is.na(mat))/nrow(mat))*100
@@ -549,8 +545,6 @@ quantPlot = function(mat, grps, labels) {
     ggplot2::scale_fill_manual(values = grDevices::rainbow(gNum))
 }
 
-#' @importFrom ggdendro ggdendrogram
-#' @importFrom ggplot2 ggtitle
 dendPlot = function(mat, grps, labels) {
   dend <- stats::hclust(stats::dist(t(mat)))
   label_grps <- grps[stats::order.dendrogram(as.dendrogram(dend))]
@@ -570,7 +564,6 @@ dendPlot = function(mat, grps, labels) {
 
 
 #' @importFrom dplyr %>% mutate
-#' @importFrom ggplot2 ggplot geom_boxplot labs aes
 abundPlot = function(mat, grps, labels) {
   rep_num = nrow(mat)
   dat = mat %>%
@@ -589,7 +582,6 @@ abundPlot = function(mat, grps, labels) {
     ggplot2::scale_fill_manual(values = grDevices::rainbow(nGrps))
 }
 
-#' @importFrom ggplot2 ggplot geom_point geom_text labs aes
 pcaPlot = function(mat, grps, labels) {
   result <- pcaMethods::pca(t(mat), method = "ppca", nPcs = 2,
                             seed = 123, main = "PCA")
@@ -1265,7 +1257,6 @@ ptImpute <- function(mat1, mat2, percent1, percent2, m = 1.6,
 #' All messages will be suppressed if set to \code{FALSE}
 #'
 #' @importFrom igraph graph_from_adjacency_matrix
-#' @importFrom RColorBrewer brewer.pal
 #' @importFrom grDevices colorRampPalette
 #' @importFrom tidyr pivot_wider
 #' @importFrom dplyr count
@@ -1273,10 +1264,6 @@ ptImpute <- function(mat1, mat2, percent1, percent2, m = 1.6,
 #' @importFrom graphics title
 #' @importFrom graphics par
 #' @importFrom graphics barplot
-#' @importFrom ggplot2 scale_color_manual
-#' @importFrom ggplot2 scale_size_continuous
-#' @importFrom ggplot2 theme_classic
-#' @importFrom ggplot2 element_blank
 #' @importFrom stats hclust
 #' @importFrom rlang .data
 #'
@@ -1453,7 +1440,6 @@ Signalomes <- function(KSR,
 }
 
 #' @import circlize
-#' @importFrom utils stack
 #' @importFrom rlang .data
 .phosRsignalome <- function(predMatrix, signalomeCutoff, kinase_signalome_color,
                             modules) {
@@ -1619,10 +1605,6 @@ generateSignalome = function(kinaseAnnot, kinaseGroup, predMatrix, KOI,
 #'
 #' @return A median scaled matrix
 #'
-#' @importFrom limma normalizeMedianAbsValues
-#'
-#'
-#' 
 #'
 medianScaling <- function(mat, scale = FALSE, grps = NULL, reorder = FALSE, 
                           assay = NULL) {
@@ -1899,7 +1881,6 @@ meanAbundance <- function(mat, grps) {
 #' All messages will be suppressed if set to \code{FALSE}
 #'
 #' @importFrom preprocessCore normalize.quantiles
-#' @importFrom utils data
 #'
 #' @return A list of 4 elements.
 #' \code{motifScoreMatrix}, \code{profileScoreMatrix},
@@ -2095,9 +2076,7 @@ kinaseActivityHeatmap <- function(ksProfileMatrix) {
 #' @return a pheatmap object.
 #'
 #' @import pheatmap
-#' @importFrom utils data
-#' @importFrom grDevices dev.off
-#' @importFrom grDevices pdf
+#' @importFrom grDevices dev.off pdf
 #'
 #' 
 kinaseSubstrateHeatmap_local <- function(phosScoringMatrices, top = 3, printPlot=NULL, 
@@ -2277,7 +2256,6 @@ substrateList = function(phosScoringMatrices, top, cs, inclusion) {
 
 
 #' @import e1071
-#' @importFrom utils tail
 multiAdaSampling <- function(train.mat, test.mat,
                              label, kernelType, iter = 5) {
   

@@ -227,7 +227,6 @@ listEnrichrDbs <- function() {
 ##' @param db library
 ##' @return List object
 ##' @author I-Hsuan Lin \email{i-hsuan.lin@manchester.ac.uk}
-##' @importFrom utils download.file
 .read_gmt <- function(db) {
     base.address <- getOption("enrichR.base.address")
     url <- paste0(base.address, "geneSetLibrary?mode=text&libraryName=", db)
@@ -352,7 +351,6 @@ listEnrichrDbs <- function() {
 ##' @author Wajid Jawaid \email{wajid.jawaid@gmail.com}
 ##' @importFrom httr GET POST
 ##' @importFrom rjson fromJSON
-##' @importFrom utils read.table
 ##' @export
 ##' @examples
 ##' # data(input) # Load example input genes
@@ -508,85 +506,6 @@ enrichr <- function(genes, databases = NULL, background = NULL, include_overlap 
     return(df)
 }
 
-##' Print Enrichr results
-##'
-##' Print Enrichr results from the selected gene-set libraries to individual text files 
-##' or a Excel spreadsheet.
-##' @title printEnrich
-##' @param data (Required). Output list object from the \code{"enrichr"} function.
-##' @param prefix (Optional). Prefix of output file. Default is \code{"enrichr"}.
-##' @param showTerms (Optional). Number of terms to show.
-##' Default is \code{NULL} to print all terms.
-##' @param columns (Optional). Columns from each entry of data.
-##' Default is \code{c(1:9)} to print all columns.
-##' * Results without background: 1-"Term", 2-"Overlap", 3-"P.value", 
-##' 4-"Adjusted.P.value", 5-"Old.P.value", 6-"Old.Adjusted.P.value", 
-##' 7-"Odds.Ratio", 8-"Combined.Score", 9-"Combined.Score".
-##' * In results with background, the second column is "Rank" if terms are not identical 
-##' with those annotated in the Enrichr GMT files
-##' @param outFile (Optional). Output file format, choose from "txt" and "excel". 
-##' Default is "txt".
-##' @return NULL
-##' @author Wajid Jawaid \email{wajid.jawaid@gmail.com}
-##' @author I-Hsuan Lin \email{i-hsuan.lin@manchester.ac.uk}
-##' @importFrom utils write.table
-##' @importFrom WriteXLS WriteXLS
-##' @export
-##' @examples
-##' # data(input) # Load example input genes
-##' # if (getOption("enrichR.live")) {
-##' #   enrichRLive <- TRUE
-##' #   dbs <- listEnrichrDbs()
-##' #   if(is.null(dbs)) enrichRLive <- FALSE
-##' #   dbs <- c("GO_Molecular_Function_2023", "GO_Cellular_Component_2023",
-##' #            "GO_Biological_Process_2023")
-##' #   enriched <- enrichr(input, dbs)
-##' #   print(head(enriched[[1]]))
-##' #   # if (enrichRLive) printEnrich(enriched, outFile = "excel")
-##' # }
-printEnrich <- function(data, prefix = "enrichr", showTerms = NULL, columns = c(1:9),
-                        outFile = c("txt","excel")) {
-    if (!is.list(data)) stop("data is malformed must be a list")
-    if (!is.integer(columns)) {
-        stop(sprintf("'columns=' (%s) is invalid, must be a positive integer vector", 
-                     paste(shQuote(columns), collapse = ",")))
-    }
-
-    outFile <- match.arg(outFile)
-    if (outFile == "excel") {
-        filename <- paste0(prefix, ".xlsx")
-        output_excel_df <- vector("list", length(data))
-        sheetnames <- names(data)
-    } else {
-        filenames <- paste0(prefix, "_", names(data), ".txt")
-    }
-
-    for (i in 1:length(data)) {
-        dbname <- names(data)[i]
-        df <- data[[i]]
-        if (!is.data.frame(df)) stop("data is malformed - it must consist of data frames")
-
-        df <- .enrichment_prep_df(df, showTerms, orderBy = "P.value")
-        df <- df[, !colnames(df) %in% c("Annotated", "Significant")]
-
-        if(any(columns > ncol(df))) {
-            stop("Undefined columns selected")
-        } else {
-            df <- df[,columns]
-        }
-
-        if (outFile == "excel") {
-            output_excel_df[[i]] <- df
-            if (i == length(data)) {
-                WriteXLS(output_excel_df, ExcelFileName = filename, SheetNames = sheetnames)
-            }
-        } else {
-            write.table(df, file = filenames[i], sep = "\t", quote = F, row.names = F, col.names = T)
-        }
-    }
-    message(sprintf("Output results in '%s' format", outFile))
-}
-
 ##' Visualise a Enrichr output as barplot
 ##'
 ##' Visualise Enrichr result from a selected gene-set library as barplot.
@@ -617,21 +536,6 @@ printEnrich <- function(data, prefix = "enrichr", showTerms = NULL, columns = c(
 ##' @author I-Hsuan Lin \email{i-hsuan.lin@manchester.ac.uk}
 ##' @seealso
 ##' \code{\link[ggplot2]{ggplot}}
-##' @importFrom ggplot2 ggplot
-##' @importFrom ggplot2 aes_string
-##' @importFrom ggplot2 geom_bar
-##' @importFrom ggplot2 coord_flip
-##' @importFrom ggplot2 theme_bw
-##' @importFrom ggplot2 scale_fill_continuous
-##' @importFrom ggplot2 scale_x_discrete
-##' @importFrom ggplot2 guides
-##' @importFrom ggplot2 guide_colorbar
-##' @importFrom ggplot2 theme
-##' @importFrom ggplot2 element_text
-##' @importFrom ggplot2 margin
-##' @importFrom ggplot2 xlab
-##' @importFrom ggplot2 ylab
-##' @importFrom ggplot2 ggtitle
 ##' @export
 ##' @examples
 ##' # data(input) # Load example input genes
