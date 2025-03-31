@@ -80,19 +80,14 @@ kinase_activity_calculation <- function(dirOutput_kinase, formule_CORAL, comp, d
 #' @import rsvg
 #' @import RColorBrewer
 #' @import colourpicker
-#' @import jsonlite
+#' @import rjson
 #' @import data.tree
 #' @import pheatmap
 #' 
 #' @export
 kinase_tree <- function(proteome_data, differential_results, formule_CORAL, 
                         dirOutput = "results_ProTN", subfold="pics", phospho_ctrl = FALSE) {
-  # oldwd <- getwd()
-  source("R/functions.R")
-  lapply(list.files("R/PhosR", full.names = TRUE), source)
-  source("R/CORAL/global.R")
-  source("R/CORAL/server.R")
-  
+
   dir.create(file.path( dirOutput, subfold, "kinaseTree"), showWarnings = FALSE)
   dirOutput_kinase <- file.path(dirOutput, subfold, "kinaseTree")
   
@@ -125,7 +120,6 @@ kinase_tree <- function(proteome_data, differential_results, formule_CORAL,
                                                           c_anno = c_anno)
   }
   
-  # setwd(oldwd)
   return(list_svg)
 }
 
