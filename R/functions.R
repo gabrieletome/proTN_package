@@ -89,7 +89,7 @@ enrichment_enrichr <- function(input_vec, # vector with gene names
     unique() # clean input vector
   input_vec <- input_vec[!duplicated(str_to_upper(input_vec))] # remove case duplicates
   
-  dbs_default <- as.vector(suppressMessages(read_tsv("R/enrichR/dbs_enrichR.txt", col_names = FALSE))[,1]) %>% unlist()
+  dbs_default <- as.vector(suppressMessages(read_tsv(system.file("extdata", "dbs_enrichR.txt", package = "proTN"), col_names = FALSE))[,1]) %>% unlist()
   dbs <- listEnrichrDbs()
   if(!is.null(dbs_vec)){dbs_used<-intersect(dbs_vec,dbs$libraryName)
   } else {dbs_used<-intersect(dbs_default,dbs$libraryName)}

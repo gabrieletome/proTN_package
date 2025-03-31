@@ -55,7 +55,7 @@ perform_enrichment_analysis <- function(differential_results, dirOutput="results
                                         overlap_size_enrich_thr=5, enrichR_custom_DB=FALSE, enrich_filter_DBs=NULL,
                                         phospho_ctrl = FALSE) {
   
-  source("R/enrichR/functions.R")
+  # source("R/functions_enrichR.R")
   set_enrichR()
   if(("protein_results_long" %in% names(differential_results))){
     phospho_with_proteome = FALSE

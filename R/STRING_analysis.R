@@ -26,7 +26,7 @@ STRINGdb_network <- function(differential_results, species="Homo sapiens",
                              dirOutput="results_ProTN", subfold_Fig="pics", subfold_net="STRINGdb",
                              phospho_ctrl = FALSE){
   #Read Taxonomy
-  codtax <- fread("R/NCBI_taxID/subset_tax.csv")
+  codtax <- fread(system.file("extdata", "subset_tax.csv", package = "proTN"))
   tryCatch({
     taxonomy_NCBI <- species
     taxonomy_NCBI <- codtax[name == taxonomy_NCBI, taxid]

@@ -104,7 +104,7 @@ enrichment_filter <- function(enr_df, category = c("all"), overlap_size_enrich_t
 generate_category_db <- function(enr_sele_df) {
   if (!is.null(enr_sele_df)) {
     # LOAD category EnrichR
-    dbs_default <- fread("R/enrichR/dbs_enrichR.txt", header = F)
+    dbs_default <- fread(system.file("extdata", "dbs_enrichR.txt", package = "proTN"), header = F)
     dbs_category <- split(dbs_default, f = as.factor(dbs_default$V2))
     
     category_db <- lapply(dbs_category, function(x) {
