@@ -12,6 +12,7 @@
 ##' @return NULL
 ##' @author Wajid Jawaid \email{wajid.jawaid@gmail.com}
 ##' @importFrom curl has_internet
+##' @export
 set_enrichR <- function() {
     options(enrichR.sites.base.address = "https://maayanlab.cloud/")
     options(enrichR.base.address = paste0(getOption("enrichR.sites.base.address"), "Enrichr/"))
@@ -116,7 +117,6 @@ getEnrichr <- function(method = "GET", url, ...) {
 ##' @title List Enrichr Websites
 ##' @return print Enrichr Website status
 ##' @author Alexander Blume
-##' @export
 listEnrichrSites <- function() {
     opts <- .proxyOpts()
     msg <- if(is.null(opts)) "Connection is Live!" else "Connection is Live! Using proxy."
@@ -169,7 +169,6 @@ setEnrichrSite <- function(site) {
 ##' @author Wajid Jawaid \email{wajid.jawaid@gmail.com}
 ##' @importFrom httr GET POST
 ##' @importFrom rjson fromJSON
-##' @export
 ##' @examples
 ##' dbs <- listEnrichrDbs()
 listEnrichrDbs <- function() {
