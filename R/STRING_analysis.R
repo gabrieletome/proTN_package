@@ -89,7 +89,8 @@ select_regulated_genes <- function(deps_l_df) {
 
 # Function to process STRING network for each comparison
 process_string_network <- function(g_sel_comp, dirOutput_net, taxonomy_NCBI) {
-  string_db <- STRINGdb$new(version="12", species=taxonomy_NCBI, score_threshold=500, input_directory="R/STRINGdb/")
+  string_folder <- system.file("extdata", package = "proTN")
+  string_db <- STRINGdb$new(version="12", species=taxonomy_NCBI, score_threshold=500, input_directory=string_folder)
   
   stringdb_results <- list()
   for (comp in names(g_sel_comp)) {

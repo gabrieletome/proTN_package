@@ -146,7 +146,7 @@ generate_plotlist <- function(enr_sele_df, category, category_db, color_contrast
         shape_col = "Significant",
         fill_col = "Significant",
         char_max = 60
-      ) + guides(color = FALSE, shape = guide_legend(override.aes = list(size = 4)))
+      ) + guides(color = "none", shape = guide_legend(override.aes = list(size = 4)))
     }
   }
   return(plotlist)
