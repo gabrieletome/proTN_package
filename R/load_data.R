@@ -67,8 +67,6 @@ read_proteomics <- function(software, folder, annotation_filename = "annotation"
                             color_col="Color", batch_corr_exe = FALSE, batch_col="batch",
                             filt_absent_value = 0){
   
-  # source("./R/functions.R")
-  
   if(!(software %in% c("PD","MQ"))){
     stop("Valid software is required. Write PD or MQ.",
          "\tPD: Proteome Discoverer",
@@ -589,8 +587,6 @@ read_phosphoproteomics <- function(software, folder,
                                    condition_col="Condition", sample_col="Sample", 
                                    color_col="Color", batch_corr_exe = FALSE, batch_col="batch",
                                    filt_absent_value = 0){
-  
-  # source("./R/functions.R")
   
   if(!(software %in% c("PD","MQ"))){
     stop("Valid software is required. Write PD or MQ.",
@@ -1306,8 +1302,7 @@ read_phospho_proteome_proteomics <- function(software,
                                              condition_phospho_col="Condition", sample_phospho_col="Sample", color_phospho_col="Color", 
                                              batch_corr_exe = FALSE, batch_col="batch",
                                              filt_absent_value = 0){
-  # source("./R/functions.R")
-  
+
   if(!(software %in% c("PD","MQ"))){
     stop("Valid software is required. Write PD or MQ.",
          "\tPD: Proteome Discoverer",
