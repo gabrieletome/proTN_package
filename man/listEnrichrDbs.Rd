@@ -16,7 +16,9 @@ Look up available databases on Enrichr
 Look up available databases on Enrichr
 }
 \examples{
+\dontrun{
 dbs <- listEnrichrDbs()
+}
 }
 \author{
 Wajid Jawaid \email{wajid.jawaid@gmail.com}

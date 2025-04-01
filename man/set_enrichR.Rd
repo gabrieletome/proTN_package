@@ -6,11 +6,6 @@
 \usage{
 set_enrichR()
 }
-\arguments{
-\item{libname}{(Required). Library name}
-
-\item{pkgname}{(Required). Package name}
-}
 \description{
 onLoad hook to setup package options
 }

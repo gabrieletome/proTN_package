@@ -7,8 +7,6 @@
 ##'
 ##' onLoad hook to setup package options and to check connection to website
 ##' @title onLoad hook to setup package options
-##' @param libname (Required). Library name
-##' @param pkgname (Required). Package name
 ##' @return NULL
 ##' @author Wajid Jawaid \email{wajid.jawaid@gmail.com}
 ##' @importFrom curl has_internet
@@ -170,7 +168,9 @@ setEnrichrSite <- function(site) {
 ##' @importFrom httr GET POST
 ##' @importFrom rjson fromJSON
 ##' @examples
-##' dbs <- listEnrichrDbs()
+#' \dontrun{
+#' dbs <- listEnrichrDbs()
+#' }
 listEnrichrDbs <- function() {
     dfSAF <- getOption("stringsAsFactors", FALSE)
     options(stringsAsFactors = FALSE)

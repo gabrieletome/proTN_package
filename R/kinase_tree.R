@@ -1,8 +1,6 @@
 kinase_activity_calculation <- function(dirOutput_kinase, formule_CORAL, comp, dat_pep, deps_pep_l_df, psm_peptide_table, c_anno) {
-  data("KinaseMotifs")
-  data("PhosphoSitePlus")
-  
-  # lapply(list.files("R/PhosR", full.names = TRUE), source)
+  data("KinaseMotifs", envir = environment())
+  data("PhosphoSitePlus", envir = environment())
   
   deps_filtered <- deps_pep_l_df[comp == deps_pep_l_df$comp & deps_pep_l_df$class %in% c("+", "-"), .(id)]
   selected_peptides <- psm_peptide_table[ID_peptide %in% deps_filtered$id,]

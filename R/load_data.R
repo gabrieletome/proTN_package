@@ -10,6 +10,7 @@
 #' @import stringr
 #' @importFrom grDevices cairo_pdf dev.off pdf
 #' @importFrom stats cmdscale dist fisher.test model.matrix na.omit p.adjust prcomp rnorm sd setNames
+#' @importFrom stats cutree median pchisq predict
 #' @export
 extract_example = function(path_phospho = NULL, 
                            path_proteome = NULL) {

@@ -904,7 +904,7 @@ makejson <- function(df,tmp="www/subdf.txt",output="www/kinome_tree.json",BGcol=
   }
   
   # write out json file
-  write(toJSON(root, pretty = TRUE), file=output)
+  write(toJSON(root), file=output)
   
 }
 
