@@ -63,8 +63,8 @@ generate_abundance_subplot <- function(proteome_data) {
     geom_bar(stat = "identity", width = 0.7, alpha = 0.8) +
     theme_bw() +
     theme(axis.title.y = element_blank()) +
-    scale_fill_manual(values = list("Available"="darkgreen", "Missing"="darkred")) +
-    scale_colour_manual(values = list("Available"="darkgreen", "Missing"="darkred")) +
+    scale_fill_manual(values = c("Available"="darkgreen", "Missing"="darkred")) +
+    scale_colour_manual(values = c("Available"="darkgreen", "Missing"="darkred")) +
     theme(panel.grid.minor = element_blank(), panel.grid.major.y = element_blank()) +
     ylim(0, 100)
   
@@ -508,8 +508,8 @@ heatmap_selected_proteins <- function(proteome_data, list_protein) {
     mat_plot <- as.data.frame(mat[,-1], row.names = mat$GeneName)
     annotation <- as.data.frame(c_anno[,c("condition")], row.names = c_anno$sample)
 
-    cc <- unique(prot_intensity_long$color)
-    names(cc) <- unique(prot_intensity_long$condition)
+    cc <- unique(c_anno$color)
+    names(cc) <- unique(c_anno$condition)
     cc <- list(condition = cc)
     
     breaks <- sort(c(-(max(abs(mat_plot))-((max(abs(mat_plot))*(1/50))*(0:49))), 
