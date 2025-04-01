@@ -24,3 +24,5 @@ script_test.R
 inst/extdata/STRINGdb
 
 phosprotn_proteome_package_tester.Rmd
+phosprotn_package_tester.Rmd
+protn_package_tester.Rmd
