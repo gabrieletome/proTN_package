@@ -14,25 +14,29 @@ knitr::opts_chunk$set(
 )
 ```
 
+# Load ProTN and extraction example
 ```{r setup}
 library(proTN)
 extract_example(path_proteome = tempdir())
 ```
 
+# Read example data
 ```{r read_proteomics_MQ}
 proteome_data <- read_proteomics(software = "MQ",
                                  folder = paste0(tempdir(),"/case_study_proteomics/case_study_1"),
                                  peptide_filename = "evidence")
 ```
 
-
-```{r preprocess_figure}
+# Pre-process figure
+```{r preprocess_figure, fig.height=5, fig.width=7}
+# Avalaible abundance. The red percentage will be imputed.
 generate_abundance <- generate_abundance_plot(proteome_data = proteome_data)
 generate_abundance$plot
-
+# Number peptide per each protein
 generate_peptide_distribution <- generate_peptide_distribution_plot(proteome_data = proteome_data)
 generate_peptide_distribution$plot
 ```
+
 
 # Impute function
 
@@ -46,57 +50,66 @@ imputed_data <- impute_intensity(proteome_data = proteome_data)
 normalized_data <- normalization_ProTN(proteome_data = imputed_data)
 ```
 
-# Exporter
+# Save the normalized data in an Excel file
 
 ```{r exporter, eval=FALSE}
 save_abundance_tables(proteome_data = normalized_data, 
                       dirOutput=outputdir)
 ```
 
-# Figure distribution normalized
+# Distribution of normalized abundance
 
-```{r normalized_plot}
+```{r normalized_plot, fig.height=5, fig.width=7}
+#Abundance per Protein
 prot_plot <- plot_abundance_distribution(proteome_data = normalized_data,
                                          type = "protein")
 prot_plot$plot
+#Abundance per Peptide
 pep_plot <- plot_abundance_distribution(proteome_data = normalized_data,
                                         type = "peptide")
 pep_plot$plot
 ```
 
-# MDS AND PCA
+# MDS figure normalized data
 
-```{r mds_normalized}
+```{r mds_normalized, fig.height=5, fig.width=7}
+#Abundance per Protein
 prot_mds <- mds_plot(proteome_data = normalized_data,
                      type = "protein")
 prot_mds$plot
+#Abundance per Peptide
 pep_mds <- mds_plot(proteome_data = normalized_data,
                     type = "peptide")
 pep_mds$plot
 ```
 
-```{r pca_normalized}
-prot_mds <- pca_plot(proteome_data = normalized_data,
+# PCA figure normalized data
+
+```{r pca_normalized, fig.height=5, fig.width=7}
+#Abundance per Protein
+prot_pca <- pca_plot(proteome_data = normalized_data,
                      type = "protein")
-prot_mds$plot
-pep_mds <- pca_plot(proteome_data = normalized_data,
+prot_pca$plot
+#Abundance per Peptide
+pep_pca <- pca_plot(proteome_data = normalized_data,
                     type = "peptide")
-pep_mds$plot
+pep_pca$plot
 ```
 
 # List protein boxplot
 
-```{r boxplot_protein}
+## Boxplot
+```{r boxplot_protein, fig.height=5, fig.width=7}
 prot_boxplot <- plot_selected_proteins(proteome_data = normalized_data,
-                                       list_protein = c("Aaas","Aacs"))
+                                       list_protein = c("Aaas","Aacs","Zyx"))
 prot_boxplot$plot
 ```
 
-
-```{r heatmap_protein}
+## Heatmap
+```{r heatmap_protein, fig.height=7, fig.width=7}
 prot_heatmap <- heatmap_selected_proteins(proteome_data = normalized_data,
                                        list_protein = c("Aaas","Aacs","Arsa","Bag2","Cd80",
-                                                        "Cdk12","Cdk2"))
+                                                        "Cdk12","Cdk2","Zyx"))
 prot_heatmap$plot
 ```
 
@@ -107,15 +120,23 @@ formule_contrast <- list("A2016vsWT"="A2016T-wt")
 
 differential_results <- differential_analysis(proteome_data = normalized_data,
                                               formule_contrast = formule_contrast,
-                                              fc_thr=0.75,
+                                              fc_thr=0.5,
                                               pval_fdr = "p_val",
                                               pval_thr=0.05,
                                               signal_thr=0)
+```
 
+## Number of differential proteins
+
+```{r differentiated_protein, fig.height=3, fig.width=7}
 ploft_diff_number <- generate_differential_barplots(differential_results,
                                                     data_type="protein")
 ploft_diff_number$plot
+```
 
+## Number of differential peptides
+
+```{r differentiated_peptide, fig.height=3, fig.width=7}
 ploft_diff_number <- generate_differential_barplots(differential_results,
                                                     data_type="peptide")
 ploft_diff_number$plot
@@ -128,8 +149,9 @@ save_differential_analysis_table(proteome_data = normalized_data,
 ```
 
 # Vulcano plot
+The vulcano plot are interactive ggplotly. Not visible inside vignettes.
 
-```{r vulcano_plot}
+```{r vulcano_plot, eval=FALSE}
 generate_volcano_plots_protein<-generate_volcano_plots(differential_results,
                                                        data_type="protein",
                                                        comparison="A2016vsWT")
@@ -142,9 +164,9 @@ generate_volcano_plots_peptide
 ```
 
 
-# MDS differential analysis
+# MDS of differential analysis
 
-```{r mds_differential}
+```{r mds_differential, fig.height=5, fig.width=7}
 mds_diff <- mds_differential_analysis_plot(differential_analysis = differential_results,
                                            proteome_data = normalized_data,
                                            type = "protein")
@@ -156,9 +178,9 @@ mds_diff_pep <- mds_differential_analysis_plot(differential_analysis = different
 mds_diff_pep$plot
 ```
 
-# PCA differential analysis
+# PCA of differential analysis
 
-```{r pca_differential}
+```{r pca_differential, fig.height=5, fig.width=7}
 pca_diff <- pca_differential_analysis_plot(differential_analysis = differential_results,
                                            proteome_data = normalized_data,
                                            type = "protein")
@@ -170,7 +192,7 @@ pca_diff_pep <- pca_differential_analysis_plot(differential_analysis = different
 pca_diff_pep$plot
 ```
 
-# Enrichement
+# Enrichment analisys with EnrichR
 
 ```{r enrichment, eval=FALSE}
 enrichemnt_results <- perform_enrichment_analysis(differential_results = differential_results,
@@ -196,7 +218,7 @@ plots_terms <- enrichment_figure(enr_df = enrichemnt_results,
 plots_terms
 ```
 
-# String DB network
+# StringDB network
 
 ```{r string network, eval=FALSE}
 
