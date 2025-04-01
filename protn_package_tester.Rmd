@@ -23,7 +23,7 @@ outputdir="./proteome"
 
 ```{r read_proteomics_MQ}
 proteome_data <- read_proteomics(software = "MQ",
-                                 folder = "./proteome/case_study_proteomics/case_study_1",
+                                 folder = "proteome/case_study_proteomics/case_study_1",
                                  peptide_filename = "evidence")
 ```
 
@@ -114,7 +114,7 @@ prot_boxplot$plot
 ```{r heatmap_protein}
 prot_heatmap <- heatmap_selected_proteins(proteome_data = normalized_data,
                                        list_protein = c("Aaas","Aacs","Arsa","Bag2","Cd80",
-                                                        "Cdk12","Tardbp","Mycbp","Cdk2"))
+                                                        "Cdk12","Cdk2"))
 prot_heatmap$plot
 ```
 

@@ -100,6 +100,13 @@ prot_boxplot$plot
 ```
 
 
+```{r heatmap_protein}
+prot_heatmap <- heatmap_selected_proteins(proteome_data = normalized_data,
+                                       list_protein = c("Aaas","Aacs","Arsa","Bag2","Cd80",
+                                                        "Cdk12","Cdk2"))
+prot_heatmap$plot
+```
+
 # Differential analysis
 
 ```{r differential_analysis}

@@ -505,6 +505,9 @@ heatmap_selected_proteins <- function(proteome_data, list_protein) {
     message(paste(prot_find, collapse = ", "))
     
     mat <- dat_gene[GeneName %in% prot_find,]
+    if(phospho_with_proteome){
+      mat <- mat[, lapply(.SD, mean), by = "GeneName"]
+    }
     mat_plot <- as.data.frame(mat[,-1], row.names = mat$GeneName)
     annotation <- as.data.frame(c_anno[,c("condition")], row.names = c_anno$sample)
 
