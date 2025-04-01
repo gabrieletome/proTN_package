@@ -13,6 +13,7 @@ output:
 # ProTN package
 
 ```{r setup}
+setwd("/home/gabriele/Desktop/UNITN/TEST_protn")
 library(proTN)
 extract_example(path_proteome = "./proteome")
 outputdir="./proteome"
@@ -110,6 +111,12 @@ prot_boxplot <- plot_selected_proteins(proteome_data = normalized_data,
 prot_boxplot$plot
 ```
 
+```{r heatmap_protein}
+prot_heatmap <- heatmap_selected_proteins(proteome_data = normalized_data,
+                                       list_protein = c("Aaas","Aacs","Arsa","Bag2","Cd80",
+                                                        "Cdk12","Tardbp","Mycbp","Cdk2"))
+prot_heatmap$plot
+```
 
 # Differential analysis
 

@@ -451,3 +451,82 @@ plot_selected_proteins <- function(proteome_data, list_protein) {
     return(NULL)
   }
 }
+
+#' Heatmap of Selected Proteins
+#'
+#' This function generates a plot for the selected proteins' abundance across different conditions. It creates an heatmap
+#' of selected proteins. If phosphoproteomics data is available, it uses the corresponding data, otherwise, it uses the proteomics data.
+#'
+#' @param proteome_data A list containing proteome data, including gene intensity data and sample annotations.
+#' @param list_protein A character vector of gene names to be plotted.
+#'
+#' @return A list containing:
+#'   \item{dt}{Data table of protein intensity values and the corresponding sample and condition information.}
+#'   \item{plot}{ggplot2 object representing the protein abundance plot for the selected proteins.}
+#'
+#' @examples
+#' \dontrun{
+#' result <- heatmap_selected_proteins(proteome_data, list_protein = c("ProteinA", "ProteinB"))
+#' print(result$plot)
+#' }
+#'
+#' @import data.table
+#' @import ggplot2
+#' @import pheatmap
+#' @import stringr
+#' @export
+heatmap_selected_proteins <- function(proteome_data, list_protein) {
+  if(("c_anno" %in% names(proteome_data))){
+    phospho_with_proteome = FALSE
+  } else if(("c_anno_phospho" %in% names(proteome_data))){
+    phospho_with_proteome = TRUE
+  } else{
+    stop("Missing sample annotation!")
+  }
+  
+  if(phospho_with_proteome){
+    dat_gene <- copy(proteome_data$dat_pep)
+    dat_gene[, GeneName := tstrsplit(ID_peptide, "_", keep = 1)[[1]]][, ID_peptide := NULL]
+    c_anno = copy(proteome_data$c_anno_phospho)
+  } else{
+    dat_gene <- copy(proteome_data$dat_gene)
+    c_anno = copy(proteome_data$c_anno)
+  }
+  
+  prot_find <- unique(c(
+    intersect(list_protein, dat_gene$GeneName),
+    intersect(str_to_title(list_protein), dat_gene$GeneName),
+    intersect(str_to_upper(list_protein), dat_gene$GeneName),
+    intersect(str_to_lower(list_protein), dat_gene$GeneName)
+  ))
+  
+  if (length(prot_find) > 0) {
+    message("Selected proteins with available abundances: \n")
+    message(paste(prot_find, collapse = ", "))
+    
+    mat <- dat_gene[GeneName %in% prot_find,]
+    mat_plot <- as.data.frame(mat[,-1], row.names = mat$GeneName)
+    annotation <- as.data.frame(c_anno[,c("condition")], row.names = c_anno$sample)
+
+    cc <- unique(prot_intensity_long$color)
+    names(cc) <- unique(prot_intensity_long$condition)
+    cc <- list(condition = cc)
+    
+    breaks <- sort(c(-(max(abs(mat_plot))-((max(abs(mat_plot))*(1/50))*(0:49))), 
+                     0, 
+                     max(abs(mat_plot))-((max(abs(mat_plot))*(1/50))*(0:49))))
+    
+    bs = 23
+    g<-pheatmap(mat_plot, 
+                color = colorRampPalette(c("#B2182B","white","#2166AC"))(101), 
+                breaks = breaks,
+                cluster_cols = T, cluster_rows = F,
+                annotation_col = annotation,
+                annotation_colors = cc)
+    
+    return(list("dt" = mat, "plot" = g))
+  } else {
+    warning("Selected proteins not found in the normalized matrix. Check the spell of the proteins.")
+    return(NULL)
+  }
+}
