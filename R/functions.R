@@ -749,7 +749,7 @@ enrichRfnc<-function(in_df, pval_fdr_enrich, pval_enrich_thr, overlap_size_enric
   
   if(.Platform$OS.type == "unix") {
     enrfcn <- function(a) {
-      source("R/functions.R")
+      # source("R/functions.R")
       frg<-DEGs_lists[[a]]
       if(length(frg)>0){
         enrichment_enrichr(frg, input_name=a, dbs_vec = dbs)
@@ -760,8 +760,8 @@ enrichRfnc<-function(in_df, pval_fdr_enrich, pval_enrich_thr, overlap_size_enric
     cluster_ext <- makeCluster(ncores, type = "SOCK")
     registerDoParallel(cl = cluster_ext)
     
-    enr_df<-foreach(a = names(DEGs_lists),.combine='rbind',.packages = c("dplyr","enrichR","tidyr","stringr")) %dopar% {
-      source("R/functions.R")
+    enr_df<-foreach(a = names(DEGs_lists),.combine='rbind',.packages = c("dplyr","enrichR","tidyr","stringr","proTN")) %dopar% {
+      # source("R/functions.R")
       frg<-DEGs_lists[[a]]
       if(length(frg)>0){
         enrichment_enrichr(frg, input_name=a, dbs_vec = dbs)
