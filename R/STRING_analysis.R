@@ -141,7 +141,7 @@ process_string_network_shiny <- function(g_sel_comp, dirOutput_net, taxonomy_NCB
     string_gene_df <- unique(data.table(gene1 = links_string$from, gene2 = links_string$to, weight = links_string$combined_score))
     if (nrow(string_gene_df) > 0) {
       fwrite(string_gene_df, file = paste0(dirOutput_net, "/", gsub(comp, pattern = "\\/", replacement="vs"), "_connection.txt"), sep = "\t")
-      stringdb_results[[comp]] <- paste(unique(string_mapped$STRING_id), collapse = "%0d")
+      stringdb_results[[comp]] <- unique(string_mapped$STRING_id)
     } else {
       stop("No strong interaction detected between the proteins. Usually too few proteins.")
     }
