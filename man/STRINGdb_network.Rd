@@ -10,7 +10,9 @@ STRINGdb_network(
   dirOutput = "results_ProTN",
   subfold_Fig = "pics",
   subfold_net = "STRINGdb",
-  phospho_ctrl = FALSE
+  phospho_ctrl = FALSE,
+  score_thr = 700,
+  shiny = FALSE
 )
 }
 \arguments{
