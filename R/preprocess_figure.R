@@ -61,7 +61,7 @@ generate_abundance_subplot <- function(proteome_data) {
                                         fill = Coverage, colour = Coverage)) +
     coord_flip() +
     geom_bar(stat = "identity", width = 0.7, alpha = 0.8) +
-    theme_bw() +
+    theme_bw(base_size = 23) +
     theme(axis.title.y = element_blank()) +
     scale_fill_manual(values = c("Available"="darkgreen", "Missing"="darkred")) +
     scale_colour_manual(values = c("Available"="darkgreen", "Missing"="darkred")) +
@@ -129,7 +129,7 @@ generate_peptide_distribution_subplot <- function(proteome_data) {
   
   plot <- ggplot(data = numeric_df, aes(x = N, y = NPeptides, color = NPeptides, fill = NPeptides)) +
     geom_bar(stat = "identity", width = 0.7, alpha = 0.8) +
-    theme_bw() +
+    theme_bw(base_size = 23) +
     theme(legend.position = "none") +
     labs(x = "# peptides per protein", y = "# proteins") +
     theme(panel.grid.minor = element_blank(),
@@ -203,7 +203,7 @@ plot_abundance_distribution <- function(proteome_data, type) {
     coord_flip() +
     geom_violin(alpha = 0.5, scale = "width", trim = FALSE) +
     geom_boxplot(alpha = 1, fill = "white", width = 0.2, outlier.shape = NA, notch = FALSE) +
-    theme_bw() +
+    theme_bw(base_size = 23) +
     theme(legend.position = "none", axis.title.y = element_blank()) +
     scale_fill_manual(values = setNames(c_anno$color, c_anno$sample)) +
     scale_colour_manual(values = setNames(c_anno$color, c_anno$sample)) +
@@ -276,7 +276,7 @@ mds_plot <- function(proteome_data, type) {
     geom_point(size = 2, alpha = .9) +
     geom_text_repel(aes(label = sample), size = 4, fontface = "bold", show.legend = FALSE) +
     scale_colour_manual(values = cc) +
-    theme_bw() +
+    theme_bw(base_size = 23) +
     theme(legend.position = "right", panel.grid.minor = element_blank())
   
   return(list("mds_dt" = mds_cmdscale, "plot" = cmd))
@@ -348,7 +348,7 @@ pca_plot <- function(proteome_data, type) {
     geom_point(size = 2, alpha = .9) +
     geom_text_repel(aes(label = sample), size = 4, fontface = "bold", show.legend = FALSE) +
     scale_colour_manual(values = cc) +
-    theme_bw() +
+    theme_bw(base_size = 23) +
     theme(legend.position = "right", panel.grid.minor = element_blank()) +
     xlab(labs[1]) +
     ylab(labs[2])
