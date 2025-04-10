@@ -286,9 +286,9 @@ pca_differential_analysis_plot <- function(differential_analysis, proteome_data,
   }
   
   deps_l_df <- if (type == "protein"){ 
-    copy(differential_results$protein_results_long)
+    copy(differential_analysis$protein_results_long)
   } else if(type == "peptide") { 
-    copy(differential_results$peptide_results_long)
+    copy(differential_analysis$peptide_results_long)
   } else{stop("type MUST be \"protein\" or \"peptide\"")}
   
   if(phospho_with_proteome){
