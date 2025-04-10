@@ -199,7 +199,7 @@ enrichment_lollipop <- function(input_df, # input dataframe
   lp <- ggplot(plot_df, aes(x_col, y_col)) +
     
     geom_segment(aes(x = 0, y = y_col, xend = x_col, yend = y_col))+
-    theme_tufte(base_family = "Arial Narrow", base_size = 23)+
+    theme_tufte(base_size = 23)+
     # scale_color_manual(values = "grey25", guide = "none")+
     theme(axis.title.y = element_blank(),axis.ticks.y= element_blank())+
     xlab(x_col)
@@ -316,11 +316,11 @@ enrichment_b2b_lollipop <- function(input_df, # input dataframe
                    aes(xmin = shift, xmax = shift+x_col))+
     geom_text(data = plot_df[plot_df$bb_col==f_left,],
               aes(y = y_col, x = 0, label = y_col),
-              inherit.aes = F,family="Arial Narrow",size=3)+
+              inherit.aes = F,size=3)+
     scale_x_continuous(limits =c((-shift-max(plot_df$x_col)),(shift+max(plot_df$x_col))),
                        breaks = c(rev(-break_vec)-shift, break_vec+shift),
                        labels = c(as.character(rev(break_vec)),as.character(break_vec)))+
-    theme_tufte(base_family = "Arial Narrow", base_size = 23)+
+    theme_tufte(base_size = 23)+
     theme(axis.ticks.y = element_blank(),
           axis.title.y = element_blank(),
           axis.text.y = element_blank(),
@@ -453,14 +453,14 @@ deps_b2b_lollipop <- function(input_df, # input dataframe
                    aes(xmin = shift, xmax = shift+x_col, size=0.75))+
     geom_text(data = plot_df[plot_df$bb_col==f_left,],
               aes(y = y_col, x = 0, label = y_col),
-              inherit.aes = F,family=bf,size=4)+
+              inherit.aes = F,size=4)+
     geom_text(data = plot_df[plot_df$bb_col==f_right,],
               aes(y = y_col, x = 0, label = y_col),
-              inherit.aes = F,family=bf,size=4)+
+              inherit.aes = F,size=4)+
     scale_x_continuous(limits =c((-shift-max(break_vec)),(shift+max(break_vec))),
                        breaks = c(rev(-break_vec)-shift, break_vec+shift),
                        labels = c(as.character(rev(break_vec)),as.character(break_vec)))+
-    theme_tufte(base_family = bf, base_size = 23)+
+    theme_tufte(base_size = 23)+
     theme(axis.ticks.y = element_blank(),
           axis.title.y = element_blank(),
           axis.text.y = element_blank(),
@@ -506,11 +506,11 @@ deps_b2b_lollipop <- function(input_df, # input dataframe
   }
   
   if(nrow(plot_df)/2 == length(unique(plot_df$y_col))){
-    lp <- lp + geom_text(aes(x=shift, label=c("Up-regulated", rep("",nrow(plot_df)-1)), hjust=(-0.05), vjust=(-2), fontface=2, color="black"),family=bf,size=4)
-    lp <- lp + geom_text(aes(x=-shift, label=c("Down-regulated", rep("",nrow(plot_df)-1)), hjust=(1.1), vjust=(-2), fontface=2, color="black"),family=bf,size=4)
+    lp <- lp + geom_text(aes(x=shift, label=c("Up-regulated", rep("",nrow(plot_df)-1)), hjust=(-0.05), vjust=(-2), fontface=2, color="black"),size=4)
+    lp <- lp + geom_text(aes(x=-shift, label=c("Down-regulated", rep("",nrow(plot_df)-1)), hjust=(1.1), vjust=(-2), fontface=2, color="black"),size=4)
   } else{
-    lp <- lp + geom_text(aes(x=shift, label=c("Up-regulated", rep("",nrow(plot_df)-1)), hjust=(-0.05), vjust=(-2), fontface=2, color="black"),family=bf,size=4, nudge_y = 2.5)
-    lp <- lp + geom_text(aes(x=-shift, label=c("Down-regulated", rep("",nrow(plot_df)-1)), hjust=(1.1), vjust=(-2), fontface=2, color="black"),family=bf,size=4, nudge_y = 2.5)
+    lp <- lp + geom_text(aes(x=shift, label=c("Up-regulated", rep("",nrow(plot_df)-1)), hjust=(-0.05), vjust=(-2), fontface=2, color="black"),size=4, nudge_y = 2.5)
+    lp <- lp + geom_text(aes(x=-shift, label=c("Down-regulated", rep("",nrow(plot_df)-1)), hjust=(1.1), vjust=(-2), fontface=2, color="black"),size=4, nudge_y = 2.5)
   }
   
   return(lp)
@@ -578,7 +578,7 @@ enrichment_dotmatrix <- function(input_df, # input dataframe
   
   
   lp <- ggplot(plot_df, aes(x_col, y_col)) +
-    theme_tufte(base_family = "Arial Narrow", base_size = 23)+
+    theme_tufte(base_size = 23)+
     theme(axis.title = element_blank(),axis.text.x = element_text(angle = 30, hjust = 1))  
   
   if("size_col" %in% colnames(plot_df)){
@@ -645,8 +645,8 @@ enrichment_geneterm_network <- function(input_df){
     scale_edge_width(range = c(0.1,1)) +
     scale_edge_colour_manual(values = "grey50") +
     geom_node_point(aes(fill=class), shape = 21,size=2.5,pch='.') +
-    geom_node_label(aes(filter = class=="term", label = name, size=2),family = bf, repel=TRUE) +
-    geom_node_text(aes(filter = class=="gene", label = name, size=2),family = bf, repel=TRUE,check_overlap = TRUE) +
+    geom_node_label(aes(filter = class=="term", label = name, size=2), repel=TRUE) +
+    geom_node_text(aes(filter = class=="gene", label = name, size=2), repel=TRUE,check_overlap = TRUE) +
     scale_fill_manual(values = col_vec) +
     scale_color_brewer(palette ="Dark2") +
     theme_graph() +
