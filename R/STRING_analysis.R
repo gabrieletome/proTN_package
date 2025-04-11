@@ -58,6 +58,8 @@ STRINGdb_network <- function(differential_results, species="Homo sapiens",
   } else {
     dir.create(file.path(dirOutput, subfold_Fig), showWarnings = FALSE)
     dirOutput_net <- paste(dirOutput, subfold_Fig, sep = "/")
+    dir.create(file.path(dirOutput_net, subfold_net), showWarnings = FALSE)
+    dirOutput_net <- paste(dirOutput_net, subfold_net, sep = "/")
     message(paste0("Saving in: ",dirOutput_net))
   }
   

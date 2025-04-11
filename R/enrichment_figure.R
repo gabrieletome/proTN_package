@@ -159,7 +159,7 @@ save_plotlist <- function(plotlist, enr_sele_df, category_db, dirOutput="results
     for (db in names(plotlist)) {
       name_list[db] <- paste0(dirOutput,"/",subfolder,"/", "enr_DE_keysources_", db, ".pdf")
       ggsave(name_list[db], plotlist[[db]], 
-             device = cairo_pdf, width = 7, 
+             device = cairo_pdf, width = 13, 
              height = max(min(20, length(unique(enr_sele_df[anno_class %in% category_db[[db]][[1]], anno_name])) * 0.3), 3),
              units = "in", create.dir = T)
     }
