@@ -28,6 +28,8 @@
 #'   This argument is used if `enrichR_custom_DB` is set to `TRUE`.
 #' @param phospho_ctrl A logical flag to indicate if phospho control data should be excluded.
 #'   Default is `FALSE`.
+#' @param with_background A logical flag to indicate if execute the enrichment providing the backgorund to EnrichR.
+#'   Default is `FALSE`.
 #'
 #' @return A data.table containing the enrichment results, including terms, significance scores, 
 #'   overlap sizes, and other relevant information.
@@ -53,7 +55,7 @@ perform_enrichment_analysis <- function(differential_results, dirOutput="results
                                         subfold_Tab="table", subfold_Dat="rdata",
                                         pval_fdr_enrich="p_adj", pval_enrich_thr=0.05, 
                                         overlap_size_enrich_thr=5, enrichR_custom_DB=FALSE, enrich_filter_DBs=NULL,
-                                        phospho_ctrl = FALSE) {
+                                        phospho_ctrl = FALSE, with_background = FALSE) {
   
   set_enrichR()
   if(("protein_results_long" %in% names(differential_results))){
@@ -84,7 +86,7 @@ perform_enrichment_analysis <- function(differential_results, dirOutput="results
     dir.create(file.path(dirOutput, subfold_Tab), showWarnings = FALSE, recursive = TRUE)
 
     # Perform enriched analysis with EnrichR
-    enr_df <- suppressMessages(enrichRfnc(in_df = diff_dt, pval_fdr_enrich, pval_enrich_thr, overlap_size_enrich_thr, dbs))
+    enr_df <- suppressMessages(enrichRfnc(in_df = diff_dt, pval_fdr_enrich, pval_enrich_thr, overlap_size_enrich_thr, dbs, with_background))
     enr_df <- as.data.table(enr_df)
     # Save in RData for possible further analysis
     enrich_df <- enr_df[overlap_size >= overlap_size_enrich_thr, .SD, .SDcols = 1:13]

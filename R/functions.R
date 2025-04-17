@@ -82,6 +82,7 @@ enrichment_test <- function(input_vec, # character vector, input genes
 enrichment_enrichr <- function(input_vec, # vector with gene names
                                input_name="i1", # name for input list
                                dbs_vec=NULL, # vector with database names
+                               back_frg = NULL,
                                return_size_in_anno = T # use only genes with at least 1 annotation to calculate input size
 ){ 
   
@@ -89,21 +90,39 @@ enrichment_enrichr <- function(input_vec, # vector with gene names
     unique() # clean input vector
   input_vec <- input_vec[!duplicated(str_to_upper(input_vec))] # remove case duplicates
   
-  dbs_default <- as.vector(suppressMessages(read_tsv(system.file("extdata", "dbs_enrichR.txt", package = "proTN"), col_names = FALSE))[,1]) %>% unlist()
-  dbs <- listEnrichrDbs()
-  if(!is.null(dbs_vec)){dbs_used<-intersect(dbs_vec,dbs$libraryName)
-  } else {dbs_used<-intersect(dbs_default,dbs$libraryName)}
+  if(!is.null(back_frg)){
+    back_frg <- back_frg %>% str_trim() %>% str_sort() %>% 
+      unique() # clean input vector
+    back_frg <- back_frg[!duplicated(str_to_upper(back_frg))] # remove case duplicates
+  }
   
-  enrich_list <- enrichr(input_vec, dbs_used)
+  dbs_default <- as.vector(suppressMessages(read_tsv(system.file("extdata", "dbs_enrichR.txt", package = "proTN"), col_names = FALSE))[,1]) %>% unlist()
+  dbs_used <- tryCatch({
+    dbs <- listEnrichrDbs()
+    if(!is.null(dbs_vec)){dbs_used<-intersect(dbs_vec,dbs$libraryName)
+    } else {dbs_used<-intersect(dbs_default,dbs$libraryName)}
+    dbs_used
+  }, error = function(cond){
+    if(!is.null(dbs_vec)){dbs_used<-dbs_vec
+    } else {dbs_used<-dbs_default}
+    dbs_used
+  })
+  
+  
+  if(is.null(back_frg)){
+    enrich_list <- enrichr(input_vec, dbs_used)
+  } else {
+    enrich_list <- enrichr(input_vec, dbs_used, background = back_frg, include_overlap = TRUE)
+  }
   out_df <- ldply(enrich_list,.id="anno_class")
   rm(enrich_list)
   
   out_df <- out_df %>% rename(anno_name=Term,
-                                     p_value=P.value,
-                                     fdr=Adjusted.P.value,
-                                     odds_ratio=Odds.Ratio,
-                                     combined_score=Combined.Score,
-                                     enrichr_ids=Genes)  # rename columns
+                              p_value=P.value,
+                              fdr=Adjusted.P.value,
+                              odds_ratio=Odds.Ratio,
+                              combined_score=Combined.Score,
+                              enrichr_ids=Genes)  # rename columns
   
   transient <- str_split(out_df$Overlap,"/",simplify=T) # extract overlap and anno size
   out_df$overlap_size <- transient[,1] %>% as.numeric()
@@ -732,15 +751,20 @@ mf <- function(x,sep){
 }
 
 ### Function for the enrichment of the protein in the dataset. It use the function enrichment_enrichr ----
-enrichRfnc<-function(in_df, pval_fdr_enrich, pval_enrich_thr, overlap_size_enrich_thr, dbs=NULL){
+enrichRfnc<-function(in_df, pval_fdr_enrich, pval_enrich_thr, overlap_size_enrich_thr, dbs=NULL, with_background=FALSE){
   setEnrichrSite("Enrichr") 
   DEGs_lists<-NULL
+  background_lists<-NULL
   
   for(comp_c in unique(in_df$comp)){
     
     DEGs_lists[[paste0(comp_c,"_all")]]<-in_df %>% filter(comp==comp_c,class!="=") %>% pull(id) %>% unique() %>% sort()
     DEGs_lists[[paste0(comp_c,"_up")]]<-in_df %>% filter(comp==comp_c,class=="+") %>% pull(id) %>% unique() %>% sort()
     DEGs_lists[[paste0(comp_c,"_down")]]<-in_df %>% filter(comp==comp_c,class=="-") %>% pull(id) %>% unique() %>% sort()
+    
+    background_lists[[paste0(comp_c,"_all")]]<-in_df %>% filter(comp==comp_c) %>% pull(id) %>% unique() %>% sort()
+    background_lists[[paste0(comp_c,"_up")]]<-in_df %>% filter(comp==comp_c) %>% pull(id) %>% unique() %>% sort()
+    background_lists[[paste0(comp_c,"_down")]]<-in_df %>% filter(comp==comp_c) %>% pull(id) %>% unique() %>% sort()
     
   }
   ncores <- min(detectCores()-2, length(unique(in_df$comp)))
@@ -751,8 +775,9 @@ enrichRfnc<-function(in_df, pval_fdr_enrich, pval_enrich_thr, overlap_size_enric
     enrfcn <- function(a) {
       # source("R/functions.R")
       frg<-DEGs_lists[[a]]
+      back_frg <- background_lists[[a]]
       if(length(frg)>0){
-        enrichment_enrichr(frg, input_name=a, dbs_vec = dbs)
+        enrichment_enrichr(frg, input_name=a, dbs_vec = dbs, back_frg = back_frg)
       }
     }
     enr_df<-do.call(rbind, mclapply(names(DEGs_lists), enrfcn, mc.cores = ncores))
@@ -763,8 +788,9 @@ enrichRfnc<-function(in_df, pval_fdr_enrich, pval_enrich_thr, overlap_size_enric
     enr_df<-foreach(a = names(DEGs_lists),.combine='rbind',.packages = c("dplyr","enrichR","tidyr","stringr","proTN")) %dopar% {
       # source("R/functions.R")
       frg<-DEGs_lists[[a]]
+      back_frg <- background_lists[[a]]
       if(length(frg)>0){
-        enrichment_enrichr(frg, input_name=a, dbs_vec = dbs)
+        enrichment_enrichr(frg, input_name=a, dbs_vec = dbs, back_frg = back_frg)
       }
     }
     stopCluster(cluster_ext)
@@ -774,8 +800,9 @@ enrichRfnc<-function(in_df, pval_fdr_enrich, pval_enrich_thr, overlap_size_enric
     enr_df<-NULL
     for(a in names(DEGs_lists)){
       frg<-DEGs_lists[[a]]
+      back_frg <- background_lists[[a]]
       if(length(frg)>0){
-        enr_df<-rbind(enr_df,enrichment_enrichr(input_vec = frg, input_name=a, dbs_vec = dbs))
+        enr_df<-rbind(enr_df,enrichment_enrichr(input_vec = frg, input_name=a, dbs_vec = dbs, back_frg = back_frg))
       }
     }
   }
