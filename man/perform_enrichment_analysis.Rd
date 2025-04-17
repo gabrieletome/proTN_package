@@ -14,7 +14,8 @@ perform_enrichment_analysis(
   overlap_size_enrich_thr = 5,
   enrichR_custom_DB = FALSE,
   enrich_filter_DBs = NULL,
-  phospho_ctrl = FALSE
+  phospho_ctrl = FALSE,
+  with_background = FALSE
 )
 }
 \arguments{
@@ -42,6 +43,9 @@ to consider significant enrichment. Default is 5.}
 This argument is used if \code{enrichR_custom_DB} is set to \code{TRUE}.}
 
 \item{phospho_ctrl}{A logical flag to indicate if phospho control data should be excluded.
+Default is \code{FALSE}.}
+
+\item{with_background}{A logical flag to indicate if execute the enrichment providing the backgorund to EnrichR.
 Default is \code{FALSE}.}
 }
 \value{
