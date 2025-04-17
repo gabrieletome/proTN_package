@@ -762,20 +762,21 @@ enrichRfnc<-function(in_df, pval_fdr_enrich, pval_enrich_thr, overlap_size_enric
     DEGs_lists[[paste0(comp_c,"_up")]]<-in_df %>% filter(comp==comp_c,class=="+") %>% pull(id) %>% unique() %>% sort()
     DEGs_lists[[paste0(comp_c,"_down")]]<-in_df %>% filter(comp==comp_c,class=="-") %>% pull(id) %>% unique() %>% sort()
     
-    background_lists[[paste0(comp_c,"_all")]]<-in_df %>% filter(comp==comp_c) %>% pull(id) %>% unique() %>% sort()
-    background_lists[[paste0(comp_c,"_up")]]<-in_df %>% filter(comp==comp_c) %>% pull(id) %>% unique() %>% sort()
-    background_lists[[paste0(comp_c,"_down")]]<-in_df %>% filter(comp==comp_c) %>% pull(id) %>% unique() %>% sort()
-    
+    if(with_background){
+      background_lists[[paste0(comp_c,"_all")]]<-in_df %>% filter(comp==comp_c) %>% pull(id) %>% unique() %>% sort()
+      background_lists[[paste0(comp_c,"_up")]]<-in_df %>% filter(comp==comp_c) %>% pull(id) %>% unique() %>% sort()
+      background_lists[[paste0(comp_c,"_down")]]<-in_df %>% filter(comp==comp_c) %>% pull(id) %>% unique() %>% sort()
+    }
   }
   ncores <- min(detectCores()-2, length(unique(in_df$comp)))
   enr_df<-NULL
-  
+  back_frg<-NULL
   
   if(.Platform$OS.type == "unix") {
     enrfcn <- function(a) {
       # source("R/functions.R")
       frg<-DEGs_lists[[a]]
-      back_frg <- background_lists[[a]]
+      if(with_background){back_frg <- background_lists[[a]]}
       if(length(frg)>0){
         enrichment_enrichr(frg, input_name=a, dbs_vec = dbs, back_frg = back_frg)
       }
@@ -788,7 +789,7 @@ enrichRfnc<-function(in_df, pval_fdr_enrich, pval_enrich_thr, overlap_size_enric
     enr_df<-foreach(a = names(DEGs_lists),.combine='rbind',.packages = c("dplyr","enrichR","tidyr","stringr","proTN")) %dopar% {
       # source("R/functions.R")
       frg<-DEGs_lists[[a]]
-      back_frg <- background_lists[[a]]
+      if(with_background){back_frg <- background_lists[[a]]}
       if(length(frg)>0){
         enrichment_enrichr(frg, input_name=a, dbs_vec = dbs, back_frg = back_frg)
       }
@@ -800,7 +801,7 @@ enrichRfnc<-function(in_df, pval_fdr_enrich, pval_enrich_thr, overlap_size_enric
     enr_df<-NULL
     for(a in names(DEGs_lists)){
       frg<-DEGs_lists[[a]]
-      back_frg <- background_lists[[a]]
+      if(with_background){back_frg <- background_lists[[a]]}
       if(length(frg)>0){
         enr_df<-rbind(enr_df,enrichment_enrichr(input_vec = frg, input_name=a, dbs_vec = dbs, back_frg = back_frg))
       }
