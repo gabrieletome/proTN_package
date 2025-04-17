@@ -28,6 +28,10 @@ or peptide level. It should include \code{protein_results_long} or \code{peptide
 \item{subfold_net}{Character. Subfolder for STRINGdb network results (default: \code{"STRINGdb"}).}
 
 \item{phospho_ctrl}{Logical. Whether to include phospho-control comparisons (default: \code{FALSE}).}
+
+\item{score_thr}{Numeric. Threshold score for STRINGdb edge. (default: \code{700})}
+
+\item{shiny}{Logical. Return results for the shiny app (default: \code{FALSE})}
 }
 \value{
 A data frame with STRINGdb network results.

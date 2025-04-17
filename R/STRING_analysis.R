@@ -10,6 +10,8 @@
 #' @param subfold_Fig Character. Subfolder for figures (default: `"pics"`).
 #' @param subfold_net Character. Subfolder for STRINGdb network results (default: `"STRINGdb"`).
 #' @param phospho_ctrl Logical. Whether to include phospho-control comparisons (default: `FALSE`).
+#' @param score_thr Numeric. Threshold score for STRINGdb edge. (default: `700`)
+#' @param shiny Logical. Return results for the shiny app (default: `FALSE`)
 #'
 #' @return A data frame with STRINGdb network results.
 #' @export

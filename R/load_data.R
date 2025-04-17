@@ -97,10 +97,10 @@ read_proteomics <- function(software, folder, annotation_filename = "annotation"
   proteome_data = NULL
   if(software == "PD"){
     proteome_data = read_PD_files(anno_filename, pep_filename, prot_filename, 
-                                  batch_corr_exe= batch_corr_exe, filt_absent_value = filt_absent_value)
+                                  batch_corr_exe= batch_corr_exe, filt_absent_value = filt_absent_value, batch_col = batch_col)
   } else if(software == "MQ"){
     proteome_data = read_MQ_files(anno_filename, pep_filename, 
-                                  batch_corr_exe = batch_corr_exe, filt_absent_value = filt_absent_value)
+                                  batch_corr_exe = batch_corr_exe, filt_absent_value = filt_absent_value, batch_col = batch_col)
   }
   
   return(proteome_data)
@@ -627,10 +627,10 @@ read_phosphoproteomics <- function(software, folder,
   if(software == "PD"){
     proteome_data = read_phospho_PD_files(anno_filename, pep_filename, prot_filename, psm_file_filename, 
                                           keep_only_phosphomodification = keep_only_phosphomodification,
-                                          batch_corr_exe= batch_corr_exe, filt_absent_value = filt_absent_value, phospho_thr = phospho_thr)
+                                          batch_corr_exe= batch_corr_exe, filt_absent_value = filt_absent_value, phospho_thr = phospho_thr, batch_col = batch_col)
   } else if(software == "MQ"){
     proteome_data = read_phospho_MQ_files(anno_filename, pep_filename, keep_only_phosphomodification = keep_only_phosphomodification,
-                                          batch_corr_exe = batch_corr_exe, filt_absent_value = filt_absent_value)
+                                          batch_corr_exe = batch_corr_exe, filt_absent_value = filt_absent_value, batch_col = batch_col)
   }
   
   return(proteome_data)
@@ -1362,10 +1362,10 @@ read_phospho_proteome_proteomics <- function(software,
   message("Reading Proteome data...")
   if(software == "PD"){
     proteome_data = read_PD_files(anno_proteome_filename, pep_proteome_filename, prot_proteome_filename, 
-                                  batch_corr_exe= batch_corr_exe, filt_absent_value = filt_absent_value)
+                                  batch_corr_exe= batch_corr_exe, filt_absent_value = filt_absent_value, batch_col = batch_col)
   } else if(software == "MQ"){
     proteome_data = read_MQ_files(anno_proteome_filename, pep_proteome_filename, 
-                                  batch_corr_exe = batch_corr_exe, filt_absent_value = filt_absent_value)
+                                  batch_corr_exe = batch_corr_exe, filt_absent_value = filt_absent_value, batch_col = batch_col)
   }
   message("Read Proteome data!")
   
@@ -1375,10 +1375,10 @@ read_phospho_proteome_proteomics <- function(software,
   if(software == "PD"){
     phospho_data = read_phospho_PD_files(anno_phospho_filename, pep_phospho_filename, prot_phospho_filename, psm_phospho_file_filename, 
                                           keep_only_phosphomodification = keep_only_phosphomodification,
-                                          batch_corr_exe= batch_corr_exe, filt_absent_value = filt_absent_value, phospho_thr = phospho_thr)
+                                          batch_corr_exe= batch_corr_exe, filt_absent_value = filt_absent_value, phospho_thr = phospho_thr, batch_col = batch_col)
   } else if(software == "MQ"){
     phospho_data = read_phospho_MQ_files(anno_phospho_filename, pep_phospho_filename, keep_only_phosphomodification = keep_only_phosphomodification,
-                                          batch_corr_exe = batch_corr_exe, filt_absent_value = filt_absent_value)
+                                          batch_corr_exe = batch_corr_exe, filt_absent_value = filt_absent_value, batch_col = batch_col)
   }
   message("Reading Phosphoproteomic data!")
   
