@@ -53,7 +53,7 @@ batch_correction <- function(proteome_data, batch_col="batch") {
     stop("Missing sample annotation!")
   }
   dat_gene <- copy(proteome_data$dat_gene)
-  dat_gene <- as.data.frame(dat_gene[,-1], row.names = as.character(dat_gene$ID_peptide))
+  dat_gene <- as.data.frame(dat_gene[,-1], row.names = as.character(dat_gene$GeneName))
   dat_gene_long <- matrix_to_long(dat_gene)
   setnames(dat_gene_long, "FullRunName", "sample")
   comBat_df_gene <- correct_with_ComBat_df(dat_gene_long, batch_annotation, batch_col = batch_col, sample_id_col = "sample")
