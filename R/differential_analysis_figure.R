@@ -171,7 +171,7 @@ generate_volcano_plots <- function(differential_results, data_type=NULL,
       stop("Color must be a vector of the same length == 2")
     }
     
-    bs=20
+    bs=16
     cmd <- ggplot(input_df, aes(x = log2_FC, y = get(col), col = class, text = paste('</br>Gene: ', id, '</br>Class: ', class, '</br>Log2_FC: ', log2_FC, '</br>', col, ': ', get(col)))) +
       geom_point(pch = 20, cex = 2) +
       geom_hline(yintercept = -log10(pval_thr), col = "black") +

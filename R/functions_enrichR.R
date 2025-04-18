@@ -620,7 +620,7 @@ plotEnrich <- function(df, showTerms = 20, numChar = 40, y = "Count", orderBy = 
     }
 
     # Make the ggplot
-    p <- ggplot(df, map) + geom_bar(stat = "identity") + coord_flip() + theme_bw(base_size = 23) +
+    p <- ggplot(df, map) + geom_bar(stat = "identity") + coord_flip() + theme_bw(base_size = 16) +
         scale_x_discrete(labels = rev(shortName), limits = rev(df$Term))
 
     if(orderBy == "Combined.Score") {

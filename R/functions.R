@@ -218,7 +218,7 @@ enrichment_lollipop <- function(input_df, # input dataframe
   lp <- ggplot(plot_df, aes(x_col, y_col)) +
     
     geom_segment(aes(x = 0, y = y_col, xend = x_col, yend = y_col))+
-    theme_tufte(base_size = 23)+
+    theme_tufte(base_size = 16)+
     # scale_color_manual(values = "grey25", guide = "none")+
     theme(axis.title.y = element_blank(),axis.ticks.y= element_blank())+
     xlab(x_col)
@@ -339,7 +339,7 @@ enrichment_b2b_lollipop <- function(input_df, # input dataframe
     scale_x_continuous(limits =c((-shift-max(plot_df$x_col)),(shift+max(plot_df$x_col))),
                        breaks = c(rev(-break_vec)-shift, break_vec+shift),
                        labels = c(as.character(rev(break_vec)),as.character(break_vec)))+
-    theme_tufte(base_size = 23)+
+    theme_tufte(base_size = 16)+
     theme(axis.ticks.y = element_blank(),
           axis.title.y = element_blank(),
           axis.text.y = element_blank(),
@@ -479,7 +479,7 @@ deps_b2b_lollipop <- function(input_df, # input dataframe
     scale_x_continuous(limits =c((-shift-max(break_vec)),(shift+max(break_vec))),
                        breaks = c(rev(-break_vec)-shift, break_vec+shift),
                        labels = c(as.character(rev(break_vec)),as.character(break_vec)))+
-    theme_tufte(base_size = 23)+
+    theme_tufte(base_size = 16)+
     theme(axis.ticks.y = element_blank(),
           axis.title.y = element_blank(),
           axis.text.y = element_blank(),
@@ -597,7 +597,7 @@ enrichment_dotmatrix <- function(input_df, # input dataframe
   
   
   lp <- ggplot(plot_df, aes(x_col, y_col)) +
-    theme_tufte(base_size = 23)+
+    theme_tufte(base_size = 16)+
     theme(axis.title = element_blank(),axis.text.x = element_text(angle = 30, hjust = 1))  
   
   if("size_col" %in% colnames(plot_df)){
