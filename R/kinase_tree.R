@@ -86,7 +86,7 @@ kinase_activity_calculation <- function(dirOutput_kinase, formule_CORAL, comp, d
 kinase_tree <- function(proteome_data, differential_results, formule_CORAL, 
                         dirOutput = "results_ProTN", subfold="pics", phospho_ctrl = FALSE) {
 
-  dir.create(file.path( dirOutput, subfold, "kinaseTree"), showWarnings = FALSE)
+  dir.create(file.path( dirOutput, subfold, "kinaseTree"), showWarnings = FALSE, recursive = T)
   dirOutput_kinase <- file.path(dirOutput, subfold, "kinaseTree")
   
   dat_pep = copy(proteome_data$dat_pep)
