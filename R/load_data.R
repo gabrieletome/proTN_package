@@ -61,6 +61,7 @@ extract_example = function(path_phospho = NULL,
 #' @importFrom dplyr ungroup mutate filter group_by n
 #' @import data.table
 #' @import readxl
+#' @importFrom biomaRt useEnsembl getBM
 #' @export
 read_proteomics <- function(software, folder, annotation_filename = "annotation",
                             peptide_filename = "pep", proteinGroup_filename = "prot", 
@@ -149,6 +150,26 @@ read_MQ_files <- function(anno_filename, pep_filename,
   # Check if conditions start with number. It generate problem later in DEqMS
   if(any(str_starts(input_files[["annotation"]]$Condition, "[0-9]"))){
     input_files[["annotation"]][(str_starts(Condition, "[0-9]")), Condition := str_c("X.", Condition)]
+  }
+  
+  # Check if "Gene Names" and "Protein names" columnare present. Otherwise add them
+  # TODO: check if true for all cases
+  if(!("Gene names" %in% colnames(input_files[["PEP"]]))){
+    input_files[["PEP"]][, `Gene names` := tstrsplit(tstrsplit(`Leading razor protein`, "\\|", keep = 3)[[1]], "_", keep = 1)[[1]]]
+    input_files[["PEP"]][, `Leading razor protein` := tstrsplit(`Leading razor protein`, "\\|", keep = 2)[[1]]]
+  }
+  if(!("Protein names" %in% colnames(input_files[["PEP"]]))){
+    ensembl <- useEnsembl(biomart = "genes")
+    dbs <- as.data.table(listDatasets(ensembl))[grep(tstrsplit(input_files[["PEP"]]$Proteins, "\\||\\;|\\_", keep = 4)[[1]][1], description, ignore.case = T)]
+    dbs <- ifelse(nrow(dbs)>0, dbs[1]$dataset, NULL)
+    if(is.null(dbs)){
+      input_files[["PEP"]][, `Protein names` := `Leading razor protein`]
+    }else{
+      ensembl = useEnsembl(biomart="ensembl", dataset=dbs)
+      anno_uniprot <- as.data.table(getBM(c("uniprotswissprot","description"), mart = ensembl))[uniprotswissprot!=""]
+      setnames(anno_uniprot, new = c("Leading razor protein", "Protein names"))
+      input_files[["PEP"]] <- input_files[["PEP"]][anno_uniprot, on = "Leading razor protein"]
+    }
   }
   
   # Manage Peptide file
@@ -580,6 +601,7 @@ read_PD_files <- function(anno_filename, pep_filename, prot_filename,
 #' @importFrom dplyr ungroup mutate filter group_by n
 #' @import data.table
 #' @import readxl
+#' @importFrom biomaRt useEnsembl getBM
 #' @export
 read_phosphoproteomics <- function(software, folder, 
                                    keep_only_phosphomodification = T, phospho_thr = 0.75, 
@@ -627,10 +649,17 @@ read_phosphoproteomics <- function(software, folder,
   if(software == "PD"){
     proteome_data = read_phospho_PD_files(anno_filename, pep_filename, prot_filename, psm_file_filename, 
                                           keep_only_phosphomodification = keep_only_phosphomodification,
-                                          batch_corr_exe= batch_corr_exe, filt_absent_value = filt_absent_value, phospho_thr = phospho_thr, batch_col = batch_col)
+                                          batch_corr_exe= batch_corr_exe, 
+                                          filt_absent_value = filt_absent_value, 
+                                          phospho_thr = phospho_thr, 
+                                          batch_col = batch_col)
   } else if(software == "MQ"){
-    proteome_data = read_phospho_MQ_files(anno_filename, pep_filename, keep_only_phosphomodification = keep_only_phosphomodification,
-                                          batch_corr_exe = batch_corr_exe, filt_absent_value = filt_absent_value, batch_col = batch_col)
+    proteome_data = read_phospho_MQ_files(anno_filename, pep_filename, 
+                                          keep_only_phosphomodification = keep_only_phosphomodification,
+                                          batch_corr_exe = batch_corr_exe, 
+                                          filt_absent_value = filt_absent_value, 
+                                          phospho_thr = phospho_thr, 
+                                          batch_col = batch_col)
   }
   
   return(proteome_data)
@@ -681,6 +710,26 @@ read_phospho_MQ_files <- function(anno_filename, pep_filename, keep_only_phospho
     input_files[["annotation"]][(str_starts(Condition, "[0-9]")), Condition := str_c("X.", Condition)]
   }
   
+  # Check if "Gene Names" and "Protein names" columnare present. Otherwise add them
+  # TODO: check if true for all cases
+  if(!("Gene names" %in% colnames(input_files[["PEP"]]))){
+    input_files[["PEP"]][, `Gene names` := tstrsplit(tstrsplit(`Leading razor protein`, "\\|", keep = 3)[[1]], "_", keep = 1)[[1]]]
+    input_files[["PEP"]][, `Leading razor protein` := tstrsplit(`Leading razor protein`, "\\|", keep = 2)[[1]]]
+  }
+  if(!("Protein names" %in% colnames(input_files[["PEP"]]))){
+    ensembl <- useEnsembl(biomart = "genes")
+    dbs <- as.data.table(listDatasets(ensembl))[grep(tstrsplit(input_files[["PEP"]]$Proteins, "\\||\\;|\\_", keep = 4)[[1]][1], description, ignore.case = T)]
+    dbs <- ifelse(nrow(dbs)>0, dbs[1]$dataset, NULL)
+    if(is.null(dbs)){
+      input_files[["PEP"]][, `Protein names` := `Leading razor protein`]
+    }else{
+      ensembl = useEnsembl(biomart="ensembl", dataset=dbs)
+      anno_uniprot <- as.data.table(getBM(c("uniprotswissprot","description"), mart = ensembl))[uniprotswissprot!=""]
+      setnames(anno_uniprot, new = c("Leading razor protein", "Protein names"))
+      input_files[["PEP"]] <- input_files[["PEP"]][anno_uniprot, on = "Leading razor protein"]
+    }
+  }
+  
   # Manage Peptide file
   message("Cleaning data...")
   initial_peptide = nrow(input_files[["PEP"]])
@@ -722,7 +771,7 @@ read_phospho_MQ_files <- function(anno_filename, pep_filename, keep_only_phospho
                                                   function(x) any(as.numeric(x) > (phospho_thr))))])
   input_files$PEP <- input_files$PEP[sapply(str_extract_all(`Phospho (STY) Probabilities`, "1|(0\\.\\d+)"), 
                                             function(x) any(as.numeric(x) > (phospho_thr)))]
-  message(paste0("\tPeptide removed due to low phosphorilation level: ",to_remove))
+  message(paste0("\tPeptide removed due to low phosphorilation level (thr > ",phospho_thr,"): ",to_remove))
   
   # Modify sequence to detect only the phosphorylated sites
   input_files$PEP[, Sequence := sapply(1:.N, function(x) {
@@ -908,7 +957,7 @@ read_phospho_MQ_files <- function(anno_filename, pep_filename, keep_only_phospho
   psm_peptide_table <- psm_peptide_table[ID_peptide %in% filter_df_single_pep]
   
   message(paste0("N Proteins (after filter): ", uniqueN(psm_anno_df$symbol)))
-  message(paste0("N Peptides (after filter): ", uniqueN(psm_peptide_table$ID_peptide)))
+  message(paste0("N Peptides (after filter): ", uniqueN(psm_peptide_table$`Phospho_%`)))
   
   return(list("c_anno" = c_anno,
               "psm_anno_df" = psm_anno_df,
@@ -1291,6 +1340,7 @@ read_phospho_PD_files <- function(anno_filename, pep_filename, prot_filename, ps
 #' @importFrom dplyr ungroup mutate filter group_by n
 #' @import data.table
 #' @import readxl
+#' @importFrom biomaRt useEnsembl getBM
 #' @export
 read_phospho_proteome_proteomics <- function(software, 
                                              folder_proteome, folder_phospho, 
@@ -1377,8 +1427,12 @@ read_phospho_proteome_proteomics <- function(software,
                                           keep_only_phosphomodification = keep_only_phosphomodification,
                                           batch_corr_exe= batch_corr_exe, filt_absent_value = filt_absent_value, phospho_thr = phospho_thr, batch_col = batch_col)
   } else if(software == "MQ"){
-    phospho_data = read_phospho_MQ_files(anno_phospho_filename, pep_phospho_filename, keep_only_phosphomodification = keep_only_phosphomodification,
-                                          batch_corr_exe = batch_corr_exe, filt_absent_value = filt_absent_value, batch_col = batch_col)
+    phospho_data = read_phospho_MQ_files(anno_phospho_filename, pep_phospho_filename, 
+                                         keep_only_phosphomodification = keep_only_phosphomodification,
+                                          batch_corr_exe = batch_corr_exe, 
+                                         filt_absent_value = filt_absent_value,
+                                         phospho_thr = phospho_thr,  
+                                         batch_col = batch_col)
   }
   message("Reading Phosphoproteomic data!")
   

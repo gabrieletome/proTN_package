@@ -50,6 +50,7 @@ Imports:
 	tibble (>= 3.2.1),
 	curl (>= 5.2.1),
 	httr (>= 1.4.7),
+	biomaRt,
 	GGally,
 	circlize,
 	e1071,
