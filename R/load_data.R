@@ -159,18 +159,16 @@ read_MQ_files <- function(anno_filename, pep_filename,
     input_files[["PEP"]][, `Leading razor protein` := tstrsplit(`Leading razor protein`, "\\|", keep = 2)[[1]]]
   }
   if(!("Protein names" %in% colnames(input_files[["PEP"]]))){
-    ensembl <- useEnsembl(biomart = "genes")
-    dbs <- as.data.table(listDatasets(ensembl))[grep(tstrsplit(input_files[["PEP"]]$Proteins, "\\||\\;|\\_", keep = 4)[[1]][1], description, ignore.case = T)]
-    dbs <- ifelse(nrow(dbs)>0, dbs[1]$dataset, NULL)
-    if(is.null(dbs)){
+    data("anno_uniprot", envir = environment())
+    if(length(intersect(anno_uniprot$`Leading razor protein`, input_files[["PEP"]]$`Leading razor protein`)) == 0){
       input_files[["PEP"]][, `Protein names` := `Leading razor protein`]
     }else{
-      ensembl = useEnsembl(biomart="ensembl", dataset=dbs)
-      anno_uniprot <- as.data.table(getBM(c("uniprotswissprot","description"), mart = ensembl))[uniprotswissprot!=""]
-      setnames(anno_uniprot, new = c("Leading razor protein", "Protein names"))
-      input_files[["PEP"]] <- input_files[["PEP"]][anno_uniprot, on = "Leading razor protein"]
+      input_files[["PEP"]] <- merge.data.table(input_files[["PEP"]], unique(anno_uniprot, by="Leading razor protein", fromLast=FALSE), 
+                                               by="Leading razor protein", 
+                                               all.x = TRUE)
     }
   }
+  
   
   # Manage Peptide file
   message("Cleaning data...")
@@ -181,8 +179,8 @@ read_MQ_files <- function(anno_filename, pep_filename,
   input_files[["PEP"]] <- input_files[["PEP"]][!grepl("Keratin|keratin", `Protein names`)]
   message(paste0("\tKeratin peptide removed: ",to_remove))
   
-  to_remove <- nrow(input_files[["PEP"]][grepl("CON_",`Leading razor protein`)])
-  input_files[["PEP"]] <- input_files[["PEP"]][!grepl("CON_",`Leading razor protein`)]
+  to_remove <- nrow(input_files[["PEP"]][grepl("CON_",`Leading proteins`)])
+  input_files[["PEP"]] <- input_files[["PEP"]][!grepl("CON_",`Leading proteins`)]
   message(paste0("\tCONTAMINANT peptide removed: ",to_remove))
   
   to_remove <- nrow(input_files[["PEP"]][is.na(`Protein names`)])
@@ -717,16 +715,13 @@ read_phospho_MQ_files <- function(anno_filename, pep_filename, keep_only_phospho
     input_files[["PEP"]][, `Leading razor protein` := tstrsplit(`Leading razor protein`, "\\|", keep = 2)[[1]]]
   }
   if(!("Protein names" %in% colnames(input_files[["PEP"]]))){
-    ensembl <- useEnsembl(biomart = "genes")
-    dbs <- as.data.table(listDatasets(ensembl))[grep(tstrsplit(input_files[["PEP"]]$Proteins, "\\||\\;|\\_", keep = 4)[[1]][1], description, ignore.case = T)]
-    dbs <- ifelse(nrow(dbs)>0, dbs[1]$dataset, NULL)
-    if(is.null(dbs)){
+    data("anno_uniprot", envir = environment())
+    if(length(intersect(anno_uniprot$`Leading razor protein`, input_files[["PEP"]]$`Leading razor protein`)) == 0){
       input_files[["PEP"]][, `Protein names` := `Leading razor protein`]
     }else{
-      ensembl = useEnsembl(biomart="ensembl", dataset=dbs)
-      anno_uniprot <- as.data.table(getBM(c("uniprotswissprot","description"), mart = ensembl))[uniprotswissprot!=""]
-      setnames(anno_uniprot, new = c("Leading razor protein", "Protein names"))
-      input_files[["PEP"]] <- input_files[["PEP"]][anno_uniprot, on = "Leading razor protein"]
+      input_files[["PEP"]] <- merge.data.table(input_files[["PEP"]], unique(anno_uniprot, by="Leading razor protein", fromLast=FALSE), 
+                                               by="Leading razor protein", 
+                                               all.x = TRUE)
     }
   }
   
@@ -739,8 +734,8 @@ read_phospho_MQ_files <- function(anno_filename, pep_filename, keep_only_phospho
   input_files[["PEP"]] <- input_files[["PEP"]][!grepl("Keratin|keratin", `Protein names`)]
   message(paste0("\tKeratin peptide removed: ",to_remove))
   
-  to_remove <- nrow(input_files[["PEP"]][grepl("CON_",`Leading razor protein`)])
-  input_files[["PEP"]] <- input_files[["PEP"]][!grepl("CON_",`Leading razor protein`)]
+  to_remove <- nrow(input_files[["PEP"]][grepl("CON_",`Leading proteins`)])
+  input_files[["PEP"]] <- input_files[["PEP"]][!grepl("CON_",`Leading proteins`)]
   message(paste0("\tCONTAMINANT peptide removed: ",to_remove))
   
   to_remove <- nrow(input_files[["PEP"]][is.na(`Protein names`)])

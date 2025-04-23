@@ -1,3 +1,15 @@
+#' @title Data.table with uniprot description
+#'
+#' @description Annotation matrix Uniprot and related description
+#'
+#' @usage data(anno_uniprot)
+#'
+#' @name anno_uniprot
+#' @docType data
+#'
+#'
+"anno_uniprot"
+
 #' @title List of human kinase motifs
 #'
 #' @description A list of human kinase motifs and their sequence probability
