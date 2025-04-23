@@ -93,7 +93,7 @@ enrichment_filter <- function(enr_df, category = c("all"), overlap_size_enrich_t
                           Significant == "TRUE" & 
                           grepl(paste0("_",category,"$"), input_name)]
   }
-  enr_sele_df <- enr_sele_df[, .SD[overlap_size %in% tail(sort((overlap_size)), 10)], by=c("input_name","anno_class")]
+  enr_sele_df <- enr_sele_df[, .SD[overlap_size %in% tail(sort((overlap_size)), 7)], by=c("input_name","anno_class")]
   setorder(enr_sele_df, -overlap_size)
   enr_sele_names <- unique(enr_sele_df[, .(anno_class, anno_name)])
   enr_sele_df <- enr_sele_df[enr_sele_names, on = .(anno_class, anno_name)]
@@ -145,7 +145,7 @@ generate_plotlist <- function(enr_sele_df, category, category_db, color_contrast
         shape_vec = c(16, 21),
         shape_col = "Significant",
         fill_col = "Significant",
-        char_max = 60
+        char_max = 30
       ) + guides(color = "none", shape = guide_legend(override.aes = list(size = 4)))
     }
   }
@@ -160,7 +160,7 @@ save_plotlist <- function(plotlist, enr_sele_df, category_db, dirOutput="results
       name_list[db] <- paste0(dirOutput,"/",subfolder,"/", "enr_DE_keysources_", db, ".pdf")
       ggsave(name_list[db], plotlist[[db]], 
              device = cairo_pdf, width = 13, 
-             height = max(min(20, length(unique(enr_sele_df[anno_class %in% category_db[[db]][[1]], anno_name])) * 0.3), 3),
+             height = max(min(20, length(unique(enr_sele_df[anno_class %in% category_db[[db]][[1]], anno_name])) * 0.25), 3),
              units = "in", create.dir = T)
     }
     pdf_combine(input = name_list, output = paste0(dirOutput,"/",subfolder,"/", namefile, ".pdf"))

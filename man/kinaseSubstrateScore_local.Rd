@@ -6,17 +6,21 @@
 \usage{
 kinaseSubstrateScore_local(
   substrate.list,
+  comp,
   mat,
   seqs,
   numMotif = 5,
   numSub = 1,
   species = "mouse",
-  verbose = TRUE
+  verbose = TRUE,
+  file_heatmap = "./heatmap.pdf"
 )
 }
 \arguments{
 \item{substrate.list}{A list of kinases with each element containing an array
 of substrates.}
+
+\item{comp}{Comparison}
 
 \item{mat}{A matrix with rows correspond to phosphosites and columns
 correspond to samples.}
@@ -38,6 +42,8 @@ profile for each kinase. Default is 1.}
 
 \item{verbose}{Default to \code{TRUE} to show messages during the progress.
 All messages will be suppressed if set to \code{FALSE}}
+
+\item{file_heatmap}{Path and file name for the heatmap}
 }
 \value{
 A list of 4 elements.

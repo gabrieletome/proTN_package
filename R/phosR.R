@@ -1718,6 +1718,7 @@ meanAbundance <- function(mat, grps) {
 #'
 #' @param substrate.list A list of kinases with each element containing an array
 #'  of substrates.
+#' @param comp Comparison 
 #' @param mat A matrix with rows correspond to phosphosites and columns
 #' correspond to samples.
 #' @param seqs An array containing aa sequences surrounding each of all
@@ -1733,6 +1734,7 @@ meanAbundance <- function(mat, grps) {
 #' \code{mouse} (default), \code{human} and \code{rat}.
 #' @param verbose Default to \code{TRUE} to show messages during the progress.
 #' All messages will be suppressed if set to \code{FALSE}
+#' @param file_heatmap Path and file name for the heatmap
 #'
 #' @importFrom preprocessCore normalize.quantiles
 #'
@@ -1742,8 +1744,9 @@ meanAbundance <- function(mat, grps) {
 #' and their \code{weights}.
 #'
 #' 
-kinaseSubstrateScore_local <- function(substrate.list, mat, seqs, numMotif = 5, 
-                                       numSub = 1, species = "mouse", verbose = TRUE) {
+kinaseSubstrateScore_local <- function(substrate.list, comp, mat, seqs, numMotif = 5, 
+                                       numSub = 1, species = "mouse", verbose = TRUE, 
+                                       file_heatmap = "./heatmap.pdf") {
   
   ks.profile.list <- kinaseSubstrateProfile(substrate.list, mat)
   # motif.mouse.list = PhosR::motif.mouse.list
@@ -1817,7 +1820,7 @@ by motifs and phospho profiles:")
                               combinedScoreMatrix = combinedScoreMatrix,
                               ksActivityMatrix = ksActivityMatrix, weights = w3)
   message("Done.")
-  # kinaseSubstrateHeatmap_local(phosScoringMatrices)
+  kinaseSubstrateHeatmap_local(phosScoringMatrices, printPlot = TRUE, filePath = file_heatmap)
   return(phosScoringMatrices)
 }
 

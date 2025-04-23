@@ -10,7 +10,8 @@ kinase_tree(
   formule_CORAL,
   dirOutput = "results_ProTN",
   subfold = "pics",
-  phospho_ctrl = FALSE
+  phospho_ctrl = FALSE,
+  phosR_thr = 0.7
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ kinase_tree(
 \item{subfold}{Character; the subdirectory within \code{dirOutput} to store the results, default is "pics".}
 
 \item{phospho_ctrl}{Logical; whether to include phospho-control data in the calculations. Default is FALSE (excludes phospho-control data).}
+
+\item{phosR_thr}{Integer; Threshold for kinase activity (0-1). Default is 0.7}
 }
 \value{
 A list of SVG plots, one for each comparison in the \code{formule_CORAL} list, showing the kinase activity tree for each comparison.
