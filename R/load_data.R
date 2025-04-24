@@ -167,6 +167,13 @@ read_MQ_files <- function(anno_filename, pep_filename,
                                                by="Leading razor protein", 
                                                all.x = TRUE)
     }
+  } 
+  if(nrow(input_files[["PEP"]][is.na(`Protein names`)])>0){
+    data("anno_uniprot", envir = environment())
+    unique_anno_uniprot <- unique(anno_uniprot, by="Leading razor protein", fromLast=FALSE)
+    setnames(unique_anno_uniprot, old=c("Protein names"), new = c("desc"))
+    input_files[["PEP"]][, `Protein names` := as.character(`Protein names`)]
+    input_files[["PEP"]][is.na(`Protein names`), `Protein names` := unique_anno_uniprot[.SD, on=.(`Leading razor protein`), x.desc]]
   }
   
   
@@ -723,6 +730,13 @@ read_phospho_MQ_files <- function(anno_filename, pep_filename, keep_only_phospho
                                                by="Leading razor protein", 
                                                all.x = TRUE)
     }
+  }
+  if(nrow(input_files[["PEP"]][is.na(`Protein names`)])>0){
+    data("anno_uniprot", envir = environment())
+    unique_anno_uniprot <- unique(anno_uniprot, by="Leading razor protein", fromLast=FALSE)
+    setnames(unique_anno_uniprot, old=c("Protein names"), new = c("desc"))
+    input_files[["PEP"]][, `Protein names` := as.character(`Protein names`)]
+    input_files[["PEP"]][is.na(`Protein names`), `Protein names` := unique_anno_uniprot[.SD, on=.(`Leading razor protein`), x.desc]]
   }
   
   # Manage Peptide file
