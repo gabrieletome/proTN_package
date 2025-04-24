@@ -59,8 +59,8 @@ differential_analysis <- function(proteome_data, formule_contrast,
     setnames(dat_gene, old = proteome_data$c_anno_proteome$sample, 
              new = str_c(proteome_data$c_anno_proteome$sample, "_proteome"))
     dat_pep <- copy(proteome_data$dat_pep)
-    setnames(dat_pep, old = proteome_data$c_anno_proteome$sample, 
-             new = str_c(proteome_data$c_anno_proteome$sample, "_phospho"))
+    setnames(dat_pep, old = proteome_data$c_anno_phospho$sample, 
+             new = str_c(proteome_data$c_anno_phospho$sample, "_phospho"))
     dat_pep[, GeneName := tstrsplit(ID_peptide, "_", keep = 1)[[1]]]
 
     # Merge proteomic and phosphoproteomic
