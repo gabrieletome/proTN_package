@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 ## Load ProTN and extraction example
 ```{r setup}
 library(proTN)
-extract_example(path_phospho = tempdir())
+extract_example(path_phospho = tempdir(), path_proteome = tempdir())
 ```
 
 ## Read example data

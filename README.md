@@ -6,23 +6,63 @@ ProTN is a R package to perform an integrative pipeline that can perform all the
 All the required information can be found on the info page of the web app.
 
 ## Before starting
+
 ### Dependencies
 ProTN requires R version >= 4.1.
 
-## Getting help
-Bugs and errors can be reported at the issues page on GitHub. Before filing new issues, please read the documentation and take a look at currently open and already closed discussions.
+## Installation
+
+To install the `proTN` package directly from GitHub the `devtools` package is required. If not already installed on your system, run:
+```r
+install.packages("devtools")
+```
+Next, load `devtools` and install `proTN` using:
+```r
+library(devtools)
+devtools::install_github("gabrieletome/proTN_package", dependencies = TRUE)
+```
+
+## Loading the package
+Once installed, load `proTN`:
+```r
+library(proTN)
+```
+
+## Case study example
+The example used for the vignettes can be open with the `extract_example` function:
+
+**Note**: the case study reported is the comparison of polysome-associated proteins with total proteins in human MCF7 cells. (PRIDE: PXD009417) (Clamer M, Tebaldi T, Lauria F, et al. Active Ribosome Profiling with RiboLace. Cell Rep. 2018;25(4):1097-1108.e5.)
+
+#### Proteomic dataset
+```r
+extract_example(path_proteome = "path_to_save")
+```
+
+#### Phospho-proteomic dataset
+```r
+extract_example(path_phospho = "path_to_save")
+```
+
+#### Phospho-proteomic dataset with proteome input
+```r
+extract_example(path_proteome = "path_to_save", 
+                path_phospho = "path_to_save")
+```
+
+## Vignette 
+
+Vignettes for all 3 workflow (proteomics, phospho-proteomic and phospho-proteomics with proteome) are available. Build them using devtools: 
+
+```r
+devtools::build_vignettes("proTN")
+```
 
 ## Workflow description 
-**Note1**
-
-The case study reported is the comparison of polysome-associated proteins with total proteins in human MCF7 cells. (PRIDE: PXD009417)
-
-Clamer M, Tebaldi T, Lauria F, et al. Active Ribosome Profiling with RiboLace. Cell Rep. 2018;25(4):1097-1108.e5.
 
 ### ProTN
 ProTN is an integrative pipeline that analyze DDA proteomics data obtained from MS. It perform a complete analysis of the raw files from Proteome Discoverer (PD) or MaxQuant (MQ), with their biological interpretation with enrichement and network analysis. ProTN executes a dual level analysis, at protein and peptide level.
 
-<img src="https://github.com/TebaldiLab/ProTN/assets/39188419/5ce589c6-64f4-4af4-b708-538b05e983c5" width="75%" style="display:block;margin-left:auto;margin-right:auto"/>
+![image](www/images/Workflow_ProTN.svg)
 
 #### Set settings for the execution and read the raw data from loaded files
 ProTN analyse the results of Proteome Discoverer and MaxQuant. The essential parameters and files to run ProTN are: (additional details on the input can be found in the ProTN info tab)
@@ -35,8 +75,8 @@ ProTN analyse the results of Proteome Discoverer and MaxQuant. The essential par
     *   **Sample** column: define the names for the samples.
         *   In case of **PD** files use the _Sample\_Annotation_ file obtained from PD, the **Sample** column in optional, if is not present the software extract the names for the **File Name** column.
         *   In case of **MQ** analysis the this column is `REQUIRED`. **`ATTENTION`****: SAMPLE NAME MUST BE EQUAL TO THE NAME INSERTED IN MAXQUANT (name of the column in peptide file).**
-- **Peptides file**: raw file of peptides obtained from PD or MQ (file peptides.txt).
-- **Proteins file**: raw file of protein groups obtained from PD or MQ (file proteinGroups.txt).
+- **Peptides file**: raw file of peptides obtained from PD or MQ (file evidence.txt).
+- **Proteins file**: raw file of protein groups obtained from PD (not required for MaxQuant).
 
 #### Normalization and imputation of the intensities
 The intensities are log2 transformed and normalized with DEqMS (Zhu 2022). Two methods are applied because a double normalization is required, one for peptides and one for proteins. At the peptide level, the normalization is done by the function equalMedianNormalization, which normalizes intensity distributions in samples so that they have median equal to 0.
@@ -56,14 +96,12 @@ The workflow continue with the differential analysis. This phase is applied to p
 Limma and DEqMS calculate DEPs for each comparison in the design file parameter. Each peptide or protein has different parameters: the log2 Fold Change, the P.Value, the adjusted P.Value and the log2 expression. In this pipeline, a protein/peptide is significant if passing 3 thresholds. A protein/peptide for each comparison can be Up-regulated or Down-regulated. It is Up-regulated if:
 
 - the log2 FC is higher than the Fold Change threshold (FC > Log2 FC thr),
-- the P.Value is lower than the threshold (P.Value < P.Value thr),
-- the log2 expression is higher than the threshold (log2 expression > Signal log2 expr thr).
+- the P.Value is lower than the threshold (P.Value < P.Value thr).
 
 It is Down-regulated if:
 
 - the log2 FC is lower of the Fold Change threshold (FC < -Log2 FC thr),
-- the P.Value is lower than the threshold (P.Value < P.Value thr),
-- the log2 expression is higher than the threshold (log2 expression > Signal log2 expr thr).
+- the P.Value is lower than the threshold (P.Value < P.Value thr).
 
 In the output, for each comparison, this distinction is reported in the “class” column, which assumes value “+” if is up-regulated, “-” if down-regulated and “=” if it is not significant.
 
@@ -103,17 +141,13 @@ In same cases can be usefull have the enrichment of the whole proteome discovere
 ##### N1. Protein-Protein Interaction network analysis of Differentially Expressed Proteins
 Last analitical step is the Protein-Protein Interaction (PPI) network analysis, since PPIs are essential in almost all processes of the cell, and it is crucial for understanding cell physiology in different states. For each comparison, ProTN analyses the interaction between the DEPs using STRING (Szklarczyk et al. 2021).
 
-The species-specific database is retrieved from STRING server, an accurate analysis discover all the interactions and an iGraph (Csardi and Nepusz 2006) network is generated. Later, the proteins are clustered via iGraph function which identify dense subgraph by optimizing modularity score.
-
-Since the network can vary a lot on composition, two ggplot layout are used: Fruchterman-Reingold algorithm and the Kamada-Kawai algorithm.
-
 <img src="www/images/figures/Risorsa%203.svg" width="75%" style="display:block;margin-left:auto;margin-right:auto"/>
 
-### PhosProTN
+### PhosProTN with Proteomic background
 PhosProTN is an integrative pipeline for phosphoproteomic analysis of DDA experimental data obtained from MS. It perform a complete analysis of the raw files from Proteome Discoverer (PD) or MaxQuant (MQ), with their biological interpretation, enrichement and network analysis. 
 PhosProTN analyse the phosphoproteomic data at peptide level, with background the proteomic analysis.
 
-<img src="https://github.com/TebaldiLab/ProTN/assets/39188419/147a2fc3-233a-4237-b37c-261e3e3d4bb3" width="75%" style="display:block;margin-left:auto;margin-right:auto"/>
+![image](www/images/Workflow_PhosProTN.svg)
 
 *The phospho-workflow is similar to the one described previously, below are reported only the different steps.*
 
@@ -171,6 +205,10 @@ Last analitical step is the kinase tree analysis. In phospho-proteomic it extrem
 The activity score provide by PhosR is used to generated a graphical versione of the human kinome tree using CORAL (Metz K.S. et al. 2018), a web shiny app for visualizing both quantitative and qualitative data. It generates high-resolution scalable vector graphic files suitable for publication without the need for refinement in graphic editing software.
 
 <img src="www/images/figures/TA_kinase_Tree_CORAL-cropped.svg" width="75%" style="display:block;margin-left:auto;margin-right:auto"/>
+
+
+## Getting help
+Bugs and errors can be reported at the issues page on GitHub. Before filing new issues, please read the documentation and take a look at currently open and already closed discussions.
 
 ## Contacts
 Gabriele Tomè, Developer: gabriele.tome@unitn.it
