@@ -38,7 +38,7 @@
 #' @importFrom SummarizedExperiment assay
 #'
 #' @aliases RUVproteome
-#'
+#' @noRd
 #' 
 RUVphospho <- function(mat, M, ctl, k = NULL, m = 1.6, s = 0.6,
                        keepImpute = FALSE, assay = NULL, ...) {
@@ -72,6 +72,7 @@ RUVphospho <- function(mat, M, ctl, k = NULL, m = 1.6, s = 0.6,
 
 #' @importFrom ruv RUVIII
 #' 
+#' @noRd
 RUVproteome <- function(mat, M, ctl, k = NULL, m = 1.8, s = 0.3,
                         keepImpute = FALSE, assay = NULL, ...) {
   pe = FALSE
@@ -130,6 +131,7 @@ RUV <- function(mat, M, ctl, k = NULL, m = m, s = s, keepImpute = keepImpute,
 #'
 #' @return A vectors of stably phosphorylated sites
 #'
+#' @noRd
 #' 
 #' 
 
@@ -214,6 +216,7 @@ getSPS <-function (phosData, assays="Quantification", conds, num = 100) {
 #'
 #' @return A frequency matrix of amino acid from substrates.seq.
 #'
+#' @noRd
 #' 
 createFrequencyMat <- function(substrates.seq) {
   # substrates.seq.split <-
@@ -268,6 +271,7 @@ createFrequencyMat <- function(substrates.seq) {
 #'
 #' @return A vector of frequency score
 #'
+#' @noRd
 #' 
 frequencyScoring <- function(sequence.list, frequency.mat) {
   
@@ -321,6 +325,7 @@ frequencyScoring <- function(sequence.list, frequency.mat) {
 #' @importFrom tidyr spread
 #' @importFrom dplyr count
 #' 
+#' @noRd
 #' 
 plotSignalomeMap <- function(signalomes, color) {
   
@@ -388,6 +393,7 @@ plotSignalomeMap <- function(signalomes, color) {
 #' @importFrom GGally ggnet2
 #' @import circlize
 #' 
+#' @noRd
 #' 
 #' 
 plotKinaseNetwork <- function(KSR, predMatrix, threshold = 0.9, color=NULL, 
@@ -475,6 +481,7 @@ plotKinaseNetwork <- function(KSR, predMatrix, threshold = 0.9, color=NULL,
 #' @return A matrix of pathways and their associated substrates and p-values.
 #'
 #'
+#' @noRd
 #' 
 pathwayOverrepresent <- function(geneSet, annotation, universe,
                                  alter = "greater") {
@@ -523,6 +530,7 @@ pathwayOverrepresent <- function(geneSet, annotation, universe,
 #' @return A matrix of pathways and their associated substrates and p-values.
 #'
 #'
+#' @noRd
 #' 
 pathwayRankBasedEnrichment <- function(geneStats, annotation,
                                        alter = "greater") {
@@ -585,6 +593,7 @@ pathwayRankBasedEnrichment <- function(geneStats, annotation,
 #' a SummarizedExperiment object, filtered SummarizedExperiment object will be 
 #' returned.
 #'
+#' @noRd
 #'
 selectGrps <- function(mat, grps, percent, n = 1, assay = NULL) {
   if (missing(mat))
@@ -648,6 +657,7 @@ selectGrps <- function(mat, grps, percent, n = 1, assay = NULL) {
 #' @importFrom methods is
 #' 
 #' 
+#' @noRd
 #'
 selectTimes <- function(mat, timepoint, order, percent, w = 1, assay = NULL) {
   if (missing(mat))
@@ -723,6 +733,7 @@ Please try a smaller w.")
 #' @importFrom SummarizedExperiment assay
 #' @importFrom methods is
 #' 
+#' @noRd
 #' 
 #'
 selectOverallPercent <- function(mat, percent = NULL, n = NULL, assay = NULL) { 
@@ -783,6 +794,7 @@ given phosphosite to be retained.")
 #' @importFrom methods is
 #' 
 #' 
+#' @noRd
 #'
 #'
 
@@ -837,6 +849,7 @@ selectLocalisedSites <- function(mat, loc=NULL, prob = 0.75) {
 #' @importFrom SummarizedExperiment assay
 #' @importFrom methods is
 #' 
+#' @noRd
 #' 
 scImpute <- function(mat, percent, grps, assay = NULL) {
   if (missing(mat)) {
@@ -913,6 +926,7 @@ stImp <- function(mat, percent) {
 #' @importFrom SummarizedExperiment SummarizedExperiment assay
 #' @importFrom methods is
 #'
+#' @noRd
 #' 
 tImpute <- function(mat, m = 1.6, s = 0.6, assay = NULL) {
   if (missing(mat)) {
@@ -995,6 +1009,7 @@ tImpute <- function(mat, m = 1.6, s = 0.6, assay = NULL) {
 #' @importFrom methods is
 #' 
 #' 
+#' @noRd
 #'
 ptImpute <- function(mat1, mat2, percent1, percent2, m = 1.6,
                      s = 0.6, paired = TRUE, verbose = TRUE, assay = NULL) {
@@ -1125,6 +1140,7 @@ ptImpute <- function(mat1, mat2, percent1, percent2, m = 1.6,
 #'  \code{Signalomes}, \code{proteinModules} and \code{kinaseSubstrates}
 #'
 #' 
+#' @noRd
 #' 
 
 Signalomes <- function(KSR, 
@@ -1295,6 +1311,7 @@ Signalomes <- function(KSR,
 
 #' @import circlize
 #' @importFrom rlang .data
+#' @noRd
 .phosRsignalome <- function(predMatrix, signalomeCutoff, kinase_signalome_color,
                             modules) {
   
@@ -1342,6 +1359,7 @@ Signalomes <- function(KSR,
 #' @importFrom dplyr count %>%
 #' @importFrom tidyr pivot_wider
 #' @importFrom rlang .data
+#' @noRd
 .getSignalomes <- function(predMatrix, exprsMat, KOI, resKinaseNetwork,
                            signalomeSubstrates, modules, kinaseGroup, verbose = TRUE) {
   
@@ -1459,6 +1477,7 @@ generateSignalome = function(kinaseAnnot, kinaseGroup, predMatrix, KOI,
 #'
 #' @return A median scaled matrix
 #'
+#' @noRd
 #'
 medianScaling <- function(mat, scale = FALSE, grps = NULL, reorder = FALSE, 
                           assay = NULL) {
@@ -1525,6 +1544,7 @@ medianScale <- function(mat, scale) {
 #'
 #' @return A standardised matrix
 #'
+#' @noRd
 #'
 #' 
 #'
@@ -1570,6 +1590,7 @@ standardise <- function(mat) {
 #' @return An intersection/union of input parameters
 #'
 #' 
+#' @noRd
 #'
 mIntersect <- function(x, y, ...) {
   if (missing(...))
@@ -1578,6 +1599,7 @@ mIntersect <- function(x, y, ...) {
 
 
 #' 
+#' @noRd
 #'
 mUnion <- function(x, y, ...) {
   if (missing(...))
@@ -1598,6 +1620,7 @@ mUnion <- function(x, y, ...) {
 #' @return Minmax standardised matrix
 #'
 #' 
+#' @noRd
 #'
 minmax <- function(mat) {
   # minmax normalise
@@ -1623,6 +1646,7 @@ minmax <- function(mat) {
 #'
 #' @return A matrix summarised to protein level
 #'
+#' @noRd
 #' 
 #'
 phosCollapse <- function(mat, id, stat, by = "min") {
@@ -1676,6 +1700,7 @@ phosCollapse <- function(mat, id, stat, by = "min") {
 #'
 #' @return A vector of multiple testing adjusted p-values
 #'
+#' @noRd
 #' 
 matANOVA <- function(mat, grps) {
   ps <- apply(mat, 1, function(x) {
@@ -1697,6 +1722,7 @@ matANOVA <- function(mat, grps) {
 #'
 #' @return a matrix with mean expression from replicates
 #'
+#' @noRd
 #'
 #' 
 meanAbundance <- function(mat, grps) {
@@ -1743,6 +1769,7 @@ meanAbundance <- function(mat, grps) {
 #' \code{combinedScoreMatrix}, \code{ksActivityMatrix} (kinase activity matrix)
 #' and their \code{weights}.
 #'
+#' @noRd
 #' 
 kinaseSubstrateScore_local <- function(substrate.list, comp, mat, seqs, numMotif = 5, 
                                        numSub = 1, species = "mouse", verbose = TRUE, 
@@ -1868,6 +1895,7 @@ scorePhosphositeProfile = function(mat, ks.profile.list.filtered) {
 #' correspond to samples.
 #' @return Kinase profile list.
 #'
+#' @noRd
 #' 
 kinaseSubstrateProfile <- function(substrate.list, mat) {
   
@@ -1935,6 +1963,7 @@ kinaseActivityHeatmap <- function(ksProfileMatrix) {
 #' @import pheatmap
 #' @importFrom grDevices dev.off pdf
 #'
+#' @noRd
 #' 
 kinaseSubstrateHeatmap_local <- function(phosScoringMatrices, top = 3, printPlot=NULL, 
                                          filePath="./kinaseSubstrateHeatmap.pdf", width=20, height=20) {
@@ -1986,6 +2015,7 @@ kinaseSubstrateHeatmap_local <- function(phosScoringMatrices, top = 3, printPlot
 #'
 #' @return A graphical plot
 #'
+#' @noRd
 #' 
 siteAnnotate <- function(site, phosScoringMatrices,
                          predMatrix) {
@@ -2038,6 +2068,7 @@ siteAnnotate <- function(site, phosScoringMatrices,
 #'
 #' @return Kinase prediction matrix
 #'
+#' @noRd
 #' 
 #'
 kinaseSubstratePred <- function(phosScoringMatrices,
@@ -2112,6 +2143,7 @@ substrateList = function(phosScoringMatrices, top, cs, inclusion) {
 
 
 #' @import e1071
+#' @noRd
 multiAdaSampling <- function(train.mat, test.mat,
                              label, kernelType, iter = 5) {
   

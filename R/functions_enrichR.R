@@ -3,14 +3,14 @@
 ## enrichR package: sends data to https://maayanlab.cloud/Enrichr/ for gene enrichment
 ## in multiple databases.
 
-##' onLoad hook to setup package options
-##'
-##' onLoad hook to setup package options and to check connection to website
-##' @title onLoad hook to setup package options
-##' @return NULL
-##' @author Wajid Jawaid \email{wajid.jawaid@gmail.com}
-##' @importFrom curl has_internet
-##' @export
+#' onLoad hook to setup package options
+#'
+#' onLoad hook to setup package options and to check connection to website
+#' @title onLoad hook to setup package options
+#' @return NULL
+#' @author Wajid Jawaid \email{wajid.jawaid@gmail.com}
+#' @importFrom curl has_internet
+#' @export
 set_enrichR <- function() {
     options(enrichR.sites.base.address = "https://maayanlab.cloud/")
     options(enrichR.base.address = paste0(getOption("enrichR.sites.base.address"), "Enrichr/"))
@@ -38,12 +38,13 @@ set_enrichR <- function() {
 }
 
 
-##' Internal function to check RCurlOptions
-##'
-##' Internal function to check RCurlOptions
-##' @title Internal function to check RCurlOptions
-##' @return Named vector
-##' @author I-Hsuan Lin \email{i-hsuan.lin@manchester.ac.uk}
+#' Internal function to check RCurlOptions
+#'
+#' Internal function to check RCurlOptions
+#' @title Internal function to check RCurlOptions
+#' @return Named vector
+#' @author I-Hsuan Lin \email{i-hsuan.lin@manchester.ac.uk}
+#' @noRd
 .proxyOpts <- function() {
     opts <- getOption("RCurlOptions")
     if(is.null(opts) || is.null(opts[["proxy"]])) {
@@ -58,21 +59,22 @@ set_enrichR <- function() {
     }
 }
 
-##' Helper function
-##'
-##' Helper function for HTTP methods GET and POST
-##' @title Helper function for HTTP methods GET and POST
-##' @param method (Required). HTTP method. Default is \code{"GET"}
-##' @param url (Required). URL address requested
-##' @param ... (Optional). Additional parameters to pass to GET
-##' @return same as GET
-##' @author Wajid Jawaid \email{wajid.jawaid@gmail.com}
-##' @author I-Hsuan Lin \email{i-hsuan.lin@manchester.ac.uk}
-##' @importFrom httr GET
-##' @importFrom httr POST
-##' @importFrom httr status_code
-##' @importFrom httr http_status
-##' @importFrom httr use_proxy
+#' Helper function
+#'
+#' Helper function for HTTP methods GET and POST
+#' @title Helper function for HTTP methods GET and POST
+#' @param method (Required). HTTP method. Default is \code{"GET"}
+#' @param url (Required). URL address requested
+#' @param ... (Optional). Additional parameters to pass to GET
+#' @return same as GET
+#' @author Wajid Jawaid \email{wajid.jawaid@gmail.com}
+#' @author I-Hsuan Lin \email{i-hsuan.lin@manchester.ac.uk}
+#' @importFrom httr GET
+#' @importFrom httr POST
+#' @importFrom httr status_code
+#' @importFrom httr http_status
+#' @importFrom httr use_proxy
+#' @noRd
 getEnrichr <- function(method = "GET", url, ...) {
     if(!method %in% c("GET","POST")) stop("Support GET and POST only.")
     options(enrichR.live = FALSE)
@@ -109,12 +111,13 @@ getEnrichr <- function(method = "GET", url, ...) {
     })
 }
 
-##' List modEnrichr Websites
-##'
-##' List Enrichr Websites
-##' @title List Enrichr Websites
-##' @return print Enrichr Website status
-##' @author Alexander Blume
+#' List modEnrichr Websites
+#'
+#' List Enrichr Websites
+#' @title List Enrichr Websites
+#' @return print Enrichr Website status
+#' @author Alexander Blume
+#' @noRd
 listEnrichrSites <- function() {
     opts <- .proxyOpts()
     msg <- if(is.null(opts)) "Connection is Live!" else "Connection is Live! Using proxy."
@@ -128,14 +131,14 @@ listEnrichrSites <- function() {
     }
 }
 
-##' Set Enrichr Website
-##'
-##' Set Enrichr Website
-##' @title Set Enrichr Website
-##' @param site site requested
-##' @return Changes Enrichr Website connection
-##' @author Alexander Blume
-##' @export
+#' Set Enrichr Website
+#'
+#' Set Enrichr Website
+#' @title Set Enrichr Website
+#' @param site site requested
+#' @return Changes Enrichr Website connection
+#' @author Alexander Blume
+#' @noRd
 setEnrichrSite <- function(site) {
     opts <- .proxyOpts()
     msg <- if(is.null(opts)) "Connection is Live!" else "Connection is Live! Using proxy."
@@ -159,18 +162,19 @@ setEnrichrSite <- function(site) {
     }
 }
 
-##' Look up available databases on Enrichr
-##'
-##' Look up available databases on Enrichr
-##' @title Look up available databases on Enrichr
-##' @return A data.frame of available Enrichr databases
-##' @author Wajid Jawaid \email{wajid.jawaid@gmail.com}
-##' @importFrom httr GET POST
-##' @importFrom rjson fromJSON
-##' @examples
+#' Look up available databases on Enrichr
+#'
+#' Look up available databases on Enrichr
+#' @title Look up available databases on Enrichr
+#' @return A data.frame of available Enrichr databases
+#' @author Wajid Jawaid \email{wajid.jawaid@gmail.com}
+#' @importFrom httr GET POST
+#' @importFrom rjson fromJSON
+#' @examples
 #' \dontrun{
 #' dbs <- listEnrichrDbs()
 #' }
+#' @noRd
 listEnrichrDbs <- function() {
     dfSAF <- getOption("stringsAsFactors", FALSE)
     options(stringsAsFactors = FALSE)
@@ -185,16 +189,17 @@ listEnrichrDbs <- function() {
 }
 
 
-##' Given an input, check format and return a character vector
-##'
-##' In standard analysis without background, crisp (symbols only) and
-##' fuzzy (with scores) gene sets are acceptable
-##' In analysis with background, only crisp gene sets are acceptable
-##' @title FormatGenes
-##' @param x Vector or dataframe of genes with or without score
-##' @param type Depends on type of gene input
-##' @return Character vector
-##' @author I-Hsuan Lin \email{i-hsuan.lin@manchester.ac.uk}
+#' Given an input, check format and return a character vector
+#'
+#' In standard analysis without background, crisp (symbols only) and
+#' fuzzy (with scores) gene sets are acceptable
+#' In analysis with background, only crisp gene sets are acceptable
+#' @title FormatGenes
+#' @param x Vector or dataframe of genes with or without score
+#' @param type Depends on type of gene input
+#' @return Character vector
+#' @author I-Hsuan Lin \email{i-hsuan.lin@manchester.ac.uk}
+#' @noRd
 .formatGenes <- function(x, type = c("standard","background")) {
     err_msg <- "Genes must be a character vector of Entrez gene symbols or a data.frame with gene symbols and/or score"
     type <- match.arg(type)
@@ -220,13 +225,14 @@ listEnrichrDbs <- function() {
 }
 
 
-##' Download and parse GMT files from Enrichr
-##'
-##' Download and parse GMT files from Enrichr
-##' @title Download and parse GMT files from Enrichr
-##' @param db library
-##' @return List object
-##' @author I-Hsuan Lin \email{i-hsuan.lin@manchester.ac.uk}
+#' Download and parse GMT files from Enrichr
+#'
+#' Download and parse GMT files from Enrichr
+#' @title Download and parse GMT files from Enrichr
+#' @param db library
+#' @return List object
+#' @author I-Hsuan Lin \email{i-hsuan.lin@manchester.ac.uk}
+#' @noRd
 .read_gmt <- function(db) {
     base.address <- getOption("enrichR.base.address")
     url <- paste0(base.address, "geneSetLibrary?mode=text&libraryName=", db)
@@ -250,15 +256,16 @@ listEnrichrDbs <- function() {
 }
 
 
-##' Upload gene list using Speedrichr API
-##'
-##' Upload gene list using Speedrichr API
-##' @title Upload gene list using Speedrichr API
-##' @param genes Input genes
-##' @return R object that corresponds to the JSON object
-##' @author I-Hsuan Lin \email{i-hsuan.lin@manchester.ac.uk}
-##' @importFrom rjson fromJSON
-##' @importFrom httr config
+#' Upload gene list using Speedrichr API
+#'
+#' Upload gene list using Speedrichr API
+#' @title Upload gene list using Speedrichr API
+#' @param genes Input genes
+#' @return R object that corresponds to the JSON object
+#' @author I-Hsuan Lin \email{i-hsuan.lin@manchester.ac.uk}
+#' @importFrom rjson fromJSON
+#' @importFrom httr config
+#' @noRd
 .add_list <- function(genes) {
     base.address <- getOption("speedrichr.base.address")
     url <- paste0(base.address, "addList")
@@ -275,15 +282,16 @@ listEnrichrDbs <- function() {
     return(data)
 }
 
-##' Upload background list using Speedrichr API
-##'
-##' Upload background list using Speedrichr API
-##' @title Upload background list using Speedrichr API
-##' @param genes gene list
-##' @return R object from JSON
-##' @author I-Hsuan Lin \email{i-hsuan.lin@manchester.ac.uk}
-##' @importFrom rjson fromJSON
-##' @importFrom httr config
+#' Upload background list using Speedrichr API
+#'
+#' Upload background list using Speedrichr API
+#' @title Upload background list using Speedrichr API
+#' @param genes gene list
+#' @return R object from JSON
+#' @author I-Hsuan Lin \email{i-hsuan.lin@manchester.ac.uk}
+#' @importFrom rjson fromJSON
+#' @importFrom httr config
+#' @noRd
 .add_background <- function(genes) {
     base.address <- getOption("speedrichr.base.address")
     url <- paste0(base.address, "addbackground")
@@ -300,15 +308,16 @@ listEnrichrDbs <- function() {
     return(data)
 }
 
-##' Get enrichment result using Speedrichr API
-##'
-##' Get enrichment result using Speedrichr API
-##' @title Get enrichment result using Speedrichr API
-##' @param uId user List ID
-##' @param bId background ID
-##' @param db background Type
-##' @return R object from JSON
-##' @author I-Hsuan Lin \email{i-hsuan.lin@manchester.ac.uk}
+#' Get enrichment result using Speedrichr API
+#'
+#' Get enrichment result using Speedrichr API
+#' @title Get enrichment result using Speedrichr API
+#' @param uId user List ID
+#' @param bId background ID
+#' @param db background Type
+#' @return R object from JSON
+#' @author I-Hsuan Lin \email{i-hsuan.lin@manchester.ac.uk}
+#' @noRd
 .get_backgroundenrich <- function(uId, bId, db) {
     base.address <- getOption("speedrichr.base.address")
     url <- paste0(base.address, "backgroundenrich")
@@ -330,45 +339,45 @@ listEnrichrDbs <- function() {
     return(data)
 }
 
-##' Gene enrichment using Enrichr
-##'
-##' Gene enrichment using Enrichr, also, you can now try adding a background.
-##' @title Gene enrichment using Enrichr
-##' @param genes (Required). Character vector of Entrez gene symbols as input. A data.frame
-##' of gene symbols in first column is also acceptable, optionally a score denoting the
-##' degree of membership between 0 and 1 in the second column.
-##' @param databases (Required). Character vector of databases to search.
-##' See https://maayanlab.cloud/Enrichr/ for available databases.
-##' @param sleepTime (Optional) Time to wait (in seconds) between sending requests to the server to prevent the same results being returned as the previous request. Default is 1.
-##' @param background (Optional). Character vector of Entrez gene symbols to be used as
-##' background. A data.frame of gene symbols in first column is also acceptable. 
-##' Default is \code{"NULL"}. Enrichment analysis with background genes is only available 
-##' on the main site (Enrichr). Also, it is using a different API service (Speedrichr), 
-##' hence it is a little slower to complete and return the results.
-##' @param include_overlap (Optional). Download database in GMT format to include 'Overlap'
-##' in the resulting data.frame when analysing with a background. Default is \code{"FALSE"}.
-##' @return Returns a list of data.frame of enrichment terms, p-values, ...
-##' @author Wajid Jawaid \email{wajid.jawaid@gmail.com}
-##' @importFrom httr GET POST
-##' @importFrom rjson fromJSON
-##' @export
-##' @examples
-##' # data(input) # Load example input genes
-##' # data(background) # Load example background genes
-##' # dbs <- c("GO_Molecular_Function_2023", "GO_Cellular_Component_2023",
-##' #          "GO_Biological_Process_2023")
-##' # if (getOption("enrichR.live")) {
-##' #   enriched1 <- enrichr(input, dbs)
-##' #   print(head(enriched1[[1]]))
-##'
-##' #   # Include background
-##' #   enriched2 <- enrichr(input, dbs, background = background)
-##' #   print(head(enriched2[[1]]))
-##'
-##' #   # Include background and add 'Overlap' info
-##' #   enriched3 <- enrichr(input, dbs, background = background, include_overlap = TRUE)
-##' #   print(head(enriched3[[1]]))
-##' # }
+#' Gene enrichment using Enrichr
+#'
+#' Gene enrichment using Enrichr, also, you can now try adding a background.
+#' @title Gene enrichment using Enrichr
+#' @param genes (Required). Character vector of Entrez gene symbols as input. A data.frame
+#' of gene symbols in first column is also acceptable, optionally a score denoting the
+#' degree of membership between 0 and 1 in the second column.
+#' @param databases (Required). Character vector of databases to search.
+#' See https://maayanlab.cloud/Enrichr/ for available databases.
+#' @param sleepTime (Optional) Time to wait (in seconds) between sending requests to the server to prevent the same results being returned as the previous request. Default is 1.
+#' @param background (Optional). Character vector of Entrez gene symbols to be used as
+#' background. A data.frame of gene symbols in first column is also acceptable. 
+#' Default is \code{"NULL"}. Enrichment analysis with background genes is only available 
+#' on the main site (Enrichr). Also, it is using a different API service (Speedrichr), 
+#' hence it is a little slower to complete and return the results.
+#' @param include_overlap (Optional). Download database in GMT format to include 'Overlap'
+#' in the resulting data.frame when analysing with a background. Default is \code{"FALSE"}.
+#' @return Returns a list of data.frame of enrichment terms, p-values, ...
+#' @author Wajid Jawaid \email{wajid.jawaid@gmail.com}
+#' @importFrom httr GET POST
+#' @importFrom rjson fromJSON
+#' @export
+#' @examples
+#' # data(input) # Load example input genes
+#' # data(background) # Load example background genes
+#' # dbs <- c("GO_Molecular_Function_2023", "GO_Cellular_Component_2023",
+#' #          "GO_Biological_Process_2023")
+#' # if (getOption("enrichR.live")) {
+#' #   enriched1 <- enrichr(input, dbs)
+#' #   print(head(enriched1[[1]]))
+#'
+#' #   # Include background
+#' #   enriched2 <- enrichr(input, dbs, background = background)
+#' #   print(head(enriched2[[1]]))
+#'
+#' #   # Include background and add 'Overlap' info
+#' #   enriched3 <- enrichr(input, dbs, background = background, include_overlap = TRUE)
+#' #   print(head(enriched3[[1]]))
+#' # }
 enrichr <- function(genes, databases = NULL, background = NULL, include_overlap = FALSE,
                     sleepTime = 1) {
     if(length(genes) < 1) {
@@ -461,15 +470,16 @@ enrichr <- function(genes, databases = NULL, background = NULL, include_overlap 
 }
 
 
-##' Given a Enrichr output, order and subset criteria, returns a data frame accordingly
-##'
-##' Given a Enrichr output, order and subset criteria, returns a data frame accordingly
-##' @title Given a Enrichr output, order and subset criteria, returns a data frame accordingly
-##' @param df Enrichr output
-##' @param showTerms Number of terms to show. Default 20.
-##' @param orderBy Column for ordering. Default "P.value"
-##' @return Data frame
-##' @author I-Hsuan Lin \email{i-hsuan.lin@manchester.ac.uk}
+#' Given a Enrichr output, order and subset criteria, returns a data frame accordingly
+#'
+#' Given a Enrichr output, order and subset criteria, returns a data frame accordingly
+#' @title Given a Enrichr output, order and subset criteria, returns a data frame accordingly
+#' @param df Enrichr output
+#' @param showTerms Number of terms to show. Default 20.
+#' @param orderBy Column for ordering. Default "P.value"
+#' @return Data frame
+#' @author I-Hsuan Lin \email{i-hsuan.lin@manchester.ac.uk}
+#' @noRd
 .enrichment_prep_df <- function(df, showTerms = 20, orderBy = "P.value") {
 
     if(is.null(showTerms)) {
@@ -506,48 +516,48 @@ enrichr <- function(genes, databases = NULL, background = NULL, include_overlap 
     return(df)
 }
 
-##' Visualise a Enrichr output as barplot
-##'
-##' Visualise Enrichr result from a selected gene-set library as barplot.
-##' @title plotEnrich
-##' @param df (Required). A single data.frame from a list of Enrichr output.
-##' @param showTerms (Optional). Number of terms to show. Default is \code{20}.
-##' @param numChar (Optional). A single integer. Default is \code{40}.
-##' Indicates the number characters to keep in the term description.
-##' @param y (Optional). A character string. Default is \code{"Count"}.
-##' Indicates the variable that should be mapped to the y-axis.
-##' It can be either \code{"Count"} or \code{"Ratio"}. 
-##' Results that includes background genes in the analysis can only show \code{"Count"}.
-##' @param orderBy (Optional). A character string. Default is \code{"P.value"}.
-##' Indicates how to order the Enrichr results before subsetting to keep top \code{N} terms.
-##' It can be one of these:
-##' \itemize{
-##' \item \code{"P.value"}
-##' \item \code{"Adjusted.P.value"} (or \code{"FDR"})
-##' \item \code{"Combined.Score"} (or \code{"Score"})
-##' }
-##' @param xlab (Optional). A character string. Default is \code{NULL}.
-##' Indicates the x-axis label.
-##' @param ylab (Optional). A character string. Default is \code{NULL}.
-##' Indicates the y-axis label.
-##' @param title (Optional). A character string. Default is \code{NULL}
-##' Indicates the main title for the graphic.
-##' @return A \code{\link[ggplot2]{ggplot}} plot object
-##' @author I-Hsuan Lin \email{i-hsuan.lin@manchester.ac.uk}
-##' @seealso
-##' \code{\link[ggplot2]{ggplot}}
-##' @export
-##' @examples
-##' # data(input) # Load example input genes
-##' # dbs <- c("GO_Molecular_Function_2023", "GO_Cellular_Component_2023",
-##' #          "GO_Biological_Process_2023")
-##' # if (getOption("enrichR.live")) {
-##' #   enriched <- enrichr(input, dbs)
-##' #   print(head(enriched[[1]]))
-##' #   # Plot top 20 terms from "GO_Biological_Process_2023" and ordered by P-value
-##' #   plotEnrich(enriched[[3]], showTerms = 20, numChar = 50, y = "Count",
-##' #              orderBy = "P.value")
-##' # }
+#' Visualise a Enrichr output as barplot
+#'
+#' Visualise Enrichr result from a selected gene-set library as barplot.
+#' @title plotEnrich
+#' @param df (Required). A single data.frame from a list of Enrichr output.
+#' @param showTerms (Optional). Number of terms to show. Default is \code{20}.
+#' @param numChar (Optional). A single integer. Default is \code{40}.
+#' Indicates the number characters to keep in the term description.
+#' @param y (Optional). A character string. Default is \code{"Count"}.
+#' Indicates the variable that should be mapped to the y-axis.
+#' It can be either \code{"Count"} or \code{"Ratio"}. 
+#' Results that includes background genes in the analysis can only show \code{"Count"}.
+#' @param orderBy (Optional). A character string. Default is \code{"P.value"}.
+#' Indicates how to order the Enrichr results before subsetting to keep top \code{N} terms.
+#' It can be one of these:
+#' \itemize{
+#' \item \code{"P.value"}
+#' \item \code{"Adjusted.P.value"} (or \code{"FDR"})
+#' \item \code{"Combined.Score"} (or \code{"Score"})
+#' }
+#' @param xlab (Optional). A character string. Default is \code{NULL}.
+#' Indicates the x-axis label.
+#' @param ylab (Optional). A character string. Default is \code{NULL}.
+#' Indicates the y-axis label.
+#' @param title (Optional). A character string. Default is \code{NULL}
+#' Indicates the main title for the graphic.
+#' @return A \code{\link[ggplot2]{ggplot}} plot object
+#' @author I-Hsuan Lin \email{i-hsuan.lin@manchester.ac.uk}
+#' @seealso
+#' \code{\link[ggplot2]{ggplot}}
+#' @examples
+#' # data(input) # Load example input genes
+#' # dbs <- c("GO_Molecular_Function_2023", "GO_Cellular_Component_2023",
+#' #          "GO_Biological_Process_2023")
+#' # if (getOption("enrichR.live")) {
+#' #   enriched <- enrichr(input, dbs)
+#' #   print(head(enriched[[1]]))
+#' #   # Plot top 20 terms from "GO_Biological_Process_2023" and ordered by P-value
+#' #   plotEnrich(enriched[[3]], showTerms = 20, numChar = 50, y = "Count",
+#' #              orderBy = "P.value")
+#' # }
+#' @noRd
 plotEnrich <- function(df, showTerms = 20, numChar = 40, y = "Count", orderBy = "P.value",
                        xlab = NULL, ylab = NULL, title = NULL) {
     if(!is.data.frame(df)) {

@@ -10,106 +10,160 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  message = FALSE,
+  warning = FALSE
 )
 ```
 
-# Load ProTN and extraction example
+## Load ProTN and extraction example
 ```{r setup}
 library(proTN)
 extract_example(path_phospho = tempdir())
 ```
 
-# Read example data
+## Read example data
+
+Raw abundances are determined from the area under the peak (m/z, time, number of events) for each PSM (Peptide-to-Spectrum Match).
+
+Initial filtering removes the following peptides:
+
+-   Low/missing abundance: PSMs not consistently present in all replicates of at least one condition are removed.
+-   Contaminants.
+
+After filtering, raw abundances are log2 transformed
+
 ```{r read_proteomics_MQ}
 proteome_data <- read_phosphoproteomics(software = "MQ",
                                  folder = paste0(tempdir(),"/case_study_phospho/txt_Phospho"),
                                  peptide_filename = "evidence")
 ```
 
-# Pre-process figure
+#### Distributions of log2 raw abundances
+Violin plot showing sample distributions of log2 raw abundances of peptides.
+
 ```{r preprocess_figure, fig.height=5, fig.width=7}
 # Avalaible abundance. The red percentage will be imputed.
 generate_abundance <- generate_abundance_plot(proteome_data = proteome_data)
 generate_abundance$plot
+```
+
+#### Percentage of quantified peptides per sample
+Barplot showing the percentage of peptides with available abundances for each sample.
+
+```{r preprocess_figure_2, fig.height=5, fig.width=7}
 # Number peptide per each protein
 generate_peptide_distribution <- generate_peptide_distribution_plot(proteome_data = proteome_data)
 generate_peptide_distribution$plot
+```
+
+#### Percentage of phosphosite residue
+The following graph represent the percentage of the phosphosites located on Serine (S), Throenines (T) and Tyrosines (Y).
+
+```{r preprocess_figure_3, fig.height=3, fig.width=7}
 #Percentage of the phosphorilated site
-create_phosphosite_fig <- create_phosphosite_plot(proteome_data = proteome_data,
+create_phosphosite_fig <- create_phosphosite_plot(proteome_data = proteome_data, 
                                                   software = "MQ")
 create_phosphosite_fig$plot
 ```
 
+#### Impute function
 
-# Impute function
+**Imputation** is performed on peptide and protein abundances with the Bioconductor package [PhosR](https://www.sciencedirect.com/science/article/pii/S221112472100084X). Round imputation is performed in absence of replicates. ProTN uses two function of PhosR for the imputation, the first impute the missing values for a peptide across replicates within a single condition, the second is a tail-based imputation approach as implemented in Perseus.
 
 ```{r impute_function}
 imputed_data <- impute_intensity(proteome_data = proteome_data)
 ```
 
-# Normalization
+#### Normalization function
+
+**Normalization:**
+
+**Peptides** abundances are normalized with the equalMedianNormalization function from the Bioconductor package [DEqMS](<https://www.bioconductor.org/packages/release/bioc/html/DEqMS.html>) (equal medians in all samples). 
+
+**Protein** normalized abundances were calculated with the medianSweeping function from the Bioconductor package [DEqMS](<https://www.bioconductor.org/packages/release/bioc/html/DEqMS.html>).
 
 ```{r normalization_function}
 normalized_data <- normalization_ProTN(proteome_data = imputed_data)
 ```
 
-# Save the normalized data in an Excel file
+#### Exporter function normalized data to an Excel file
 
 ```{r exporter, eval=FALSE}
 save_abundance_tables(proteome_data = normalized_data, 
                       dirOutput=outputdir)
 ```
 
-# Distribution of normalized abundance
+#### Distribution of protein normalized abundance
+Violin plot showing sample distributions of log2 normalized and imputed abundances.
 
 ```{r normalized_plot, fig.height=5, fig.width=7}
 #Abundance per Protein
 prot_plot <- plot_abundance_distribution(proteome_data = normalized_data,
                                          type = "protein")
 prot_plot$plot
+```
+
+#### Distribution of peptide normalized abundance
+Violin plot showing sample distributions of log2 normalized and imputed abundances.
+
+```{r normalized_plot_2, fig.height=5, fig.width=7}
 #Abundance per Peptide
 pep_plot <- plot_abundance_distribution(proteome_data = normalized_data,
                                         type = "peptide")
 pep_plot$plot
 ```
 
-# MDS figure normalized data
+#### MDS based on protein normalized data
+Multidimensional scaling (MDS) takes a set of dissimilarities and returns a set of points such that the distances between the points are approximately equal to the dissimilarities. Classical multidimensional scaling is also known as principal coordinates analysis.
 
 ```{r mds_normalized, fig.height=5, fig.width=7}
 #Abundance per Protein
 prot_mds <- mds_plot(proteome_data = normalized_data,
                      type = "protein")
 prot_mds$plot
+```
+
+#### MDS based on peptide normalized data
+Multidimensional scaling (MDS) takes a set of dissimilarities and returns a set of points such that the distances between the points are approximately equal to the dissimilarities. Classical multidimensional scaling is also known as principal coordinates analysis.
+
+```{r mds_normalized_2, fig.height=5, fig.width=7}
 #Abundance per Peptide
 pep_mds <- mds_plot(proteome_data = normalized_data,
                     type = "peptide")
 pep_mds$plot
 ```
 
-# PCA figure normalized data
+#### PCA based on protein normalized data
+Principal component analysis (PCA) is performed on normalized Protein and Peptide abundances.
 
 ```{r pca_normalized, fig.height=5, fig.width=7}
 #Abundance per Protein
 prot_pca <- pca_plot(proteome_data = normalized_data,
                      type = "protein")
 prot_pca$plot
+```
+
+#### PCA based on peptide normalized data
+Principal component analysis (PCA) is performed on normalized Protein and Peptide abundances. 
+
+```{r pca_normalized_2, fig.height=5, fig.width=7}
 #Abundance per Peptide
 pep_pca <- pca_plot(proteome_data = normalized_data,
                     type = "peptide")
 pep_pca$plot
 ```
 
-# List protein boxplot
-
-## Boxplot
+#### Boxplot abundances of selected proteins
+Normalized log2 abundances are displayed for proteins selected in the input. Abundances are grouped per condition.
 ```{r boxplot_protein, fig.height=5, fig.width=7}
 prot_boxplot <- plot_selected_proteins(proteome_data = normalized_data,
                                        list_protein = c("Aaas","Aacs","Zyx"))
 prot_boxplot$plot
 ```
 
-## Heatmap
+#### Heatmap abundances of selected proteins
+Normalized log2 abundances are displayed for proteins selected in the input.
 ```{r heatmap_protein, fig.height=7, fig.width=7}
 prot_heatmap <- heatmap_selected_proteins(proteome_data = normalized_data,
                                        list_protein = c("Aaas","Aacs","Arsa","Bag2","Cd80",
@@ -117,7 +171,7 @@ prot_heatmap <- heatmap_selected_proteins(proteome_data = normalized_data,
 prot_heatmap$plot
 ```
 
-# Differential analysis
+## Differential analysis
 
 ```{r differential_analysis}
 formule_contrast <- list("A2016vsWT"="A2016T-wt")
@@ -130,7 +184,7 @@ differential_results <- differential_analysis(proteome_data = normalized_data,
                                               signal_thr=0)
 ```
 
-## Number of differential proteins
+#### Number of differentially expressed proteins for each comparison
 
 ```{r differentiated_protein, fig.height=3, fig.width=7}
 ploft_diff_number <- generate_differential_barplots(differential_results,
@@ -138,7 +192,7 @@ ploft_diff_number <- generate_differential_barplots(differential_results,
 ploft_diff_number$plot
 ```
 
-## Number of differential peptides
+#### Number of differentially expressed peptide for each comparison
 
 ```{r differentiated_peptide, fig.height=3, fig.width=7}
 ploft_diff_number <- generate_differential_barplots(differential_results,
@@ -146,13 +200,15 @@ ploft_diff_number <- generate_differential_barplots(differential_results,
 ploft_diff_number$plot
 ```
 
+#### Exporter function differential analysis to an Excel file
+
 ```{r exporter_differential, eval=FALSE}
 save_differential_analysis_table(proteome_data = normalized_data,
                                  differential_results = differential_results,
                                  dirOutput=outputdir)
 ```
 
-# Vulcano plot
+#### Vulcano plot
 The vulcano plot are interactive ggplotly. Not visible inside vignettes.
 
 ```{r vulcano_plot, eval=FALSE}
@@ -167,22 +223,28 @@ generate_volcano_plots_peptide<-generate_volcano_plots(differential_results,
 generate_volcano_plots_peptide
 ```
 
-
-# MDS of differential analysis
+#### MDS based on differentially expressed proteins
+Multidimensional scaling (MDS) are performed on normalized abundances of differentially expressed Proteins.
 
 ```{r mds_differential, fig.height=5, fig.width=7}
 mds_diff <- mds_differential_analysis_plot(differential_analysis = differential_results,
                                            proteome_data = normalized_data,
                                            type = "protein")
 mds_diff$plot
+```
 
+#### MDS based on differentially expressed peptide
+Multidimensional scaling (MDS) are performed on normalized abundances of differentially expressed peptide.
+
+```{r mds_differential_2, fig.height=5, fig.width=7}
 mds_diff_pep <- mds_differential_analysis_plot(differential_analysis = differential_results,
                                                proteome_data = normalized_data,
                                                type = "peptide")
 mds_diff_pep$plot
 ```
 
-# PCA of differential analysis
+#### PCA based on differentially expressed proteins
+Principal component analysis (PCA) are performed on normalized abundances of differentially expressed Proteins.
 
 ```{r pca_differential, fig.height=5, fig.width=7}
 pca_diff <- pca_differential_analysis_plot(differential_analysis = differential_results,
@@ -190,39 +252,52 @@ pca_diff <- pca_differential_analysis_plot(differential_analysis = differential_
                                            type = "protein")
 pca_diff$plot
 
+```
+
+#### PCA based on differentially expressed peptide
+Principal component analysis (PCA) are performed on normalized abundances of differentially expressed peptide.
+
+```{r pca_differential_2, fig.height=5, fig.width=7}
 pca_diff_pep <- pca_differential_analysis_plot(differential_analysis = differential_results,
                                                proteome_data = normalized_data,
                                                type = "peptide")
 pca_diff_pep$plot
 ```
 
-# Enrichment analisys with EnrichR
+## Enrichment analisys with EnrichR
+Annotation enrichment analysis is performed using the web-based application [EnrichR](https://maayanlab.cloud/Enrichr/), against an updated collection of 98 databases covering Transcription, Pathways, Ontologies, Diseases, Drugs, Cell Types, Experimental Datasets. 
+For each comparison enrichment is calculate over up-regulated proteins (UP), down-regulated proteins (DOWN), and their union (ALL).
 
 ```{r enrichment, eval=FALSE}
 enrichemnt_results <- perform_enrichment_analysis(differential_results = differential_results,
                                                   enrichR_custom_DB = T,
-                                                  enrich_filter_DBs=c("Human_Gene_Atlas","BioPlanet_2019","KEGG_2021_Human",
+                                                  enrich_filter_DBs=c("Human_Gene_Atlas","BioPlanet_2019",
+                                                                      "KEGG_2021_Human",
                                                                       "Reactome_2022","ChEA_2022"),
                                                   dirOutput=outputdir)
+
+## Generate figure regarding the enrichment analysis.
+## ALL: analysis computed on the UP+DOWN regulated proteins
+## UP: analysis computed on the UP regulated proteins
+## DOWN: analysis computed on the DOWN regulated proteins
+## enrich_filter_term: show only terms matching the pattern provided.
 
 plots_all <- enrichment_figure(enr_df = enrichemnt_results,
                                category = c("all"),
                                save=F)
-plots_all
 
 plots_down <- enrichment_figure(enr_df = enrichemnt_results,
                                 category = c("down","up"),
                                 save=F)
-plots_down
 
 plots_terms <- enrichment_figure(enr_df = enrichemnt_results,
                                  category = c("down","up"),
                                  save=F,
                                  enrich_filter_term = c("cell","pathways"))
-plots_terms
 ```
 
-# StringDB network
+## Protein-protein interaction network analysis of differentially expressed proteins 
+Protein-protein interactions (PPIs) are crucial for understanding cell physiopathology. PPI analysis of differentially expressed proteins is based on the [STRING](https://string-db.org/) database.  Communities within the network are identified with the Clauset-Newman-Moore (CNM) algorithm.
 
 ```{r string network, eval=FALSE}
 
@@ -233,8 +308,11 @@ strindb_res
 
 ```
 
-# Kinase tree with PhosR and CORAL
-
+## Kinase Trees
+In this step, PhosProTN identifies alterations in the activity of kinases, based on the differentially phosphorylated sites observed in each contrast. The identification of the altered kinases is perfomed by [PhosR](https://github.com/PYangLab/PhosR) package (Kim et al. 2021), which provide a score of kinase activities based on the comparison formula provided. The activities of the kinases are saved in txt files inside the KinaseTree folder.
+In addition, graphical kinase trees are generated using an adapted version of the webtool [CORAL](http://phanstiel-lab.med.unc.edu/CORAL/) (Metz K.S. et al. 2018).
+"DISCLAIMER CORAL: The kinome tree plots generated by CORAL make use the data generated by: "Manning et al., Science, 2002", and are based on a figure generated by "Cell Signaling Technology": "https://www.cellsignal.com/contents/science/protein-kinases-introduction/kinases"
+            
 ```{r kinase_tree, eval=FALSE}
 kinase_res <- kinase_tree(proteome_data = normalized_data, 
                           differential_results = differential_results, 
