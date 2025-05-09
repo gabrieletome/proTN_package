@@ -33,7 +33,7 @@ jobs:
         
       - name: install latex
         if: runner.os == 'Linux'
-        run: sudo apt-get install texlive-latex-base
+        run: sudo apt-get install texlive-latex-base libcurl4-openssl-dev
        
       - name: check R
         if: runner.os == 'Linux'
