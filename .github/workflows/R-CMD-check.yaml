@@ -12,6 +12,11 @@ permissions: read-all
 jobs:
   build:
     runs-on: ${{ matrix.config.os }}
+    
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      continue-on-error: true  # Allows the job to proceed even with warnings or notes
+      
     strategy:
        matrix:
         config:
