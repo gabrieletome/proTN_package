@@ -9,7 +9,8 @@ name: R-CMD-check.yaml
 
 permissions: read-all
 
-jobs:build:
+jobs:
+  build:
     runs-on: ${{ matrix.config.os }}
     strategy:
        matrix:
