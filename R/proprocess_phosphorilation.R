@@ -23,16 +23,16 @@ create_phosphosite_plot <- function(proteome_data, software) {
   psm_peptide_table <- copy(proteome_data$psm_peptide_table)
   
   if (software == "PD") {
-    active_sites <- lapply(lapply(
+    active_sites <- table(unlist(lapply(lapply(
       stri_extract_all_regex(psm_peptide_table$Modifications, "\\w\\d+\\(1|\\w\\d+\\.|\\ \\w\\]|\\w\\(1"), 
       function(x) { stri_replace_all(x, regex = " ", replacement = "") }), 
       function(y) { unlist(stri_extract_all_regex(unlist(y), "S|T|Y")) }
-    ) |> unlist() |> table()
+    )))
   } else if( software=="MQ"){
-    active_sites <- lapply(
+    active_sites <- table(unlist(lapply(
       stri_extract_all_regex(psm_peptide_table$Annotated_Sequence, "\\w\\(1"), 
       function(x) { stri_sub_all(x, from = 1, to = 1) }
-    ) |> unlist() |> table()
+    )))
   } else{
     stop("Software must be MQ or PD")
   }

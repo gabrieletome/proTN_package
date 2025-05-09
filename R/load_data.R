@@ -61,7 +61,6 @@ extract_example = function(path_phospho = NULL,
 #' @importFrom dplyr ungroup mutate filter group_by n
 #' @import data.table
 #' @import readxl
-#' @importFrom biomaRt useEnsembl getBM listDatasets
 #' @export
 read_proteomics <- function(software, folder, annotation_filename = "annotation",
                             peptide_filename = "pep", proteinGroup_filename = "prot", 
@@ -606,7 +605,6 @@ read_PD_files <- function(anno_filename, pep_filename, prot_filename,
 #' @importFrom dplyr ungroup mutate filter group_by n
 #' @import data.table
 #' @import readxl
-#' @importFrom biomaRt useEnsembl getBM listDatasets
 #' @export
 read_phosphoproteomics <- function(software, folder, 
                                    keep_only_phosphomodification = T, phospho_thr = 0.75, 
@@ -1349,7 +1347,6 @@ read_phospho_PD_files <- function(anno_filename, pep_filename, prot_filename, ps
 #' @importFrom dplyr ungroup mutate filter group_by n
 #' @import data.table
 #' @import readxl
-#' @importFrom biomaRt useEnsembl getBM listDatasets
 #' @export
 read_phospho_proteome_proteomics <- function(software, 
                                              folder_proteome, folder_phospho, 
