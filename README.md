@@ -141,7 +141,7 @@ In same cases can be usefull have the enrichment of the whole proteome discovere
 ##### N1. Protein-Protein Interaction network analysis of Differentially Expressed Proteins
 Last analitical step is the Protein-Protein Interaction (PPI) network analysis, since PPIs are essential in almost all processes of the cell, and it is crucial for understanding cell physiology in different states. For each comparison, ProTN analyses the interaction between the DEPs using STRING (Szklarczyk et al. 2021).
 
-<img src="www/images/figures/Risorsa%203.svg" width="75%" style="display:block;margin-left:auto;margin-right:auto"/>
+<img src="www/images/figures/Risorsa3.svg" width="75%" style="display:block;margin-left:auto;margin-right:auto"/>
 
 ### PhosProTN with Proteomic background
 PhosProTN is an integrative pipeline for phosphoproteomic analysis of DDA experimental data obtained from MS. It perform a complete analysis of the raw files from Proteome Discoverer (PD) or MaxQuant (MQ), with their biological interpretation, enrichement and network analysis. 
