@@ -54,10 +54,19 @@ jobs:
           
       - name: Install dependencies
         run: |
-          install.packages(c("remotes", "rcmdcheck","pandoc", "rlang", "vctrs", "processx", "rmarkdown"), INSTALL_opts="--no-multiarch")
+          install.packages(c("remotes", "BiocManager" "rcmdcheck","pandoc", "rlang", "vctrs", "processx", "rmarkdown"), INSTALL_opts="--no-multiarch")
+          BiocManager::install(c("SummarizedExperiment", "STRINGdb", "DEqMS", "limma", "preprocessCore"))
           remotes::install_deps(dependencies = TRUE)
         shell: Rscript {0}
-          
+
+      - name: Install proBatch from Github
+        run: |
+          Rscript -e "remotes::install_github("symbioticMe/proBatch")"
+
+      - name: Install PhosR from Github
+        run: |
+          Rscript -e "remotes::install_github("PYangLab/PhosR")"
+
       - name: Check
         run: rcmdcheck::rcmdcheck(args = c("--no-manual", "--no-multiarch"), error_on = "error")
         shell: Rscript {0}
