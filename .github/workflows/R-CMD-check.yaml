@@ -45,15 +45,6 @@ jobs:
         with:
           r-version: ${{ matrix.config.r }}
           
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: any::rcmdcheck
-          needs: check
-          
-      - uses: r-lib/actions/check-r-package@v2
-        with:
-          error-on: '"error"'
-      
       - name: Query dependencies
         run: |
           install.packages(c('remotes', 'BiocManager'), INSTALL_opts="--no-multiarch")
