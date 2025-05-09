@@ -55,9 +55,8 @@ jobs:
       - name: Install dependencies
         run: |
           install.packages(c("remotes", "rcmdcheck","pandoc", "rlang", "vctrs", "processx", "rmarkdown"), INSTALL_opts="--no-multiarch")
-          remotes::install_github("symbioticMe/proBatch")
-          remotes::install_github("PYangLab/PhosR")
           remotes::install_deps(dependencies = TRUE)
+          remotes::install_github("PYangLab/PhosR")
         shell: Rscript {0}
           
       - name: Check
