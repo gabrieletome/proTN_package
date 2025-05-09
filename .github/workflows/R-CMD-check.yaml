@@ -59,13 +59,15 @@ jobs:
           remotes::install_deps(dependencies = TRUE)
         shell: Rscript {0}
 
-      - name: Install proBatch from Github
-        run: |
-          Rscript -e "remotes::install_github("symbioticMe/proBatch")"
-
       - name: Install PhosR from Github
         run: |
-          Rscript -e "remotes::install_github("PYangLab/PhosR")"
+          remotes::install_github("PYangLab/PhosR")
+        shell: Rscript {0}
+        
+      - name: Install proBatch from Github
+        run: |
+          remotes::install_github("symbioticMe/proBatch")
+        shell: Rscript {0}
 
       - name: Check
         run: rcmdcheck::rcmdcheck(args = c("--no-manual", "--no-multiarch"), error_on = "error")
