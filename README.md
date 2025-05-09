@@ -1,7 +1,5 @@
 ![image](www/images/logo_scritta_black.svg)
 
-[![R-CMD-check](https://github.com/gabrieletome/proTN_package/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/gabrieletome/proTN_package/actions/workflows/R-CMD-check.yaml)
-
 # ProTN
 ProTN is a R package to perform an integrative pipeline that can perform all the steps of proteomics and phospho-proteomic analysis downstream of peptide quantification. ProTN works with any MS proteomic experiments managed with Proteome Discoverer and MaxQuant, two of the most used bioinformatic platforms to obtain peptide abundances from raw MS spectra. The implementation of ProTN focuses on being user-friendly, quick in doing the analysis, and comprehensive in the generation of images and tables that help the biological interpretation of results.
 
