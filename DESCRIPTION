@@ -59,7 +59,9 @@ Imports:
 	preprocessCore,
 	rjson,
 	rlang,
-	ruv
+	ruv,
+	foreach,
+	doParallel
 Suggests: 
     knitr,
     rmarkdown

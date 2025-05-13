@@ -44,6 +44,8 @@
 #' @importFrom dplyr summarise rename select arrange group_by ungroup mutate left_join
 #' @importFrom curl has_internet
 #' @importFrom httr GET POST status_code http_status use_proxy
+#' @importFrom doParallel registerDoParallel
+#' @import foreach
 #'
 #' @examples
 #' \dontrun{
