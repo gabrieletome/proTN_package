@@ -8,6 +8,7 @@ kinase_tree(
   proteome_data,
   differential_results,
   formule_CORAL,
+  species = "Homo sapiens",
   dirOutput = "results_ProTN",
   subfold = "pics",
   phospho_ctrl = FALSE,
@@ -20,6 +21,8 @@ kinase_tree(
 \item{differential_results}{List; a list containing differential analysis results, specifically \code{peptide_results_long} for peptide-wise differential analysis.}
 
 \item{formule_CORAL}{List; a list of formulae for CORAL-based kinase activity calculations. It must include formulae for the comparisons of interest.}
+
+\item{species}{Character. The species name "Homo sapiens" or "Mus musculus" (default: \code{"Homo sapiens"}). If selected "Mus musculus" the visial CORAL kinome tree will not be done.}
 
 \item{dirOutput}{Character; the directory where the results will be stored. Default is "results_ProTN".}
 

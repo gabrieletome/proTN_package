@@ -5,7 +5,8 @@ kinase_activity_calculation <- function(dirOutput_kinase,
                                         deps_pep_l_df, 
                                         psm_peptide_table, 
                                         c_anno,
-                                        phosR_thr = 0.7) {
+                                        phosR_thr = 0.7,
+                                        species = "Homo sapiens") {
   data("KinaseMotifs", envir = environment())
   data("PhosphoSitePlus", envir = environment())
   
@@ -21,7 +22,15 @@ kinase_activity_calculation <- function(dirOutput_kinase,
   Sequence(ppe) <- tmp_dat_pep$Annotated_Sequence
   
   mat <- assay(ppe, "Quantification")
-  substrate.list <- sapply(PhosphoSite.human, function(y) unlist(lapply(y, function(x) gsub(";.+", "", x))))
+  
+  if(species == "Mus musculus"){
+    substrate.list <- sapply(PhosphoSite.mouse, function(y) unlist(lapply(y, function(x) gsub(";.+", "", x))))
+  } else if(species == "Homo sapiens"){
+    substrate.list <- sapply(PhosphoSite.human, function(y) unlist(lapply(y, function(x) gsub(";.+", "", x))))
+  } else{
+    warning("Species not recognised. Select between: 'Homo sapiens' and 'Mus musculus'. Select default 'Homo sapiens'")
+    substrate.list <- sapply(PhosphoSite.human, function(y) unlist(lapply(y, function(x) gsub(";.+", "", x))))
+  }
   
   mat.std <- standardise(mat)
   rownames(mat.std) <- toupper(sub("\\..*", "", rownames(mat.std)))
@@ -40,7 +49,7 @@ kinase_activity_calculation <- function(dirOutput_kinase,
     # Differential analysis for the svg
     mean_kinase_activity <- lapply(rownames(contrast)[which((contrast != 0)[, 1])], 
                                    function(x) {
-                                     rowMeans(kssMat$ksActivityMatrix[, c_anno[x == condition, sample]])[colnames(predMat)] * contrast[x, ]
+                                     rowMeans(kssMat$ksActivityMatrix[, make.names(c_anno[x == condition, sample])])[colnames(predMat)] * contrast[x, ]
                                    }
     )
     kinase_Act <- Reduce("+", mean_kinase_activity)
@@ -51,9 +60,10 @@ kinase_activity_calculation <- function(dirOutput_kinase,
     message("Saving kinase activity matrix.")
     write_xlsx(dt, file.path(dirOutput_kinase, paste0(comp, "_kinase_activity_matrix.xlsx")), col_names = T)
     
-    message("Preparing svg tree...")
-    
-    renderSvg(comp, kinase_Act, dirOutput_kinase)
+    if(species == "Homo sapiens"){
+      message("Preparing svg tree...")
+      renderSvg(comp, kinase_Act, dirOutput_kinase)
+    }
     
     return(list(dt))
   }, error = function(err){
@@ -70,6 +80,7 @@ kinase_activity_calculation <- function(dirOutput_kinase,
 #' @param proteome_data List; a list containing proteomics data.
 #' @param differential_results List; a list containing differential analysis results, specifically `peptide_results_long` for peptide-wise differential analysis.
 #' @param formule_CORAL List; a list of formulae for CORAL-based kinase activity calculations. It must include formulae for the comparisons of interest.
+#' @param species Character. The species name "Homo sapiens" or "Mus musculus" (default: `"Homo sapiens"`). If selected "Mus musculus" the visial CORAL kinome tree will not be done.
 #' @param dirOutput Character; the directory where the results will be stored. Default is "results_ProTN".
 #' @param subfold Character; the subdirectory within `dirOutput` to store the results, default is "pics".
 #' @param phospho_ctrl Logical; whether to include phospho-control data in the calculations. Default is FALSE (excludes phospho-control data).
@@ -97,7 +108,7 @@ kinase_activity_calculation <- function(dirOutput_kinase,
 #' @import pheatmap
 #' 
 #' @export
-kinase_tree <- function(proteome_data, differential_results, formule_CORAL, 
+kinase_tree <- function(proteome_data, differential_results, formule_CORAL, species="Homo sapiens", 
                         dirOutput = "results_ProTN", subfold="pics", phospho_ctrl = FALSE, phosR_thr = 0.7) {
 
   dir.create(file.path( dirOutput, subfold, "kinaseTree"), showWarnings = FALSE, recursive = T)
@@ -130,7 +141,8 @@ kinase_tree <- function(proteome_data, differential_results, formule_CORAL,
                                                           deps_pep_l_df = deps_pep_l_df, 
                                                           psm_peptide_table = psm_peptide_table, 
                                                           c_anno = c_anno, 
-                                                          phosR_thr = phosR_thr)
+                                                          phosR_thr = phosR_thr,
+                                                          species = species)
   }
   
   return(list_svg)

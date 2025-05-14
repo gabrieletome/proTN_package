@@ -82,14 +82,14 @@ STRINGdb_network <- function(differential_results, species="Homo sapiens",
 select_regulated_genes <- function(deps_l_df) {
   g_sel_comp <- list()
   doComp <- list()
-  for (comp in unique(deps_l_df$comp)) {
-    tmp_deps <- deps_l_df[class != "=" & comp == comp]
+  for (comparison in unique(deps_l_df$comp)) {
+    tmp_deps <- deps_l_df[class != "=" & comp == comparison]
     genes <- tmp_deps[order(p_val)][1:min(500, .N), .(id)]
     if (nrow(genes) > 0) {
-      g_sel_comp[[comp]] <- genes
-      doComp[[comp]] <- TRUE
+      g_sel_comp[[comparison]] <- genes
+      doComp[[comparison]] <- TRUE
     } else {
-      g_sel_comp[[comp]] <- list()
+      g_sel_comp[[comparison]] <- list()
     }
   }
   return(list(g_sel_comp = g_sel_comp, doComp = doComp))
