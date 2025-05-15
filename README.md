@@ -170,9 +170,8 @@ imputation.
 In this step, two MDSs and two PCAs (proteins and peptides) are
 generated.
 
-![](www/images/figures/PCA_readme_protn.png){style="margin-left: auto;margin-right: auto;background-color: white;"
-width="49%"}
-<img src="www/images/figures/MDS_readme_protn.png" width="49%" style="background-color: white;margin-left: auto;margin-right: auto"/>
+<img src="www/images/figures/PCA_readme_protn.png" width="45%"/>
+<img src="www/images/figures/MDS_readme_protn.png" width="45%"/>
 
 #### Statistical differential analysis
 
@@ -210,11 +209,11 @@ Various figures are generated, first a bar plot that graphically
 represents the DEPs identified. Followed by comparison-specific volcano
 plots.
 
-<img src="www/images/figures/DEPs_readme_protn.png" width="75%" style="background-color: white;display: block;margin-left: auto;margin-right: auto"/>
+<img src="www/images/figures/DEPs_readme_protn.png" width="100%"/>
 
 <hr>
 
-<img src="www/images/figures/protein_vulcano.png" width="75%" style="background-color: white;display: block;margin-left: auto;margin-right: auto"/>
+<img src="www/images/figures/protein_vulcano.png" width="75%"/>
 
 #### Report creation and download of the results
 
@@ -271,7 +270,7 @@ the column DB to analyse of the options file. The other 2 are filtered
 on words to search on the term description, it uses the list of words in
 column Terms to search.
 
-<img src="www/images/figures/enrichment_readme_protn.png" width="75%" style="background-color: white;display: block;margin-left: auto;margin-right: auto"/>
+<img src="www/images/figures/enrichment_readme_protn.png" width="75%"/>
 
 ###### E1.1. Enrichment analysis of the whole set of proteins discovered by the experiment
 
@@ -290,7 +289,7 @@ and it is crucial for understanding cell physiology in different states.
 For each comparison, ProTN analyses the interaction between the DEPs
 using STRING (Szklarczyk et al. 2021).
 
-<img src="www/images/figures/stringdb_readme_protn.png" width="75%" style="background-color: white;display: block;margin-left: auto;margin-right: auto"/>
+<img src="www/images/figures/stringdb_readme_protn.png" width="75%"/>
 
 ### PhosProTN with Proteomic background
 
@@ -414,7 +413,7 @@ web shiny app for visualizing both quantitative and qualitative data. It
 generates high-resolution scalable vector graphic files suitable for
 publication without the need for refinement in graphic editing software.
 
-<img src="www/images/figures/TA_kinase_Tree_CORAL-cropped.svg" width="75%" style="display:block;margin-left:auto;margin-right:auto"/>
+<img src="www/images/figures/kinase_Tree.png" width="75%"/>
 
 ## Getting help
 
