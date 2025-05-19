@@ -56,7 +56,7 @@ kinase_activity_calculation <- function(dirOutput_kinase,
     
     dt <- as.data.table(kssMat$ksActivityMatrix, keep.rownames = "GeneName")
     message("Saving differential kinase activity.")
-    fwrite(data.table(kinase_Act, keep.rownames = T), file = file.path(dirOutput_kinase, paste0(comp, "_kinase_activity_differential.txt")), col.names = FALSE, quote = FALSE)
+    fwrite(as.data.table(kinase_Act, keep.rownames = "GeneName"), file = file.path(dirOutput_kinase, paste0(comp, "_kinase_activity_differential.txt")), col.names = FALSE, quote = FALSE)
     message("Saving kinase activity matrix.")
     write_xlsx(dt, file.path(dirOutput_kinase, paste0(comp, "_kinase_activity_matrix.xlsx")), col_names = T)
     
