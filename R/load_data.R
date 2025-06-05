@@ -49,6 +49,7 @@ extract_example = function(path_phospho = NULL,
 #' @param batch_corr_exe Logical; whether batch correction should be applied. Default is FALSE.
 #' @param batch_col Character; the column name representing batch information in the annotation file. Default is "batch".
 #' @param filt_absent_value Numeric; the value used to filter out absent data. Default is 0.
+#' @param min_peptide_protein Numeric; the value used to filter out protein by N peptide. Default is 0.
 #'
 #' @return A list containing proteomics data, including annotation and peptide data, 
 #'         with batch correction applied if specified.
@@ -66,7 +67,7 @@ read_proteomics <- function(software, folder, annotation_filename = "annotation"
                             peptide_filename = "pep", proteinGroup_filename = "prot", 
                             condition_col="Condition", sample_col="Sample", 
                             color_col="Color", batch_corr_exe = FALSE, batch_col="batch",
-                            filt_absent_value = 0){
+                            filt_absent_value = 0,min_peptide_protein = 0){
   
   if(!(software %in% c("PD","MQ"))){
     stop("Valid software is required. Write PD or MQ.",
@@ -97,10 +98,22 @@ read_proteomics <- function(software, folder, annotation_filename = "annotation"
   proteome_data = NULL
   if(software == "PD"){
     proteome_data = read_PD_files(anno_filename, pep_filename, prot_filename, 
-                                  batch_corr_exe= batch_corr_exe, filt_absent_value = filt_absent_value, batch_col = batch_col)
+                                  condition_col=condition_col, 
+                                  sample_col=sample_col, 
+                                  color_col=color_col,
+                                  batch_corr_exe= batch_corr_exe, 
+                                  filt_absent_value = filt_absent_value, 
+                                  batch_col = batch_col,
+                                  min_peptide_protein = min_peptide_protein)
   } else if(software == "MQ"){
     proteome_data = read_MQ_files(anno_filename, pep_filename, 
-                                  batch_corr_exe = batch_corr_exe, filt_absent_value = filt_absent_value, batch_col = batch_col)
+                                  condition_col=condition_col, 
+                                  sample_col=sample_col, 
+                                  color_col=color_col,
+                                  batch_corr_exe = batch_corr_exe, 
+                                  filt_absent_value = filt_absent_value, 
+                                  batch_col = batch_col,
+                                  min_peptide_protein = min_peptide_protein)
   }
   
   return(proteome_data)
@@ -111,7 +124,7 @@ read_proteomics <- function(software, folder, annotation_filename = "annotation"
 read_MQ_files <- function(anno_filename, pep_filename, 
                           condition_col="Condition", sample_col="Sample", 
                           color_col="Color", batch_corr_exe = FALSE, batch_col="batch",
-                          filt_absent_value = 0){
+                          filt_absent_value = 0, min_peptide_protein = 0){
   input_files <- list()
   
   message("Reading files...")
@@ -273,11 +286,10 @@ read_MQ_files <- function(anno_filename, pep_filename,
   psm_log_prot_df[, (setdiff(names(psm_log_prot_df), "ID_peptide")) := lapply(.SD, log2), .SDcols = setdiff(names(psm_log_prot_df), "ID_peptide")]
   
   # Filter proteins with only 1 peptID_peptidee
-  # TODO: change this filter
-  # filter_df_single_pep <- psm_anno_df[, .N, by = symbol][N > 1]
-  # filter_df_single_pep <- merge(filter_df_single_pep, psm_anno_df, by = "symbol")[, ID_peptide]
-  # psm_log_prot_df <- psm_log_prot_df[ID_peptide %in% filter_df_single_pep]
-  # psm_anno_df <- psm_anno_df[ID_peptide %in% filter_df_single_pep]
+  filter_df_single_pep <- psm_anno_df[, .N, by = symbol][N >= min_peptide_protein]
+  filter_df_single_pep <- merge(filter_df_single_pep, psm_anno_df, by = "symbol")[, ID_peptide]
+  psm_log_prot_df <- psm_log_prot_df[ID_peptide %in% filter_df_single_pep]
+  psm_anno_df <- psm_anno_df[ID_peptide %in% filter_df_single_pep]
   
   # Preprocess peptID_peptidee intensities
   psm_sig_pet_raw[psm_sig_pet_raw == 0] <- NA  # Transform 0s into NAs
@@ -293,7 +305,6 @@ read_MQ_files <- function(anno_filename, pep_filename,
   psm_peptide_table <- as.data.table(psm_peptide_table)[ID_peptide %in% filter_ID_peptide]
   
   # Determine tryptic condition
-  # TODO: check this triptic test
   peptides_df <- psm_peptide_table[, .(Accession, Annotated_Sequence)]
   peptides_df[, preAA := str_sub(str_extract(str_split_fixed(Annotated_Sequence,regex("\\."), n = 3)[,1], regex("\\[\\w+\\]")),
                                  2,
@@ -318,7 +329,7 @@ read_MQ_files <- function(anno_filename, pep_filename,
   psm_log_pet_df[, (setdiff(names(psm_log_pet_df), "ID_peptide")) := lapply(.SD, log2), .SDcols = setdiff(names(psm_log_pet_df), "ID_peptide")]
   
   # Filter proteins with only 1 peptID_peptidee
-  filter_df_single_pep <- psm_anno_df[, .N, by = symbol][N > 0]
+  filter_df_single_pep <- psm_anno_df[, .N, by = symbol][N >= min_peptide_protein]
   filter_df_single_pep <- merge(filter_df_single_pep, psm_anno_df, by = "symbol")[, symbol]
   filter_df_single_pep <- psm_peptide_table[GeneName %in% filter_df_single_pep, ID_peptide]
   
@@ -340,7 +351,7 @@ read_MQ_files <- function(anno_filename, pep_filename,
 read_PD_files <- function(anno_filename, pep_filename, prot_filename,
                           condition_col="Condition", sample_col="Sample", 
                           color_col="Color", batch_corr_exe = FALSE, batch_col="batch",
-                          filt_absent_value = 0){
+                          filt_absent_value = 0, min_peptide_protein=0){
   input_files <- list()
   
   message("Reading files...")
@@ -509,11 +520,10 @@ read_PD_files <- function(anno_filename, pep_filename, prot_filename,
   psm_log_prot_df[, (setdiff(names(psm_log_prot_df), "ID_peptide")) := lapply(.SD, log2), .SDcols = setdiff(names(psm_log_prot_df), "ID_peptide")]
   
   # Filter proteins with only 1 peptID_peptidee
-  # TODO: change this filter
-  # filter_df_single_pep <- psm_anno_df[, .N, by = symbol][N > 1]
-  # filter_df_single_pep <- merge(filter_df_single_pep, psm_anno_df, by = "symbol")[, ID_peptide]
-  # psm_log_prot_df <- psm_log_prot_df[ID_peptide %in% filter_df_single_pep]
-  # psm_anno_df <- psm_anno_df[ID_peptide %in% filter_df_single_pep]
+  filter_df_single_pep <- psm_anno_df[, .N, by = symbol][N >= min_peptide_protein]
+  filter_df_single_pep <- merge(filter_df_single_pep, psm_anno_df, by = "symbol")[, ID_peptide]
+  psm_log_prot_df <- psm_log_prot_df[ID_peptide %in% filter_df_single_pep]
+  psm_anno_df <- psm_anno_df[ID_peptide %in% filter_df_single_pep]
   
   # Preprocess peptID_peptidee intensities
   psm_sig_pet_raw[psm_sig_pet_raw == 0] <- NA  # Transform 0s into NAs
@@ -554,7 +564,7 @@ read_PD_files <- function(anno_filename, pep_filename, prot_filename,
   psm_log_pet_df[, (setdiff(names(psm_log_pet_df), "ID_peptide")) := lapply(.SD, log2), .SDcols = setdiff(names(psm_log_pet_df), "ID_peptide")]
   
   # Filter proteins with only 1 peptID_peptidee
-  filter_df_single_pep <- psm_anno_df[, .N, by = symbol][N > 0]
+  filter_df_single_pep <- psm_anno_df[, .N, by = symbol][N >= min_peptide_protein]
   filter_df_single_pep <- merge(filter_df_single_pep, psm_anno_df, by = "symbol")[, symbol]
   filter_df_single_pep <- psm_peptide_table[GeneName %in% filter_df_single_pep, ID_peptide]
   
@@ -593,6 +603,7 @@ read_PD_files <- function(anno_filename, pep_filename, prot_filename,
 #' @param batch_corr_exe Logical; whether batch correction should be applied. Default is FALSE.
 #' @param batch_col Character; the column name representing batch information in the annotation file. Default is "batch".
 #' @param filt_absent_value Numeric; the value used to filter out absent data. Default is 0.
+#' @param min_peptide_protein Numeric; the value used to filter out protein by N peptide. Default is 0.
 #'
 #' @return A list containing phosphoproteomics data, including annotation and peptide data, 
 #'         with batch correction applied if specified and only phospho-modified peptides kept if requested.
@@ -612,7 +623,7 @@ read_phosphoproteomics <- function(software, folder,
                                    proteinGroup_filename = "prot", psm_filename = "psm",
                                    condition_col="Condition", sample_col="Sample", 
                                    color_col="Color", batch_corr_exe = FALSE, batch_col="batch",
-                                   filt_absent_value = 0){
+                                   filt_absent_value = 0, min_peptide_protein=0){
   
   if(!(software %in% c("PD","MQ"))){
     stop("Valid software is required. Write PD or MQ.",
@@ -653,16 +664,24 @@ read_phosphoproteomics <- function(software, folder,
     proteome_data = read_phospho_PD_files(anno_filename, pep_filename, prot_filename, psm_file_filename, 
                                           keep_only_phosphomodification = keep_only_phosphomodification,
                                           batch_corr_exe= batch_corr_exe, 
+                                          condition_col=condition_col, 
+                                          sample_col=sample_col, 
+                                          color_col=color_col,
                                           filt_absent_value = filt_absent_value, 
                                           phospho_thr = phospho_thr, 
-                                          batch_col = batch_col)
+                                          batch_col = batch_col,
+                                          min_peptide_protein = min_peptide_protein)
   } else if(software == "MQ"){
     proteome_data = read_phospho_MQ_files(anno_filename, pep_filename, 
                                           keep_only_phosphomodification = keep_only_phosphomodification,
+                                          condition_col=condition_col, 
+                                          sample_col=sample_col, 
+                                          color_col=color_col,
                                           batch_corr_exe = batch_corr_exe, 
                                           filt_absent_value = filt_absent_value, 
                                           phospho_thr = phospho_thr, 
-                                          batch_col = batch_col)
+                                          batch_col = batch_col,
+                                          min_peptide_protein = min_peptide_protein)
   }
   
   return(proteome_data)
@@ -673,7 +692,7 @@ read_phosphoproteomics <- function(software, folder,
 read_phospho_MQ_files <- function(anno_filename, pep_filename, keep_only_phosphomodification = T,
                                   phospho_thr = 0.75, condition_col="Condition", sample_col="Sample", 
                                   color_col="Color", batch_corr_exe = FALSE, batch_col="batch",
-                                  filt_absent_value = 0){
+                                  filt_absent_value = 0, min_peptide_protein = 0){
   input_files <- list()
   
   message("Reading files...")
@@ -911,11 +930,10 @@ read_phospho_MQ_files <- function(anno_filename, pep_filename, keep_only_phospho
   psm_log_prot_df[, (setdiff(names(psm_log_prot_df), "ID_peptide")) := lapply(.SD, log2), .SDcols = setdiff(names(psm_log_prot_df), "ID_peptide")]
   
   # Filter proteins with only 1 peptID_peptidee
-  # TODO: change this filter
-  # filter_df_single_pep <- psm_anno_df[, .N, by = symbol][N > 1]
-  # filter_df_single_pep <- merge(filter_df_single_pep, psm_anno_df, by = "symbol")[, ID_peptide]
-  # psm_log_prot_df <- psm_log_prot_df[ID_peptide %in% filter_df_single_pep]
-  # psm_anno_df <- psm_anno_df[ID_peptide %in% filter_df_single_pep]
+  filter_df_single_pep <- psm_anno_df[, .N, by = symbol][N >= min_peptide_protein]
+  filter_df_single_pep <- merge(filter_df_single_pep, psm_anno_df, by = "symbol")[, ID_peptide]
+  psm_log_prot_df <- psm_log_prot_df[ID_peptide %in% filter_df_single_pep]
+  psm_anno_df <- psm_anno_df[ID_peptide %in% filter_df_single_pep]
   
   # Preprocess peptID_peptidee intensities
   psm_sig_pet_raw[psm_sig_pet_raw == 0] <- NA  # Transform 0s into NAs
@@ -956,7 +974,7 @@ read_phospho_MQ_files <- function(anno_filename, pep_filename, keep_only_phospho
   psm_log_pet_df[, (setdiff(names(psm_log_pet_df), "ID_peptide")) := lapply(.SD, log2), .SDcols = setdiff(names(psm_log_pet_df), "ID_peptide")]
   
   # Filter proteins with only 1 peptID_peptidee
-  filter_df_single_pep <- psm_anno_df[, .N, by = symbol][N > 0]
+  filter_df_single_pep <- psm_anno_df[, .N, by = symbol][N >= min_peptide_protein]
   filter_df_single_pep <- merge(filter_df_single_pep, psm_anno_df, by = "symbol")[, symbol]
   filter_df_single_pep <- psm_peptide_table[GeneName %in% filter_df_single_pep, ID_peptide]
   
@@ -979,7 +997,7 @@ read_phospho_PD_files <- function(anno_filename, pep_filename, prot_filename, ps
                           keep_only_phosphomodification = T, phospho_thr = 0.75,
                           condition_col="Condition", sample_col="Sample", 
                           color_col="Color", batch_corr_exe = FALSE, batch_col="batch",
-                          filt_absent_value = 0){
+                          filt_absent_value = 0, min_peptide_protein = min_peptide_protein){
   input_files <- list()
   
   message("Reading files...")
@@ -1243,11 +1261,10 @@ read_phospho_PD_files <- function(anno_filename, pep_filename, prot_filename, ps
   psm_log_prot_df[, (setdiff(names(psm_log_prot_df), "ID_peptide")) := lapply(.SD, log2), .SDcols = setdiff(names(psm_log_prot_df), "ID_peptide")]
   
   # Filter proteins with only 1 peptID_peptidee
-  # TODO: change this filter
-  # filter_df_single_pep <- psm_anno_df[, .N, by = symbol][N > 1]
-  # filter_df_single_pep <- merge(filter_df_single_pep, psm_anno_df, by = "symbol")[, ID_peptide]
-  # psm_log_prot_df <- psm_log_prot_df[ID_peptide %in% filter_df_single_pep]
-  # psm_anno_df <- psm_anno_df[ID_peptide %in% filter_df_single_pep]
+  filter_df_single_pep <- psm_anno_df[, .N, by = symbol][N >= min_peptide_protein]
+  filter_df_single_pep <- merge(filter_df_single_pep, psm_anno_df, by = "symbol")[, ID_peptide]
+  psm_log_prot_df <- psm_log_prot_df[ID_peptide %in% filter_df_single_pep]
+  psm_anno_df <- psm_anno_df[ID_peptide %in% filter_df_single_pep]
   
   # Preprocess peptID_peptidee intensities
   psm_sig_pet_raw[psm_sig_pet_raw == 0] <- NA  # Transform 0s into NAs
@@ -1287,7 +1304,7 @@ read_phospho_PD_files <- function(anno_filename, pep_filename, prot_filename, ps
   psm_log_pet_df[, (setdiff(names(psm_log_pet_df), "ID_peptide")) := lapply(.SD, log2), .SDcols = setdiff(names(psm_log_pet_df), "ID_peptide")]
   
   # Filter proteins with only 1 peptID_peptidee
-  filter_df_single_pep <- psm_anno_df[, .N, by = symbol][N > 0]
+  filter_df_single_pep <- psm_anno_df[, .N, by = symbol][N >= min_peptide_protein]
   filter_df_single_pep <- merge(filter_df_single_pep, psm_anno_df, by = "symbol")[, symbol]
   filter_df_single_pep <- psm_peptide_table[GeneName %in% filter_df_single_pep, ID_peptide]
   
@@ -1333,6 +1350,7 @@ read_phospho_PD_files <- function(anno_filename, pep_filename, prot_filename, ps
 #' @param batch_corr_exe Logical; whether batch correction should be applied. Default is FALSE.
 #' @param batch_col Character; the column name representing batch information in the annotation file. Default is "batch".
 #' @param filt_absent_value Numeric; the value used to filter out absent data. Default is 0.
+#' @param min_peptide_protein Numeric; the value used to filter out protein by N peptide. Default is 0.
 #'
 #' @return A list containing both proteome and phosphoproteome data, including annotation and peptide data, 
 #'         with batch correction applied if specified and only phospho-modified peptides kept if requested.
@@ -1358,7 +1376,7 @@ read_phospho_proteome_proteomics <- function(software,
                                              proteinGroup_phospho_filename = "prot", psm_phospho_filename = "psm",
                                              condition_phospho_col="Condition", sample_phospho_col="Sample", color_phospho_col="Color", 
                                              batch_corr_exe = FALSE, batch_col="batch",
-                                             filt_absent_value = 0){
+                                             filt_absent_value = 0, min_peptide_protein = 0){
 
   if(!(software %in% c("PD","MQ"))){
     stop("Valid software is required. Write PD or MQ.",
@@ -1418,10 +1436,22 @@ read_phospho_proteome_proteomics <- function(software,
   message("Reading Proteome data...")
   if(software == "PD"){
     proteome_data = read_PD_files(anno_proteome_filename, pep_proteome_filename, prot_proteome_filename, 
-                                  batch_corr_exe= batch_corr_exe, filt_absent_value = filt_absent_value, batch_col = batch_col)
+                                  condition_col=condition_proteome_col, 
+                                  sample_col=sample_proteome_col, 
+                                  color_col=color_proteome_col,
+                                  batch_corr_exe= batch_corr_exe, 
+                                  filt_absent_value = filt_absent_value, 
+                                  batch_col = batch_col,
+                                  min_peptide_protein = min_peptide_protein)
   } else if(software == "MQ"){
     proteome_data = read_MQ_files(anno_proteome_filename, pep_proteome_filename, 
-                                  batch_corr_exe = batch_corr_exe, filt_absent_value = filt_absent_value, batch_col = batch_col)
+                                  condition_col=condition_proteome_col, 
+                                  sample_col=sample_proteome_col, 
+                                  color_col=color_proteome_col,
+                                  batch_corr_exe = batch_corr_exe, 
+                                  filt_absent_value = filt_absent_value, 
+                                  batch_col = batch_col,
+                                  min_peptide_protein = min_peptide_protein)
   }
   message("Read Proteome data!")
   
@@ -1431,14 +1461,25 @@ read_phospho_proteome_proteomics <- function(software,
   if(software == "PD"){
     phospho_data = read_phospho_PD_files(anno_phospho_filename, pep_phospho_filename, prot_phospho_filename, psm_phospho_file_filename, 
                                           keep_only_phosphomodification = keep_only_phosphomodification,
-                                          batch_corr_exe= batch_corr_exe, filt_absent_value = filt_absent_value, phospho_thr = phospho_thr, batch_col = batch_col)
+                                         condition_col=condition_phospho_col, 
+                                         sample_col=sample_phospho_col, 
+                                         color_col=color_phospho_col,
+                                          batch_corr_exe= batch_corr_exe, 
+                                         filt_absent_value = filt_absent_value, 
+                                         phospho_thr = phospho_thr, 
+                                         batch_col = batch_col,
+                                         min_peptide_protein = min_peptide_protein)
   } else if(software == "MQ"){
     phospho_data = read_phospho_MQ_files(anno_phospho_filename, pep_phospho_filename, 
                                          keep_only_phosphomodification = keep_only_phosphomodification,
-                                          batch_corr_exe = batch_corr_exe, 
+                                         condition_col=condition_phospho_col, 
+                                         sample_col=sample_phospho_col, 
+                                         color_col=color_phospho_col,
+                                         batch_corr_exe = batch_corr_exe, 
                                          filt_absent_value = filt_absent_value,
                                          phospho_thr = phospho_thr,  
-                                         batch_col = batch_col)
+                                         batch_col = batch_col,
+                                         min_peptide_protein = min_peptide_protein)
   }
   message("Reading Phosphoproteomic data!")
   

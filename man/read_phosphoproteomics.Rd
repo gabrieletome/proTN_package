@@ -18,7 +18,8 @@ read_phosphoproteomics(
   color_col = "Color",
   batch_corr_exe = FALSE,
   batch_col = "batch",
-  filt_absent_value = 0
+  filt_absent_value = 0,
+  min_peptide_protein = 0
 )
 }
 \arguments{
@@ -49,6 +50,8 @@ read_phosphoproteomics(
 \item{batch_col}{Character; the column name representing batch information in the annotation file. Default is "batch".}
 
 \item{filt_absent_value}{Numeric; the value used to filter out absent data. Default is 0.}
+
+\item{min_peptide_protein}{Numeric; the value used to filter out protein by N peptide. Default is 0.}
 }
 \value{
 A list containing phosphoproteomics data, including annotation and peptide data,
