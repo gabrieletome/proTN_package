@@ -11,7 +11,8 @@ generate_volcano_plots(
   fc_thr = 0.75,
   pval_fdr = "p_val",
   pval_thr = 0.05,
-  color_contrast = NULL
+  color_contrast = NULL,
+  interactomics = FALSE
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ generate_volcano_plots(
 \item{pval_thr}{A numeric value for the p-value threshold (default is 0.05).}
 
 \item{color_contrast}{A vector of two colors to use for plotting (optional).}
+
+\item{interactomics}{Logical. Set to TRUE if is an interactomics analysis (default is FALSE).}
 }
 \value{
 A list containing the volcano plot for the specified comparison.

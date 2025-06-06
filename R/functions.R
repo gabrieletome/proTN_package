@@ -430,14 +430,14 @@ deps_b2b_lollipop <- function(input_df, # input dataframe
 ){
   bf<-"Arial"
   plot_df <- input_df %>% select(bb_col=all_of(bb_col),
-                                        x_col=all_of(x_col),
-                                        y_col=all_of(y_col),
-                                        size_col=any_of(size_col),
-                                        shape_col=any_of(shape_col),
-                                        color_col=any_of(color_col),
-                                        fill_col=any_of(fill_col),
-                                        text_col=any_of(text_col),
-                                        facet_col=any_of(facet_col))
+                                 x_col=all_of(x_col),
+                                 y_col=all_of(y_col),
+                                 size_col=any_of(size_col),
+                                 shape_col=any_of(shape_col),
+                                 color_col=any_of(color_col),
+                                 fill_col=any_of(fill_col),
+                                 text_col=any_of(text_col),
+                                 facet_col=any_of(facet_col))
   
   # creation of labels, abbreviating text 
   plot_df$y_col<- plot_df %>% pull(y_col) %>% str_trim() # Clean text
@@ -462,74 +462,132 @@ deps_b2b_lollipop <- function(input_df, # input dataframe
   # define shift (if 1, roughly 1/3 of the plot)
   shift<-(max(plot_df$x_col)/2)*shift_mult
   
-  f_left<- levels(plot_df$bb_col)[1]
-  f_right<- levels(plot_df$bb_col)[2]
-  
-  lp<- ggplot(plot_df, aes(y = y_col))+
-    geom_linerange(data = plot_df[plot_df$bb_col==f_left,],
-                   aes(xmin = -shift, xmax = -shift-x_col, size=0.75))+
-    geom_linerange(data = plot_df[plot_df$bb_col==f_right,],
-                   aes(xmin = shift, xmax = shift+x_col, size=0.75))+
-    geom_text(data = plot_df[plot_df$bb_col==f_left,],
-              aes(y = y_col, x = 0, label = y_col),
-              inherit.aes = F,size=4)+
-    geom_text(data = plot_df[plot_df$bb_col==f_right,],
-              aes(y = y_col, x = 0, label = y_col),
-              inherit.aes = F,size=4)+
-    scale_x_continuous(limits =c((-shift-max(break_vec)),(shift+max(break_vec))),
-                       breaks = c(rev(-break_vec)-shift, break_vec+shift),
-                       labels = c(as.character(rev(break_vec)),as.character(break_vec)))+
-    theme_tufte(base_size = 16)+
-    theme(axis.ticks.y = element_blank(),
-          axis.title.y = element_blank(),
-          axis.text.y = element_blank(),
-          legend.position = "none")+
-    labs(x = "N DEPs")
-  
-  
-  if("size_col" %in% colnames(plot_df)){
-    lp <- lp + 
-      geom_point(data = plot_df[plot_df$bb_col==f_left,],
-                 aes(x = -shift-x_col, size = 5), position = position_nudge(y = -position_dodge))+
-      geom_point(data = plot_df[plot_df$bb_col==f_right,],
-                 aes(x = shift+x_col, size = 5), position = position_nudge(y = position_dodge))+
-      scale_size(name=size_col,range = size_vec)
-  } else {
-    lp <- lp + 
-      geom_point(data = plot_df[plot_df$bb_col==f_left,],
-                 aes(x = -shift-x_col),size=2)+
-      geom_point(data = plot_df[plot_df$bb_col==f_right,],
-                 aes(x = shift+x_col),size=2)
-  }
-  
-  
-  if("text_col" %in% colnames(plot_df)){
-    lp <- lp + geom_text(data = plot_df[plot_df$bb_col==f_left,],
-                         aes(x = -(shift*13/10)-x_col, label=text_col, vjust=0),
-                         fontface="italic", size=4, show.legend = F) +
+  if(uniqueN(plot_df$bb_col) != 1){
+    f_left<- levels(plot_df$bb_col)[1]
+    f_right<- levels(plot_df$bb_col)[2]
+    
+    lp<- ggplot(plot_df, aes(y = y_col))+
+      geom_linerange(data = plot_df[plot_df$bb_col==f_left,],
+                     aes(xmin = -shift, xmax = -shift-x_col, size=0.75))+
+      geom_linerange(data = plot_df[plot_df$bb_col==f_right,],
+                     aes(xmin = shift, xmax = shift+x_col, size=0.75))+
+      geom_text(data = plot_df[plot_df$bb_col==f_left,],
+                aes(y = y_col, x = 0, label = y_col),
+                inherit.aes = F,size=4)+
       geom_text(data = plot_df[plot_df$bb_col==f_right,],
-                aes(x = (shift*13/10)+x_col, label=text_col, vjust=0),
-                fontface="italic", size=4, show.legend = F)
-  }
-  
-  if("shape_col" %in% colnames(plot_df)){
-    lp <- lp + aes(shape=shape_col) + scale_shape_manual(name=shape_col, values= shape_vec) # drop = FALSE
-  }
-  
-  if("color_col" %in% colnames(plot_df)){
-    lp <- lp + aes(colour=color_col) + scale_color_manual(name=color_col,values= color_vec) # drop = FALSE
-  }
-  
-  if("fill_col" %in% colnames(plot_df)){
-    lp <- lp + aes(fill=fill_col) + scale_fill_manual(name=fill_col, values= fill_vec) # drop = FALSE
-  }
-  
-  if(nrow(plot_df)/2 == length(unique(plot_df$y_col))){
-    lp <- lp + geom_text(aes(x=shift, label=c("Up-regulated", rep("",nrow(plot_df)-1)), hjust=(-0.05), vjust=(-2), fontface=2, color="black"),size=4)
-    lp <- lp + geom_text(aes(x=-shift, label=c("Down-regulated", rep("",nrow(plot_df)-1)), hjust=(1.1), vjust=(-2), fontface=2, color="black"),size=4)
-  } else{
-    lp <- lp + geom_text(aes(x=shift, label=c("Up-regulated", rep("",nrow(plot_df)-1)), hjust=(-0.05), vjust=(-2), fontface=2, color="black"),size=4, nudge_y = 2.5)
-    lp <- lp + geom_text(aes(x=-shift, label=c("Down-regulated", rep("",nrow(plot_df)-1)), hjust=(1.1), vjust=(-2), fontface=2, color="black"),size=4, nudge_y = 2.5)
+                aes(y = y_col, x = 0, label = y_col),
+                inherit.aes = F,size=4)+
+      scale_x_continuous(limits =c((-shift-max(break_vec)),(shift+max(break_vec))),
+                         breaks = c(rev(-break_vec)-shift, break_vec+shift),
+                         labels = c(as.character(rev(break_vec)),as.character(break_vec)))+
+      theme_tufte(base_size = 16)+
+      theme(axis.ticks.y = element_blank(),
+            axis.title.y = element_blank(),
+            axis.text.y = element_blank(),
+            legend.position = "none")+
+      labs(x = "N DEPs")
+    
+    
+    if("size_col" %in% colnames(plot_df)){
+      lp <- lp + 
+        geom_point(data = plot_df[plot_df$bb_col==f_left,],
+                   aes(x = -shift-x_col, size = 5), position = position_nudge(y = -position_dodge))+
+        geom_point(data = plot_df[plot_df$bb_col==f_right,],
+                   aes(x = shift+x_col, size = 5), position = position_nudge(y = position_dodge))+
+        scale_size(name=size_col,range = size_vec)
+    } else {
+      lp <- lp + 
+        geom_point(data = plot_df[plot_df$bb_col==f_left,],
+                   aes(x = -shift-x_col),size=2)+
+        geom_point(data = plot_df[plot_df$bb_col==f_right,],
+                   aes(x = shift+x_col),size=2)
+    }
+    
+    
+    if("text_col" %in% colnames(plot_df)){
+      lp <- lp + geom_text(data = plot_df[plot_df$bb_col==f_left,],
+                           aes(x = -(shift*13/10)-x_col, label=text_col, vjust=0),
+                           fontface="italic", size=4, show.legend = F) +
+        geom_text(data = plot_df[plot_df$bb_col==f_right,],
+                  aes(x = (shift*13/10)+x_col, label=text_col, vjust=0),
+                  fontface="italic", size=4, show.legend = F)
+    }
+    
+    if("shape_col" %in% colnames(plot_df)){
+      lp <- lp + aes(shape=shape_col) + scale_shape_manual(name=shape_col, values= shape_vec) # drop = FALSE
+    }
+    
+    if("color_col" %in% colnames(plot_df)){
+      lp <- lp + aes(colour=color_col) + scale_color_manual(name=color_col,values= color_vec) # drop = FALSE
+    }
+    
+    if("fill_col" %in% colnames(plot_df)){
+      lp <- lp + aes(fill=fill_col) + scale_fill_manual(name=fill_col, values= fill_vec) # drop = FALSE
+    }
+    
+    if(nrow(plot_df)/2 == length(unique(plot_df$y_col))){
+      lp <- lp + geom_text(aes(x=shift, label=c("Up-regulated", rep("",nrow(plot_df)-1)), hjust=(-0.05), vjust=(-2), fontface=2, color="black"),size=4)
+      lp <- lp + geom_text(aes(x=-shift, label=c("Down-regulated", rep("",nrow(plot_df)-1)), hjust=(1.1), vjust=(-2), fontface=2, color="black"),size=4)
+    } else{
+      lp <- lp + geom_text(aes(x=shift, label=c("Up-regulated", rep("",nrow(plot_df)-1)), hjust=(-0.05), vjust=(-2), fontface=2, color="black"),size=4, nudge_y = 2.5)
+      lp <- lp + geom_text(aes(x=-shift, label=c("Down-regulated", rep("",nrow(plot_df)-1)), hjust=(1.1), vjust=(-2), fontface=2, color="black"),size=4, nudge_y = 2.5)
+    }
+  } else{ # Plot for interactomics
+    f_right<- levels(plot_df$bb_col)[1]
+    
+    lp<- ggplot(plot_df, aes(y = y_col))+
+      geom_linerange(data = plot_df[plot_df$bb_col==f_right,],
+                     aes(xmin = shift, xmax = shift+x_col, size=0.75))+
+      geom_text(data = plot_df[plot_df$bb_col==f_right,],
+                aes(y = y_col, x = 0, label = y_col),
+                inherit.aes = F,size=4)+
+      scale_x_continuous(limits =c(0,(shift+max(break_vec))),
+                         breaks = c(break_vec+shift),
+                         labels = c(as.character(break_vec)))+
+      theme_tufte(base_size = 16)+
+      theme(axis.ticks.y = element_blank(),
+            axis.title.y = element_blank(),
+            axis.text.y = element_blank(),
+            legend.position = "none")+
+      labs(x = "N DEPs")
+    
+    
+    if("size_col" %in% colnames(plot_df)){
+      lp <- lp + 
+        geom_point(data = plot_df[plot_df$bb_col==f_right,],
+                   aes(x = shift+x_col, size = 5), position = position_nudge(y = position_dodge))+
+        scale_size(name=size_col,range = size_vec)
+    } else {
+      lp <- lp + 
+        geom_point(data = plot_df[plot_df$bb_col==f_right,],
+                   aes(x = shift+x_col),size=2)
+    }
+    
+    
+    if("text_col" %in% colnames(plot_df)){
+      lp <- lp + 
+        geom_text(data = plot_df[plot_df$bb_col==f_right,],
+                  aes(x = (shift*13/10)+x_col, label=text_col, vjust=0),
+                  fontface="italic", size=4, show.legend = F)
+    }
+    
+    if("shape_col" %in% colnames(plot_df)){
+      lp <- lp + aes(shape=shape_col) + scale_shape_manual(name=shape_col, values= shape_vec) # drop = FALSE
+    }
+    
+    if("color_col" %in% colnames(plot_df)){
+      lp <- lp + aes(colour=color_col) + scale_color_manual(name=color_col,values= color_vec) # drop = FALSE
+    }
+    
+    if("fill_col" %in% colnames(plot_df)){
+      lp <- lp + aes(fill=fill_col) + scale_fill_manual(name=fill_col, values= fill_vec) # drop = FALSE
+    }
+    
+    if(nrow(plot_df) == length(unique(plot_df$y_col))){
+      lp <- lp + geom_text(aes(x=shift, label=c("Up-regulated", rep("",nrow(plot_df)-1)), hjust=(-0.05), vjust=(-2), fontface=2, color="black"),size=4)
+    } else{
+      lp <- lp + geom_text(aes(x=shift, label=c("Up-regulated", rep("",nrow(plot_df)-1)), hjust=(-0.05), vjust=(-2), fontface=2, color="black"),size=4, nudge_y = 2.5)
+    }
   }
   
   return(lp)
@@ -850,7 +908,7 @@ enrichRfnc_universe<-function(in_df, pval_fdr_enrich, pval_enrich_thr, overlap_s
 
 
 ### Update limma function with data.table ----
-limmafnc_dt <- function(type = "PROT", c_anno, dat_gene, psm_count_table, formule_contrast, expr_avgse_df, signal_thr, fc_thr, pval_thr, pval_fdr) {
+limmafnc_dt <- function(type = "PROT", c_anno, dat_gene, psm_count_table, formule_contrast, expr_avgse_df, signal_thr, fc_thr, pval_thr, pval_fdr, interactomics = FALSE) {
   # make design table
   design <- model.matrix(~0 + c_anno$condition)
   colnames(design) <- levels(as.factor(c_anno$condition))
@@ -921,9 +979,14 @@ limmafnc_dt <- function(type = "PROT", c_anno, dat_gene, psm_count_table, formul
     }
     
     degs_u <- as.data.table(degs_u)
-    degs_u[, `:=`(log2_expr = 2^log2_FC, FC = 2^log2_FC, comp = comp, class = "=")]
-    degs_u[log2_FC >= fc_thr & get(pval_col) <= pval_thr, class := "+"]
-    degs_u[log2_FC <= -fc_thr & get(pval_col) <= pval_thr, class := "-"]
+    if(!interactomics){
+      degs_u[, `:=`(log2_expr = 2^log2_FC, FC = 2^log2_FC, comp = comp, class = "=")]
+      degs_u[log2_FC >= fc_thr & get(pval_col) <= pval_thr, class := "+"]
+      degs_u[log2_FC <= -fc_thr & get(pval_col) <= pval_thr, class := "-"]
+    } else{
+      degs_u[, `:=`(log2_expr = 2^log2_FC, FC = 2^log2_FC, comp = comp, class = "=")]
+      degs_u[log2_FC >= fc_thr & get(pval_col) <= pval_thr, class := "+"]
+    }
     
     degs_l_df <- rbindlist(list(degs_l_df, degs_u[, .(id, comp, class, log2_FC, FC, p_val, p_adj)]))
     degs_add <- degs_u[, .(id, class, log2_FC, FC, p_val, p_adj)]

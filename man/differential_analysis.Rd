@@ -10,7 +10,8 @@ differential_analysis(
   fc_thr = 0.75,
   pval_fdr = "p_val",
   pval_thr = 0.05,
-  signal_thr = 0
+  signal_thr = 0,
+  interactomics = FALSE
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ differential_analysis(
 \item{pval_thr}{Numeric. The threshold for p-value (default is 0.05).}
 
 \item{signal_thr}{Numeric. The threshold for signal log2 intensity (default is 0).}
+
+\item{interactomics}{Logical. Set to TRUE if is an interactomics analysis (default is FALSE).}
 }
 \value{
 A list containing the results of the differential analysis

@@ -8,6 +8,7 @@
 #' @param pval_fdr String. The column name for p-value after FDR adjustment (default is "p_val").
 #' @param pval_thr Numeric. The threshold for p-value (default is 0.05).
 #' @param signal_thr Numeric. The threshold for signal log2 intensity (default is 0).
+#' @param interactomics Logical. Set to TRUE if is an interactomics analysis (default is FALSE).
 #'
 #' @return A list containing the results of the differential analysis
 #'
@@ -30,7 +31,7 @@
 #' @export
 differential_analysis <- function(proteome_data, formule_contrast, 
                                   fc_thr=0.75, pval_fdr = "p_val", pval_thr=0.05, 
-                                  signal_thr=0) {
+                                  signal_thr=0, interactomics = FALSE) {
   if(("c_anno" %in% names(proteome_data))){
     phospho_with_proteome = FALSE
   } else if(("c_anno_phospho" %in% names(proteome_data))){
@@ -40,7 +41,11 @@ differential_analysis <- function(proteome_data, formule_contrast,
   }
   
   message("**Thresholds used:**\n")
-  message(sprintf("- Fold Change threshold: log2_FC > %s (+), log2_FC < -%s (-)\n", fc_thr, fc_thr))
+  if(!interactomics){
+    message(sprintf("- Fold Change threshold: log2_FC > %s (+), log2_FC < -%s (-)\n", fc_thr, fc_thr))
+  } else{
+    message(sprintf("- Fold Change threshold: log2_FC > %s (+)\n", fc_thr))
+  }
   message(sprintf("- Statistical significance threshold: p.val < %s\n", pval_thr))
   if (signal_thr != -Inf) message(sprintf("- Signal log2 intensity threshold: signal > %s\n", signal_thr))
   
@@ -194,7 +199,7 @@ differential_analysis <- function(proteome_data, formule_contrast,
     colnames(expr_avgse_df)[1] <- "GeneName"
     
     deps_df <- limmafnc_dt(type = "PROT", c_anno = c_anno, dat_gene = dat_gene, psm_count_table = psm_count_table, formule_contrast = formule_contrast,
-                           expr_avgse_df = expr_avgse_df, signal_thr = signal_thr, fc_thr = fc_thr, pval_thr = pval_thr, pval_fdr = pval_fdr)
+                           expr_avgse_df = expr_avgse_df, signal_thr = signal_thr, fc_thr = fc_thr, pval_thr = pval_thr, pval_fdr = pval_fdr, interactomics = interactomics)
     
     deps_l_df <- deps_df$degs_l_df
     deps_w_df <- deps_df$degs_w_df
@@ -218,7 +223,7 @@ differential_analysis <- function(proteome_data, formule_contrast,
     expr_avgse_pep_df <- Reduce(merge, list(expr_avg_pep_df, expr_se_pep_df, expr_cv_pep_df))
     
     deps_pep_df <- limmafnc_dt("PEP", c_anno = c_anno, dat_gene = dat_pep, psm_count_table = psm_count_table, formule_contrast = formule_contrast,
-                               expr_avgse_df = expr_avgse_df, signal_thr = signal_thr, fc_thr = fc_thr, pval_thr = pval_thr, pval_fdr = pval_fdr)
+                               expr_avgse_df = expr_avgse_df, signal_thr = signal_thr, fc_thr = fc_thr, pval_thr = pval_thr, pval_fdr = pval_fdr, interactomics = interactomics)
     
     deps_pep_l_df <- deps_pep_df$degs_l_df
     deps_pep_w_df <- deps_pep_df$degs_w_df

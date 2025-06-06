@@ -67,8 +67,12 @@ generate_differential_barplots <- function(differential_results, data_type="prot
     }
     
     tryCatch({
-      names(col_vec)[seq(1, length(lolli_df$comp), by = 2)] <- paste0(lolli_df$comp[seq(1, length(lolli_df$comp), by = 2)], "_+")
-      names(col_vec)[seq(2, length(lolli_df$comp), by = 2)] <- paste0(lolli_df$comp[seq(1, length(lolli_df$comp), by = 2)], "_-")
+      if("+" %in% lolli_df$class){
+        names(col_vec)[seq(1, length(lolli_df$comp), by = 2)] <- paste0(lolli_df$comp[seq(1, length(lolli_df$comp), by = 2)], "_+")
+      }
+      if("-" %in% lolli_df$class){
+        names(col_vec)[seq(2, length(lolli_df$comp), by = 2)] <- paste0(lolli_df$comp[seq(1, length(lolli_df$comp), by = 2)], "_-")
+      }
     }, error = function(cond){
       stop("Color must be a vector of the same length of the number of comparison.")
     })
@@ -106,6 +110,7 @@ generate_differential_barplots <- function(differential_results, data_type="prot
 #' @param pval_fdr A character string indicating whether to use "p_val" or "p_adj" for the p-value threshold (default is "p_val").
 #' @param pval_thr A numeric value for the p-value threshold (default is 0.05).
 #' @param color_contrast A vector of two colors to use for plotting (optional).
+#' @param interactomics Logical. Set to TRUE if is an interactomics analysis (default is FALSE).
 #'
 #' @return A list containing the volcano plot for the specified comparison.
 #'
@@ -130,7 +135,7 @@ generate_differential_barplots <- function(differential_results, data_type="prot
 #' @export
 generate_volcano_plots <- function(differential_results, data_type=NULL, 
                                    comparison=NULL, fc_thr=0.75, pval_fdr = "p_val", 
-                                   pval_thr=0.05, color_contrast=NULL) {
+                                   pval_thr=0.05, color_contrast=NULL, interactomics = FALSE) {
   if(is.null(comparison)){
     stop("Provide a valid comparison")
   }
@@ -175,13 +180,18 @@ generate_volcano_plots <- function(differential_results, data_type=NULL,
     cmd <- ggplot(input_df, aes(x = log2_FC, y = get(col), col = class, text = paste('</br>Gene: ', id, '</br>Class: ', class, '</br>Log2_FC: ', log2_FC, '</br>', col, ': ', get(col)))) +
       geom_point(pch = 20, cex = 2) +
       geom_hline(yintercept = -log10(pval_thr), col = "black") +
-      geom_vline(xintercept = c(-fc_thr, fc_thr), col = "black") +
       ggtitle(paste0("Volcano Plot of ", comparison)) +
       ylab(if (pval_fdr=="p_adj") "-log10(fdr)" else "-log10(p_val)") +
       scale_color_manual(values = c("+" = col_vec[1], "-" = col_vec[2], "=" = "grey70")) +
       scale_x_continuous(limits = c(min(-max(abs(input_df$log2_FC)), -3), max(max(abs(input_df$log2_FC)), 3))) +
       scale_y_continuous(limits = c(0, max(max(abs(input_df[,get(col)])), 4))) +
       theme_bw(base_size = bs)
+    
+    if(!interactomics){
+      cmd <- cmd + geom_vline(xintercept = c(-fc_thr, fc_thr), col = "black")
+    } else{
+      cmd <- cmd + geom_vline(xintercept = c(fc_thr), col = "black")
+    }
     
     plotlist[[comparison]] <- ggplotly(cmd, tooltip = c("text"))
     return(plotlist)

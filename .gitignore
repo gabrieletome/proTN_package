@@ -26,3 +26,6 @@ inst/extdata/STRINGdb
 phosprotn_proteome_package_tester.Rmd
 phosprotn_package_tester.Rmd
 protn_package_tester.Rmd
+inst/extdata/9606.protein.links.v12.0.txt.gz
+inst/extdata/9606.protein.info.v12.0.txt.gz
+inst/extdata/9606.protein.aliases.v12.0.txt.gz
