@@ -7,6 +7,7 @@
 read_proteomics(
   software,
   folder,
+  use_proteinGroups_MQ = FALSE,
   annotation_filename = "annotation",
   peptide_filename = "pep",
   proteinGroup_filename = "prot",
@@ -23,6 +24,8 @@ read_proteomics(
 \item{software}{Character; the proteomics software used, either "PD" for Proteome Discoverer or "MQ" for MaxQuant.}
 
 \item{folder}{Character; the folder containing the data files.}
+
+\item{use_proteinGroups_MQ}{Logical; Only for MaxQuant. If FALSE it expect the evidence.txt file, if TRUE require peptide.txt and proteinGroups.txt files. Default is FALSE-}
 
 \item{annotation_filename}{Character; the name or pattern of the annotation file. Default is "annotation".}
 
