@@ -230,6 +230,7 @@ read_MQ_files <- function(anno_filename, pep_filename,
   
   to_remove <- nrow(input_files[["PEP"]][!(`Raw file` %in% input_files[["annotation"]]$Sample)])
   input_files[["PEP"]] <- input_files[["PEP"]][(`Raw file` %in% input_files[["annotation"]]$Sample)]
+  input_files[["annotation"]] <- input_files[["annotation"]][Sample %in% input_files[["PEP"]]$`Raw file`]
   message(paste0("\tPeptide removed since sample not in sample annotation: ",to_remove))
   
   # to_remove <- nrow(input_files[["PEP"]][(Type == "MSMS")])
@@ -243,7 +244,9 @@ read_MQ_files <- function(anno_filename, pep_filename,
   psm_sig_raw <- data.table("ID_peptide" = as.factor(paste(input_files[["PEP"]]$`Gene names`, input_files[["PEP"]]$Sequence, input_files[["PEP"]]$Modifications, sep="_")), 
                             "Sample" = as.factor(input_files[["PEP"]]$`Raw file`), 
                             "Intensity" = input_files[["PEP"]]$Intensity)
-  psm_sig_raw <- dcast(psm_sig_raw, formula = ID_peptide~Sample, value.var = "Intensity", fun.aggregate = sum)
+  suppressWarnings({
+    psm_sig_raw <- dcast(psm_sig_raw, formula = ID_peptide~Sample, value.var = "Intensity", fun.aggregate = sum)
+  })
   colnames(psm_sig_raw)[-1] <- input_files[["annotation"]][match(colnames(psm_sig_raw)[-1], input_files[["annotation"]]$Sample)]$Sample
   
   #Made the description of the mpeptides
@@ -621,8 +624,7 @@ read_MQ_prot_peptide_files <- function(anno_filename, pep_filename, prot_filenam
   }, error=function(cond){
     stop(paste0("Missing file. The file \'PEPTIDE\' is missing or not have the pattern in the filename or there are duplicates files."))
   })
-  message("File read.")
-  
+
   # Read peptide file
   input_files[["PROT"]] <- tryCatch({
     fread(prot_filename)
@@ -708,24 +710,27 @@ read_MQ_prot_peptide_files <- function(anno_filename, pep_filename, prot_filenam
   
   input_files[["PROT_PEP"]] <- merge.data.table(input_files[["PROT"]], input_files[["PEP"]], 
                                                 by.x = "Leading razor protein", by.y = "Leading razor protein")
-  
-  input_files[["PROT_PEP"]] <- melt(input_files[["PROT_PEP"]], 
-                                    id.vars = c("Leading razor protein", "Protein names", "Fasta headers", "Gene names", "Sequence", "Modifications"),
-                                    measure.vars = grep("Intensity ", names(input_files$PEP), value = TRUE), 
-                                    variable.name = "Raw file", 
-                                    value.name = "Intensity")
+  suppressWarnings({
+    input_files[["PROT_PEP"]] <- melt(input_files[["PROT_PEP"]], 
+                                      id.vars = c("Leading razor protein", "Protein names", "Fasta headers", "Gene names", "Sequence", "Modifications"),
+                                      measure.vars = grep("Intensity ", names(input_files$PEP), value = TRUE), 
+                                      variable.name = "Raw file", 
+                                      value.name = "Intensity")
+  })
   input_files[["PROT_PEP"]][, `Raw file` := stri_replace(`Raw file`, regex = "Intensity ", replacement = "")]
   
   to_remove <- nrow(input_files[["PROT_PEP"]][!(`Raw file` %in% input_files[["annotation"]]$Sample)])
   input_files[["PROT_PEP"]] <- input_files[["PROT_PEP"]][(`Raw file` %in% input_files[["annotation"]]$Sample)]
+  input_files[["annotation"]] <- input_files[["annotation"]][Sample %in% input_files[["PROT_PEP"]]$`Raw file`]
   message(paste0("\tPeptide removed since sample not in sample annotation: ",to_remove))
-  
   
   #Made the matrix
   psm_sig_raw <- data.table("ID_peptide" = as.factor(paste(input_files[["PROT_PEP"]]$`Gene names`, input_files[["PROT_PEP"]]$Sequence, input_files[["PEP"]]$Modifications, sep="_")), 
                             "Sample" = as.factor(input_files[["PROT_PEP"]]$`Raw file`), 
                             "Intensity" = input_files[["PROT_PEP"]]$Intensity)
-  psm_sig_raw <- dcast(psm_sig_raw, formula = ID_peptide~Sample, value.var = "Intensity", fun.aggregate = sum)
+  suppressWarnings({
+      psm_sig_raw <- dcast(psm_sig_raw, formula = ID_peptide~Sample, value.var = "Intensity", fun.aggregate = sum)
+  })
   colnames(psm_sig_raw)[-1] <- input_files[["annotation"]][match(colnames(psm_sig_raw)[-1], input_files[["annotation"]]$Sample)]$Sample
   
   #Made the description of the mpeptides
@@ -1042,6 +1047,7 @@ read_phospho_MQ_files <- function(anno_filename, pep_filename, keep_only_phospho
   
   to_remove <- nrow(input_files[["PEP"]][!(`Raw file` %in% input_files[["annotation"]]$Sample)])
   input_files[["PEP"]] <- input_files[["PEP"]][(`Raw file` %in% input_files[["annotation"]]$Sample)]
+  input_files[["annotation"]] <- input_files[["annotation"]][Sample %in% input_files[["PEP"]]$`Raw file`]
   message(paste0("\tPeptide removed since sample not in sample annotation: ",to_remove))
   
   to_remove <- nrow(input_files[["PEP"]][(Type == "MSMS")])
@@ -1076,7 +1082,9 @@ read_phospho_MQ_files <- function(anno_filename, pep_filename, keep_only_phospho
   psm_sig_raw <- data.table("ID_peptide" = as.factor(paste(input_files[["PEP"]]$`Gene names`, input_files[["PEP"]]$Sequence, input_files[["PEP"]]$Modifications, sep="_")), 
                             "Sample" = as.factor(input_files[["PEP"]]$`Raw file`), 
                             "Intensity" = input_files[["PEP"]]$Intensity)
-  psm_sig_raw <- dcast(psm_sig_raw, formula = ID_peptide~Sample, value.var = "Intensity", fun.aggregate = sum)
+  suppressWarnings({
+    psm_sig_raw <- dcast(psm_sig_raw, formula = ID_peptide~Sample, value.var = "Intensity", fun.aggregate = sum)
+  })
   colnames(psm_sig_raw)[-1] <- input_files[["annotation"]][match(colnames(psm_sig_raw)[-1], input_files[["annotation"]]$Sample)]$Sample
   
   #Made the description of the mpeptides
