@@ -59,24 +59,14 @@ generate_differential_barplots <- function(differential_results, data_type="prot
     lolli_df$id <- paste(lolli_df$comp, lolli_df$class, sep = "_")
     
     if(is.null(color_contrast)){
-      color_contrast=c("#664069","#8A628D")
-      col_vec <- rep(as.vector(t(color_contrast)), uniqueN(lolli_df$comp))
+      color_contrast=data.table("class"=c("+","-"), "color"=c("#664069","#8A628D"))
+      col_dt <- merge.data.table(lolli_df[,c("comp","class","id")], color_contrast, by = "class")
+      col_vec <- col_dt$color
+      names(col_vec) <- col_dt$id
       message("Set default colors.")
     } else{
       col_vec <- as.vector(t(color_contrast))
     }
-    
-    tryCatch({
-      if("+" %in% lolli_df$class){
-        names(col_vec)[seq(1, length(lolli_df$comp), by = 2)] <- paste0(lolli_df$comp[seq(1, length(lolli_df$comp), by = 2)], "_+")
-      }
-      if("-" %in% lolli_df$class){
-        names(col_vec)[seq(2, length(lolli_df$comp), by = 2)] <- paste0(lolli_df$comp[seq(1, length(lolli_df$comp), by = 2)], "_-")
-      }
-    }, error = function(cond){
-      stop("Color must be a vector of the same length of the number of comparison.")
-    })
-    
     
     pDEPs <- deps_b2b_lollipop(
       input_df = lolli_df,

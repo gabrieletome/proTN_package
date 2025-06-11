@@ -525,7 +525,7 @@ deps_b2b_lollipop <- function(input_df, # input dataframe
       lp <- lp + aes(fill=fill_col) + scale_fill_manual(name=fill_col, values= fill_vec) # drop = FALSE
     }
     
-    if(nrow(plot_df)/2 == length(unique(plot_df$y_col))){
+    if(uniqueN(plot_df$y_col) == length(unique(plot_df$y_col))){
       lp <- lp + geom_text(aes(x=shift, label=c("Up-regulated", rep("",nrow(plot_df)-1)), hjust=(-0.05), vjust=(-2), fontface=2, color="black"),size=4)
       lp <- lp + geom_text(aes(x=-shift, label=c("Down-regulated", rep("",nrow(plot_df)-1)), hjust=(1.1), vjust=(-2), fontface=2, color="black"),size=4)
     } else{
