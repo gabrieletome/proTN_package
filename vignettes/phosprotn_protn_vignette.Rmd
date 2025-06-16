@@ -197,10 +197,7 @@ differential_results <- differential_analysis(proteome_data = normalized_data,
 ```{r differentiated_protein, fig.height=3, fig.width=7}
 ploft_diff_number_ctrl <- generate_differential_barplots(differential_results, 
                                                          data_type="protein", 
-                                                         phospho_ctrl = T, 
-                                                         color_contrast = c("grey40","grey60",
-                                                                            "grey40","grey60",
-                                                                            "#664069","#8A628D"))
+                                                         phospho_ctrl = T)
 ploft_diff_number_ctrl$plot
 ```
 
