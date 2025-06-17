@@ -70,18 +70,23 @@ read_proteomics <- function(software, folder, use_proteinGroups_MQ = FALSE, anno
                             color_col="Color", batch_corr_exe = FALSE, batch_col="batch",
                             filt_absent_value = 0,min_peptide_protein = 0){
   
-  if(!(software %in% c("PD","MQ"))){
-    stop("Valid software is required. Write PD or MQ.",
+  if(!(software %in% c("PD","MQ","SP"))){
+    stop("Valid software is required. Write PD or MQ or SP.",
          "\tPD: Proteome Discoverer",
-         "\tMQ: MaxQuant")
+         "\tMQ: MaxQuant",
+         "\tSP: Spectronaut")
   }
-  
-  # TODO: controllo che ci siano i file
-  # TODO: batch correction verificare input
   
   anno_filename = list.files(folder, pattern = annotation_filename, full.names = T, ignore.case = T)
   if(is.null(anno_filename) | length(anno_filename) > 1){
-    stop("Missing file annotation or wrong annotation filename parameter or multiple files with same pattern")
+    if(software != "SP"){
+      stop("Missing file annotation or wrong annotation filename parameter or multiple files with same pattern")
+    } else{
+      # Update Column name for Spectronaut Annotation
+      condition_col="R.Condition"
+      sample_col="R.FileName"
+      anno_filename = NULL
+    }
   }
   pep_filename = list.files(folder, pattern = peptide_filename, full.names = T, ignore.case = T)
   if(is.null(pep_filename) | length(pep_filename) > 1){
@@ -92,7 +97,7 @@ read_proteomics <- function(software, folder, use_proteinGroups_MQ = FALSE, anno
     if(is.null(prot_filename) | length(prot_filename) > 1){
       stop("Missing file proteinGroup or wrong proteinGroup filename parameter or multiple files with same pattern")
     }
-  } else if(use_proteinGroups_MQ){
+  } else if(use_proteinGroups_MQ & software != "SP"){
     prot_filename = list.files(folder, pattern = proteinGroup_filename, full.names = T, ignore.case = T)
     if(is.null(prot_filename) | length(prot_filename) > 1){
       stop("Missing file proteinGroup or wrong proteinGroup filename parameter or multiple files with same pattern")
@@ -132,6 +137,18 @@ read_proteomics <- function(software, folder, use_proteinGroups_MQ = FALSE, anno
                                   filt_absent_value = filt_absent_value, 
                                   batch_col = batch_col,
                                   min_peptide_protein = min_peptide_protein)
+  } else if(software == "SP"){
+    message("Reading Spectronaut files...")
+    proteome_data = read_Spectronaut_files(anno_filename,
+                                           pep_filename, 
+                                           condition_col=condition_col, 
+                                           sample_col=sample_col, 
+                                           color_col=color_col,
+                                           batch_corr_exe = batch_corr_exe, 
+                                           filt_absent_value = filt_absent_value, 
+                                           batch_col = batch_col,
+                                           min_peptide_protein = min_peptide_protein)
+    
   }
   
   return(proteome_data)
@@ -190,6 +207,7 @@ read_MQ_files <- function(anno_filename, pep_filename,
   }
   if(!("Protein names" %in% colnames(input_files[["PEP"]]))){
     data("anno_uniprot", envir = environment())
+    anno_uniprot[, `Gene Names`:=NULL]
     if(length(intersect(anno_uniprot$`Leading razor protein`, input_files[["PEP"]]$`Leading razor protein`)) == 0){
       input_files[["PEP"]][, `Protein names` := `Leading razor protein`]
     }else{
@@ -200,6 +218,7 @@ read_MQ_files <- function(anno_filename, pep_filename,
   } 
   if(nrow(input_files[["PEP"]][is.na(`Protein names`)])>0){
     data("anno_uniprot", envir = environment())
+    anno_uniprot[, `Gene Names`:=NULL]
     unique_anno_uniprot <- unique(anno_uniprot, by="Leading razor protein", fromLast=FALSE)
     setnames(unique_anno_uniprot, old=c("Protein names"), new = c("desc"))
     input_files[["PEP"]][, `Protein names` := as.character(`Protein names`)]
@@ -220,9 +239,9 @@ read_MQ_files <- function(anno_filename, pep_filename,
   input_files[["PEP"]] <- input_files[["PEP"]][!grepl("CON_",`Leading proteins`)]
   message(paste0("\tCONTAMINANT peptide removed: ",to_remove))
   
-  to_remove <- nrow(input_files[["PEP"]][is.na(`Protein names`)])
-  input_files[["PEP"]] <- input_files[["PEP"]][!is.na(`Protein names`)]
-  message(paste0("\tPeptide removed due to missing Protein Names: ",to_remove))
+  # to_remove <- nrow(input_files[["PEP"]][is.na(`Protein names`)])
+  # input_files[["PEP"]] <- input_files[["PEP"]][!is.na(`Protein names`)]
+  # message(paste0("\tPeptide removed due to missing Protein Names: ",to_remove))
   
   to_remove <- nrow(input_files[["PEP"]][is.na(`Gene names`) | stri_isempty(`Gene names`) | `Gene names` == ""])
   input_files[["PEP"]] <- input_files[["PEP"]][!(is.na(`Gene names`) | stri_isempty(`Gene names`) | `Gene names` == "")]
@@ -661,6 +680,7 @@ read_MQ_prot_peptide_files <- function(anno_filename, pep_filename, prot_filenam
   }
   if(!("Protein names" %in% colnames(input_files[["PEP"]]))){
     data("anno_uniprot", envir = environment())
+    anno_uniprot[, `Gene Names`:=NULL]
     if(length(intersect(anno_uniprot$`Leading razor protein`, input_files[["PEP"]]$`Leading razor protein`)) == 0){
       input_files[["PEP"]][, `Protein names` := `Leading razor protein`]
     }else{
@@ -671,6 +691,7 @@ read_MQ_prot_peptide_files <- function(anno_filename, pep_filename, prot_filenam
   } 
   if(nrow(input_files[["PEP"]][is.na(`Protein names`)])>0){
     data("anno_uniprot", envir = environment())
+    anno_uniprot[, `Gene Names`:=NULL]
     unique_anno_uniprot <- unique(anno_uniprot, by="Leading razor protein", fromLast=FALSE)
     setnames(unique_anno_uniprot, old=c("Protein names"), new = c("desc"))
     input_files[["PEP"]][, `Protein names` := as.character(`Protein names`)]
@@ -691,9 +712,9 @@ read_MQ_prot_peptide_files <- function(anno_filename, pep_filename, prot_filenam
   input_files[["PEP"]] <- input_files[["PEP"]][!grepl("CON_",`Leading razor protein`)]
   message(paste0("\tCONTAMINANT peptide removed: ",to_remove))
   
-  to_remove <- nrow(input_files[["PEP"]][is.na(`Protein names`)])
-  input_files[["PEP"]] <- input_files[["PEP"]][!is.na(`Protein names`)]
-  message(paste0("\tPeptide removed due to missing Protein Names: ",to_remove))
+  # to_remove <- nrow(input_files[["PEP"]][is.na(`Protein names`)])
+  # input_files[["PEP"]] <- input_files[["PEP"]][!is.na(`Protein names`)]
+  # message(paste0("\tPeptide removed due to missing Protein Names: ",to_remove))
   
   to_remove <- nrow(input_files[["PEP"]][is.na(`Gene names`) | stri_isempty(`Gene names`) | `Gene names` == ""])
   input_files[["PEP"]] <- input_files[["PEP"]][!(is.na(`Gene names`) | stri_isempty(`Gene names`) | `Gene names` == "")]
@@ -766,6 +787,224 @@ read_MQ_prot_peptide_files <- function(anno_filename, pep_filename, prot_filenam
   psm_anno_raw$rank<- psm_anno_raw$row - psm_anno_raw$min +1
   psm_anno_raw$id<- paste(psm_anno_raw$symbol,psm_anno_raw$rank,psm_anno_raw$card,sep="_")
   psm_anno_raw <- as.data.table(psm_anno_raw)
+  
+  # Convert to data.table
+  psm_sig_prot_raw <- as.data.table(psm_sig_raw)
+  psm_sig_pet_raw <- as.data.table(psm_sig_raw)
+  
+  # Preprocess Protein intensities
+  psm_sig_prot_raw[psm_sig_prot_raw == 0] <- NA  # Transform 0s into NAs
+  sig_thr <- filt_absent_value  # NA threshold
+  
+  psm_long_dt <- melt(psm_sig_prot_raw, id.vars = "ID_peptide", variable.name = "sample", value.name = "counts")
+  psm_long_dt <- merge(psm_long_dt, as.data.table(c_anno), by = "sample", all.x = TRUE)
+  
+  psm_filter_dt <- psm_long_dt[, .(min_c = sum(is.na(counts))), by = .(ID_peptide, condition)]
+  psm_filter_dt <- psm_filter_dt[, .(passes_c = sum(min_c <= sig_thr)), by = ID_peptide]
+  
+  filter_ID_peptide <- psm_filter_dt[passes_c > 0, ID_peptide]
+  psm_sig_prot_df <- psm_sig_prot_raw[ID_peptide %in% filter_ID_peptide]
+  psm_anno_df <- as.data.table(psm_anno_raw)[ID_peptide %in% filter_ID_peptide]
+  
+  # Log2 transformation
+  psm_log_prot_df <- copy(psm_sig_prot_df)
+  psm_log_prot_df[, (setdiff(names(psm_log_prot_df), "ID_peptide")) := lapply(.SD, log2), .SDcols = setdiff(names(psm_log_prot_df), "ID_peptide")]
+  
+  # Filter proteins with only 1 peptID_peptidee
+  filter_df_single_pep <- psm_anno_df[, .N, by = symbol][N >= min_peptide_protein]
+  filter_df_single_pep <- merge(filter_df_single_pep, psm_anno_df, by = "symbol")[, ID_peptide]
+  psm_log_prot_df <- psm_log_prot_df[ID_peptide %in% filter_df_single_pep]
+  psm_anno_df <- psm_anno_df[ID_peptide %in% filter_df_single_pep]
+  
+  # Preprocess peptID_peptidee intensities
+  psm_sig_pet_raw[psm_sig_pet_raw == 0] <- NA  # Transform 0s into NAs
+  
+  psm_long_dt <- melt(psm_sig_pet_raw, id = "ID_peptide", variable.name = "sample", value.name = "counts")
+  psm_long_dt <- merge(psm_long_dt, as.data.table(c_anno), by = "sample", all.x = TRUE)
+  
+  psm_filter_dt <- psm_long_dt[, .(min_c = sum(is.na(counts))), by = .(ID_peptide, condition)]
+  psm_filter_dt <- psm_filter_dt[, .(passes_c = sum(min_c <= sig_thr)), by = ID_peptide]
+  
+  filter_ID_peptide <- psm_filter_dt[passes_c > 0, ID_peptide]
+  psm_sig_pet_df <- psm_sig_pet_raw[ID_peptide %in% filter_ID_peptide]
+  psm_peptide_table <- as.data.table(psm_peptide_table)[ID_peptide %in% filter_ID_peptide]
+  
+  # Determine tryptic condition
+  peptides_df <- psm_peptide_table[, .(Accession, Annotated_Sequence)]
+  peptides_df[, preAA := str_sub(str_extract(str_split_fixed(Annotated_Sequence,regex("\\."), n = 3)[,1], regex("\\[\\w+\\]")),
+                                 2,
+                                 str_length(str_extract(str_split_fixed(Annotated_Sequence,regex("\\."),
+                                                                        n = 3)[,1], regex("\\[\\w+\\]")))-1)]
+  peptides_df[, endAA := substr(Annotated_Sequence, nchar(Annotated_Sequence)-1, nchar(Annotated_Sequence)-1)]
+  peptides_df[, postAA := str_sub(str_extract(str_split_fixed(Annotated_Sequence,regex("\\."), n = 3)[,3], regex("\\[\\w+\\]")),
+                                  2,
+                                  str_length(str_extract(str_split_fixed(Annotated_Sequence,regex("\\."),
+                                                                         n = 3)[,3], regex("\\[\\w+\\]")))-1)]
+  
+  peptides_df[, fully_TRI := preAA %in% c("K","R") & endAA %in% c("K","R") & (!postAA %in% "P" | is.na(postAA))]
+  peptides_df[, NSEMI_TRI := preAA %in% c("K","R") & !endAA %in% c("K","R") & (!postAA %in% "P" | is.na(postAA))]
+  peptides_df[, CSEMI_TRI := !preAA %in% c("K","R") & endAA %in% c("K","R") & (!postAA %in% "P" | is.na(postAA))]
+  peptides_df[, non_TRI := !fully_TRI & !NSEMI_TRI & !CSEMI_TRI]
+  
+  peptides_df[, tryptic_cond := fifelse(fully_TRI, "fully tryptic", fifelse(NSEMI_TRI, "N-semi tryptic", fifelse(CSEMI_TRI, "C-semi tryptic", "non tryptic")))]
+  psm_peptide_table[, tryptic_cond := peptides_df$tryptic_cond]
+  
+  # Log2 transformation for peptID_peptidees
+  psm_log_pet_df <- copy(psm_sig_pet_df)
+  psm_log_pet_df[, (setdiff(names(psm_log_pet_df), "ID_peptide")) := lapply(.SD, log2), .SDcols = setdiff(names(psm_log_pet_df), "ID_peptide")]
+  
+  # Filter proteins with only 1 peptID_peptidee
+  filter_df_single_pep <- psm_anno_df[, .N, by = symbol][N >= min_peptide_protein]
+  filter_df_single_pep <- merge(filter_df_single_pep, psm_anno_df, by = "symbol")[, symbol]
+  filter_df_single_pep <- psm_peptide_table[GeneName %in% filter_df_single_pep, ID_peptide]
+  
+  psm_log_pet_df <- psm_log_pet_df[ID_peptide %in% filter_df_single_pep]
+  psm_peptide_table <- psm_peptide_table[ID_peptide %in% filter_df_single_pep]
+  
+  message(paste0("N Proteins (after filter): ", uniqueN(psm_anno_df$symbol)))
+  message(paste0("N Peptides (after filter): ", uniqueN(psm_peptide_table$ID_peptide)))
+  
+  return(list("c_anno" = c_anno,
+              "psm_anno_df" = psm_anno_df,
+              "psm_log_prot_df" = psm_log_prot_df,
+              "psm_peptide_table" = psm_peptide_table,
+              "psm_log_pet_df" = psm_log_pet_df,
+              "colour_vec" = colour_vec))
+}
+
+# Read MaxQuant files
+read_Spectronaut_files <- function(anno_filename, pep_filename, 
+                          condition_col="R.Condition", sample_col="R.FileName", 
+                          color_col="Color", batch_corr_exe = FALSE, batch_col="batch",
+                          filt_absent_value = 0, min_peptide_protein = 0){
+  input_files <- list()
+  
+  message("Reading files...")
+  # Read peptide file
+  input_files[["PEP"]] <- tryCatch({
+    fread(pep_filename)
+  }, error=function(cond){
+    stop(paste0("Missing file. The file \'PEPTIDE\' is missing or not have the pattern in the filename or there are duplicates files."))
+  })
+  
+  # Read annotation file
+  if(!is.null(anno_filename)){
+    message("Provide annotation excel. Use that as annotator of the sample.")
+    input_files[["annotation"]] <- tryCatch({
+      as.data.table(read_xlsx(anno_filename))
+    }, error=function(cond){
+      stop(paste0("Missing file. The file \'ANNOTATION\' is missing or not have the pattern in the filename or there are duplicates files."))
+    })
+  } else{
+    message(paste0("Not provide annotation excel. Use column '", sample_col, "' for Sample and column '", condition_col, "' for the condition"))
+  }
+  
+  message("File read.")
+  
+  message("Starting preprocessing...")
+  
+  # Read annotation file
+  if(is.null(anno_filename)){
+    colToKeep<-intersect(colnames(input_files[["PEP"]]), c(condition_col, sample_col, color_col, batch_col))
+  } else{
+    colToKeep<-intersect(colnames(input_files[["annotation"]]), c(condition_col, sample_col, color_col, batch_col))
+  }
+  #Clean files and merge
+  if(!(condition_col %in% colToKeep)){
+    stop("\'Condition\' column missing.")
+  }
+  if(!(sample_col %in% colToKeep)){
+    stop("\'Sample\' column missing.")
+  }
+  if(batch_corr_exe & !(batch_col %in% colToKeep)){ 
+    stop(paste0("\'",batch_col,"\' column missing with batch correction activated"))
+  }
+  
+  if(is.null(anno_filename)){ input_files[["annotation"]] <- unique(input_files[["PEP"]][, ..colToKeep]) }
+  setnames(input_files[["annotation"]], old = condition_col, new = "Condition")
+  setnames(input_files[["annotation"]], old = sample_col, new = "Sample")
+  
+  # Check if conditions start with number. It generate problem later in DEqMS
+  if(any(str_starts(input_files[["annotation"]]$Condition, "[0-9]"))){
+    input_files[["annotation"]][(str_starts(Condition, "[0-9]")), Condition := str_c("X.", Condition)]
+  }
+  
+  
+  # Remove Fragments columns (F.*)
+  colToKeep_Spect <- grep("^F\\.", names(input_files[["PEP"]]), value = T, invert = T)
+  input_files[["PEP"]] <- unique(input_files[["PEP"]][, ..colToKeep_Spect])
+  # Add Accession and GeneName
+  input_files[["PEP"]][, Accession := tstrsplit(PG.ProteinAccessions, "\\|", keep = 2)[[1]]]
+  data("anno_uniprot", envir = environment())
+  input_files[["PEP"]] <- merge.data.table(input_files[["PEP"]], anno_uniprot, by.x = "Accession", by.y = "Leading razor protein")
+  
+  
+  # Manage Peptide file
+  message("Cleaning data...")
+  initial_peptide = nrow(input_files[["PEP"]])
+  message(paste0("\tRaw number of peptide: ",initial_peptide))
+  
+  to_remove <- nrow(input_files[["PEP"]][grepl("Keratin|keratin", `Protein names`)])
+  input_files[["PEP"]] <- input_files[["PEP"]][!grepl("Keratin|keratin", `Protein names`)]
+  message(paste0("\tKeratin peptide removed: ",to_remove))
+  
+  to_remove <- nrow(input_files[["PEP"]][grepl("CON_",`PG.ProteinAccessions`)])
+  input_files[["PEP"]] <- input_files[["PEP"]][!grepl("CON_",`PG.ProteinAccessions`)]
+  message(paste0("\tCONTAMINANT peptide removed: ",to_remove))
+  
+  # to_remove <- nrow(input_files[["PEP"]][is.na(`Protein names`)])
+  # input_files[["PEP"]] <- input_files[["PEP"]][!is.na(`Protein names`)]
+  # message(paste0("\tPeptide removed due to missing Protein Names: ",to_remove))
+  
+  to_remove <- nrow(input_files[["PEP"]][is.na(`Gene Names`) | stri_isempty(`Gene Names`) | `Gene Names` == ""])
+  input_files[["PEP"]] <- input_files[["PEP"]][!(is.na(`Gene Names`) | stri_isempty(`Gene Names`) | `Gene Names` == "")]
+  message(paste0("\tPeptide removed due to missing Gene Names: ",to_remove))
+  
+  # Keep only first gene name
+  input_files[["PEP"]][str_detect(`Gene Names`,";"), `Gene Names` := tstrsplit(`Gene Names`, ";", keep = 1)]
+  input_files[["PEP"]][, EG.ModifiedSequence:=gsub(" ", "_", EG.ModifiedSequence)]
+  #Made the matrix
+  psm_sig_raw <- data.table("ID_peptide" = as.factor(paste(input_files[["PEP"]]$`Gene Names`, input_files[["PEP"]]$PEP.StrippedSequence, input_files[["PEP"]]$EG.ModifiedSequence, sep="_")), 
+                            "Sample" = as.factor(input_files[["PEP"]][, ..sample_col][[1]]), 
+                            "Intensity" = input_files[["PEP"]]$PEP.Quantity)
+  suppressWarnings({
+    psm_sig_raw <- dcast(psm_sig_raw, formula = ID_peptide~Sample, value.var = "Intensity", fun.aggregate = sum)
+  })
+  
+  #Made the description of the mpeptides
+  psm_peptide_table <- as.data.table(unique(input_files[["PEP"]][, c("Accession", "Protein names", "Gene Names", "PEP.StrippedSequence", "EG.ModifiedSequence")]))
+  colnames(psm_peptide_table) <- c("Accession","Description","GeneName","Annotated_Sequence","Modifications")
+  psm_peptide_table[, ID_peptide := paste(GeneName, Annotated_Sequence, Modifications, sep="_")]
+  
+  # Extract annotation
+  c_anno<-input_files[["annotation"]]
+  colnames(c_anno)<-tolower(colnames(c_anno))
+  
+  if(!("color" %in% colnames(c_anno))){
+    message("Color column not found! Setting default color")
+    c_anno<-merge.data.table(c_anno,
+                             data.table("color"=colour_vec[1:length(unique(c_anno$condition))],
+                                        "condition"=unique(c_anno$condition)),
+                             by = "condition")
+  }
+  colour_vec<-na.omit(c_anno$color)
+  names(colour_vec)<-na.omit(c_anno$sample)
+  
+  # Add chunk peptide annotation
+  psm_anno_raw <- data.table("ID_peptide"=psm_peptide_table$ID_peptide,
+                             "symbol"=psm_peptide_table$GeneName,
+                             "sequence"=psm_peptide_table$Annotated_Sequence,
+                             "modifications"=psm_peptide_table$Modifications)
+  
+  psm_anno_raw$old_id<-psm_anno_raw$ID_peptide
+  
+  # create peptide names linked to symbols
+  psm_anno_raw[, row := seq(1,nrow(psm_anno_raw))]
+  psm_anno_raw <- psm_anno_raw %>% group_by(symbol) %>% mutate("min"=min(row),"card"=n()) %>% ungroup()
+  psm_anno_raw$rank<- psm_anno_raw$row - psm_anno_raw$min +1
+  psm_anno_raw$id<- paste(psm_anno_raw$symbol,psm_anno_raw$rank,psm_anno_raw$card,sep="_")
+  psm_anno_raw <- as.data.table(psm_anno_raw)
+  
   
   # Convert to data.table
   psm_sig_prot_raw <- as.data.table(psm_sig_raw)
@@ -1008,6 +1247,7 @@ read_phospho_MQ_files <- function(anno_filename, pep_filename, keep_only_phospho
   }
   if(!("Protein names" %in% colnames(input_files[["PEP"]]))){
     data("anno_uniprot", envir = environment())
+    anno_uniprot[, `Gene Names`:=NULL]
     if(length(intersect(anno_uniprot$`Leading razor protein`, input_files[["PEP"]]$`Leading razor protein`)) == 0){
       input_files[["PEP"]][, `Protein names` := `Leading razor protein`]
     }else{
@@ -1018,6 +1258,7 @@ read_phospho_MQ_files <- function(anno_filename, pep_filename, keep_only_phospho
   }
   if(nrow(input_files[["PEP"]][is.na(`Protein names`)])>0){
     data("anno_uniprot", envir = environment())
+    anno_uniprot[, `Gene Names`:=NULL]
     unique_anno_uniprot <- unique(anno_uniprot, by="Leading razor protein", fromLast=FALSE)
     setnames(unique_anno_uniprot, old=c("Protein names"), new = c("desc"))
     input_files[["PEP"]][, `Protein names` := as.character(`Protein names`)]
@@ -1037,9 +1278,9 @@ read_phospho_MQ_files <- function(anno_filename, pep_filename, keep_only_phospho
   input_files[["PEP"]] <- input_files[["PEP"]][!grepl("CON_",`Leading proteins`)]
   message(paste0("\tCONTAMINANT peptide removed: ",to_remove))
   
-  to_remove <- nrow(input_files[["PEP"]][is.na(`Protein names`)])
-  input_files[["PEP"]] <- input_files[["PEP"]][!is.na(`Protein names`)]
-  message(paste0("\tPeptide removed due to missing Protein Names: ",to_remove))
+  # to_remove <- nrow(input_files[["PEP"]][is.na(`Protein names`)])
+  # input_files[["PEP"]] <- input_files[["PEP"]][!is.na(`Protein names`)]
+  # message(paste0("\tPeptide removed due to missing Protein Names: ",to_remove))
   
   to_remove <- nrow(input_files[["PEP"]][is.na(`Gene names`) | stri_isempty(`Gene names`) | `Gene names` == ""])
   input_files[["PEP"]] <- input_files[["PEP"]][!(is.na(`Gene names`) | stri_isempty(`Gene names`) | `Gene names` == "")]

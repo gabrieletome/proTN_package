@@ -117,6 +117,7 @@ enrichment_enrichr <- function(input_vec, # vector with gene names
   out_df <- ldply(enrich_list,.id="anno_class")
   rm(enrich_list)
   
+  if(nrow(out_df) > 0){
   out_df <- out_df %>% rename(anno_name=Term,
                               p_value=P.value,
                               fdr=Adjusted.P.value,
@@ -160,6 +161,9 @@ enrichment_enrichr <- function(input_vec, # vector with gene names
                                     input_size,anno_size,overlap_input_ratio,overlap_anno_ratio,
                                     overlap_ids) %>% as_tibble()
   # background_size is not estimated, odds ratio retrived from enrichr
+  } else{
+    out_df <- NULL
+  }
   
   return(out_df)
 }

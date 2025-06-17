@@ -5,7 +5,7 @@
 \alias{anno_uniprot}
 \title{Data.table with uniprot description}
 \format{
-An object of class \code{data.table} (inherits from \code{data.frame}) with 41748 rows and 2 columns.
+An object of class \code{data.table} (inherits from \code{data.frame}) with 383760 rows and 3 columns.
 }
 \usage{
 data(anno_uniprot)

@@ -105,24 +105,33 @@ process_string_network <- function(g_sel_comp, dirOutput_net, taxonomy_NCBI, sco
     gene_name <- unique(g_sel_comp[[comp]])
     setnames(gene_name, "id", "gene_id")
     string_mapped <- string_db$map(gene_name, "gene_id", removeUnmappedRows = TRUE)
-    links_string <- as.data.table(string_db$get_interactions(string_mapped$STRING_id))
-    links_string[, `:=`(
-      from = string_mapped$gene_id[match(from, string_mapped$STRING_id)],
-      to = string_mapped$gene_id[match(to, string_mapped$STRING_id)]
-    )]
-    string_gene_df <- unique(data.table(gene1 = links_string$from, gene2 = links_string$to, weight = links_string$combined_score))
-    if (nrow(string_gene_df) > 0) {
-      fwrite(string_gene_df, file = paste0(dirOutput_net, "/", gsub(comp, pattern = "\\/", replacement="vs"), "_connection.txt"), sep = "\t")
-      link <- paste0("https://string-db.org/cgi/network?identifiers=", paste(unique(string_mapped$STRING_id), collapse = "%0d"), "&species=", taxonomy_NCBI, "&required_score=",score_thr)
-      string_db$plot_network(string_mapped, required_score = score_thr)
-      pdf(file = paste0(dirOutput_net,"/", comp, "_network.pdf"), width = 150, height = 150)
-      string_db$plot_network(string_mapped, required_score = score_thr)
-      dev.off()
-      
-      stringdb_results[[comp]] <- string_gene_df
-    } else {
-      stop("No strong interaction detected between the proteins. Usually too few proteins.")
+    if(nrow(string_mapped) > 0){
+      links_string <- as.data.table(string_db$get_interactions(string_mapped$STRING_id))
+      links_string[, `:=`(
+        from = string_mapped$gene_id[match(from, string_mapped$STRING_id)],
+        to = string_mapped$gene_id[match(to, string_mapped$STRING_id)]
+      )]
+      string_gene_df <- unique(data.table(gene1 = links_string$from, gene2 = links_string$to, weight = links_string$combined_score))
+      if (nrow(string_gene_df) > 0) {
+        fwrite(string_gene_df, file = paste0(dirOutput_net, "/", gsub(comp, pattern = "\\/", replacement="vs"), "_connection.txt"), sep = "\t")
+        link <- paste0("https://string-db.org/cgi/network?identifiers=", paste(unique(string_mapped$STRING_id), collapse = "%0d"), "&species=", taxonomy_NCBI, "&required_score=",score_thr)
+        string_db$plot_network(string_mapped, required_score = score_thr)
+        pdf(file = paste0(dirOutput_net,"/", comp, "_network.pdf"), width = 150, height = 150)
+        string_db$plot_network(string_mapped, required_score = score_thr)
+        dev.off()
+        
+        stringdb_results[[comp]] <- string_gene_df
+      } else {
+        warning("No interaction detected between the proteins with the score_thr selected. Usually too few proteins or threshold too high (suggest: 700).")
+        string_db$plot_network(string_mapped, required_score = score_thr)
+        pdf(file = paste0(dirOutput_net,"/", comp, "_network.pdf"), width = 150, height = 150)
+        string_db$plot_network(string_mapped, required_score = score_thr)
+        dev.off()
+      }
+    } else{
+      stop("No proteins remeained after the STRINGdb conversion. Verify the species or there are too few differential proteins.")
     }
+    
   }
   return(stringdb_results)
 }
