@@ -65,7 +65,14 @@ generate_differential_barplots <- function(differential_results, data_type="prot
       names(col_vec) <- col_dt$id
       message("Set default colors.")
     } else{
-      col_vec <- as.vector(t(color_contrast))
+      if(is.null(names(color_contrast))){
+        color_contrast_dt=data.table("class"=rep(c("-","+"), length(color_contrast)/2), "color"=color_contrast)
+        col_dt <- merge.data.table(lolli_df[,c("comp","class","id")], color_contrast_dt, by = "class")
+        col_vec <- col_dt$color
+        names(col_vec) <- col_dt$id
+      } else{
+        col_vec <- color_contrast
+      }
     }
     
     pDEPs <- deps_b2b_lollipop(
@@ -159,7 +166,35 @@ generate_volcano_plots <- function(differential_results, data_type=NULL,
       col_vec <- rep(as.vector(t(color_contrast)), uniqueN(input_df$comp))
       message("Set default colors.")
     } else{
-      col_vec <- as.vector(t(color_contrast))
+      if(is.null(names(color_contrast))){
+        col_vec <- rev(color_contrast[1:2])
+      } else{
+        if("+" %in% names(color_contrast)){
+          col_plus <- color_contrast["+"]
+          message(paste0("Detected color for '+' ",data_type,": ",col_plus))
+        } else if(paste0(comparison,"_+") %in% names(color_contrast)){
+          col_plus <- color_contrast[paste0(comparison,"_+")]
+          message(paste0("Detected color for '",paste0(comparison,"_+"),"' ",data_type,": ",col_plus))
+        } else{
+          col_plus <- "#664069"
+          warning(paste0("No valid named corresponding to comparison. Setting default color for '",paste0(comparison,"_+"),"'"))
+        }
+        if(!interactomics){
+          if("-" %in% names(color_contrast)){
+            col_minus <- color_contrast["-"]
+            message(paste0("Detected color for '-' ",data_type,": ",col_minus))
+          } else if(paste0(comparison,"_-") %in% names(color_contrast)){
+            col_minus <- color_contrast[paste0(comparison,"_-")]
+            message(paste0("Detected color for '",paste0(comparison,"_-"),"' ",data_type,": ",col_minus))
+          } else{
+            col_minus <- "#8A628D"
+            warning(paste0("No valid named corresponding to comparison. Setting default color for '",paste0(comparison,"_-"),"'"))
+          }
+        } else{
+          col_minus <- "grey70"
+        }
+        col_vec <- c(col_plus, col_minus)
+      }
     }
     
     if(!(length(col_vec < 2))){
