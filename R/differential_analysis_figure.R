@@ -193,7 +193,7 @@ generate_volcano_plots <- function(differential_results, data_type=NULL,
         } else{
           col_minus <- "grey70"
         }
-        col_vec <- c(col_plus, col_minus)
+        col_vec <- as.vector(c(col_plus, col_minus))
       }
     }
     

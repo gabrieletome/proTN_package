@@ -2,6 +2,7 @@
 #'
 #' @param path_phospho Character; path where extract case study
 #' @param path_proteome Character; path where extract case study
+#' @param path_interactn Character; path where extract case study
 #' @examples
 #' \dontrun{
 #' extract_example(path_proteome = tempdir())
@@ -13,7 +14,8 @@
 #' @importFrom stats cutree median pchisq predict
 #' @export
 extract_example = function(path_phospho = NULL, 
-                           path_proteome = NULL) {
+                           path_proteome = NULL,
+                           path_interactn = NULL) {
   if(!is.null(path_phospho)){
     message("Extracting phosphoproteome example...")
     dir<-path_phospho
@@ -28,7 +30,14 @@ extract_example = function(path_phospho = NULL,
     unzip(proteome_zip, exdir = path_proteome)
     message(paste0("Proteome example saved in: ",normalizePath(dir),"/case_study_proteomics"))
   }
-  if(is.null(path_phospho) & is.null(path_proteome)){
+  if(!is.null(path_interactn)){
+    message("Extracting interactomics example...")
+    dir<-path_interactn
+    interactn_zip <- system.file("extdata", "case_study_interactn.zip", package = "proTN")
+    unzip(interactn_zip, exdir = path_interactn)
+    message(paste0("Interactomics example saved in: ",normalizePath(dir),"/case_study_interactn"))
+  }
+  if(is.null(path_phospho) & is.null(path_proteome) & is.null(path_interactn)){
     stop("Missing path. Provide at least one path")
   }
 }
@@ -1553,62 +1562,6 @@ read_phospho_MQ_files <- function(anno_filename, pep_filename, keep_only_phospho
   psm_peptide_table <- as.data.table(unique(input_files[["PEP"]][, c("Leading razor protein", "Protein names", "Gene names", "Sequence", "Modifications", "Phospho (STY) Probabilities")]))
   colnames(psm_peptide_table) <- c("Accession","Description","GeneName","Annotated_Sequence","Modifications","Phospho_%")
   psm_peptide_table[, ID_peptide := paste(GeneName, Annotated_Sequence, Modifications, sep="_")]
-  
-  #TODO: verify if is essential
-  # {
-  #   input_files$PEP_info <- psm_peptide_table
-  #   # Set row names
-  #   input_files$PEP_info[, rowname := paste(Accession,`Phospho_%`,Modifications, sep = "_")]
-  #   
-  #   # Extract phosphorylation pattern
-  #   pattern <- data.table(Phospho = input_files$PEP_info$`Phospho_%`)
-  #   
-  #   # Split phosphorylation percentages into columns
-  #   split_values <- tstrsplit(pattern$Phospho, "\\(|\\)", type.convert = TRUE)
-  #   
-  #   # Convert to data.table
-  #   pattern <- data.table(do.call(cbind, split_values))
-  #   setnames(pattern, as.character(seq_len(ncol(pattern))))
-  #   
-  #   # Add grouping columns
-  #   pattern[, `:=`(group = input_files$PEP_info$ID_peptide,
-  #                  seq = input_files$PEP_info$Annotated_Sequence)]
-  #   
-  #   # Convert even-indexed columns to numeric
-  #   num_cols <- na.omit(names(pattern)[seq(2, ncol(pattern)-2, by = 2)])
-  #   pattern[, (num_cols) := lapply(.SD, as.numeric), .SDcols = num_cols]
-  #   
-  #   # Aggregate means for numeric columns
-  #   pattern2 <- pattern[, lapply(.SD, mean, na.rm = TRUE), by = group, .SDcols = num_cols]
-  #   
-  #   # Round numeric values
-  #   pattern2[, (num_cols) := lapply(.SD, round, 3), .SDcols = num_cols]
-  #   
-  #   # Merge original values back
-  #   setkey(pattern, group)
-  #   setkey(pattern2, group)
-  #   pattern2 <- pattern[pattern2]
-  #   
-  #   # Convert to character and replace NA values
-  #   pattern2 <- pattern2[, lapply(.SD, as.character)]
-  #   pattern2[is.na(pattern2)] <- "tmpC"
-  #   
-  #   # Format new phosphorylation sequence
-  #   base_string <- paste0(rep("%s(%s)", ncol(pattern)-2), collapse = "")
-  #   pattern2[, newseq := gsub("\\(tmpC\\)|tmpC| ", "", do.call(sprintf, c(fmt = base_string, .SD))), .SDcols = names(pattern2)[1:ncol(pattern)-2]]
-  #   
-  #   # Update PEP_info with new phosphorylation percentages
-  #   input_files$PEP_info <- unique(input_files$PEP[, .(Accession = `Leading razor protein`, 
-  #                                                      Description = `Protein names`, 
-  #                                                      GeneName = `Gene names`, 
-  #                                                      `Annotated Sequence` = Sequence, 
-  #                                                      Modifications)])
-  #   setkey(input_files$PEP_info, Accession, Modifications, `Annotated Sequence`)
-  #   setkey(pattern2, group)
-  #   
-  #   input_files$PEP_info[pattern2, Phospho_% := newseq, on = .(Accession, Modifications, `Annotated Sequence`)]
-  #   
-  # }
   
   # Extract annotation
   c_anno<-input_files[["annotation"]]

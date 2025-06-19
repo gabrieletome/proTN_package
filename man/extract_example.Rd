@@ -4,12 +4,18 @@
 \alias{extract_example}
 \title{Extract case study}
 \usage{
-extract_example(path_phospho = NULL, path_proteome = NULL)
+extract_example(
+  path_phospho = NULL,
+  path_proteome = NULL,
+  path_interactn = NULL
+)
 }
 \arguments{
 \item{path_phospho}{Character; path where extract case study}
 
 \item{path_proteome}{Character; path where extract case study}
+
+\item{path_interactn}{Character; path where extract case study}
 }
 \description{
 Extract case study
