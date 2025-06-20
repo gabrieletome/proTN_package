@@ -277,10 +277,6 @@ Besides that, the pipeline plots the enrichment results in different figures. Th
 
 <img src="www/images/figures/enrichment_readme_protn.png" width="75%"/>
 
-###### E1.1. Enrichment analysis of the whole set of proteins discovered by the experiment
-
-In same cases can be usefull have the enrichment of the whole proteome discovered by the experiment. For example it can be used as negative control of the differentially expressed proteins. So, the entire proteome is analysed with EnrichR, and saved in an RData and in an Excel file. Also, as before, 4 plots can be generated, in this case adding as last dot column the negative control provided by the whole proteome.
-
 ##### N1. Protein-Protein Interaction network analysis of Differentially Expressed Proteins
 
 Last analitical step is the Protein-Protein Interaction (PPI) network analysis, since PPIs are essential in almost all processes of the cell, and it is crucial for understanding cell physiology in different states. For each comparison, ProTN analyses the interaction between the DEPs using STRING (Szklarczyk et al. 2021).
