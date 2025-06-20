@@ -35,8 +35,8 @@ After filtering, raw abundances are log2 transformed
 
 ```{r read_proteomics_MQ}
 proteome_data <- read_phospho_proteome_proteomics(software = "MQ", 
-                                                  folder_proteome = paste0(tempdir(),"/case_study_phospho/txt_PROTEOME"),
-                                                  folder_phospho = paste0(tempdir(),"/case_study_phospho/txt_Phospho"),
+                                                  folder_proteome = paste0(tempdir(),"/case_study_proteomics/"),
+                                                  folder_phospho = paste0(tempdir(),"/case_study_phospho/"),
                                                   peptide_proteome_filename = "evidence", 
                                                   peptide_phospho_filename = "evidence", 
                                                   phospho_thr = 0.75)
