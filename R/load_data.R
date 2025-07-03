@@ -523,8 +523,11 @@ read_PD_files <- function(anno_filename, pep_filename, prot_filename,
   #Maintain only the new complete matrix of abundance
   input_files$PD_PEP_matrix[, ID_peptide := as.factor(paste(input_files[["PD_PEP_matrix"]]$GeneName, input_files[["PD_PEP_matrix"]]$Annotated_Sequence, input_files[["PD_PEP_matrix"]]$Modifications, sep="_"))]
   
+  
   colToKeep <- c("ID_peptide",input_files$annotation$Sample)
   psm_sig_raw<-input_files$PD_PEP_matrix[, ..colToKeep]
+  #Sum duplicated peptides
+  psm_sig_raw<-psm_sig_raw[, lapply(.SD, sum), by = ID_peptide, .SDcols = is.numeric]
   
   #Made the description of the mpeptides
   psm_peptide_table <- as.data.table(unique(input_files[["PD_PEP_matrix"]][, c("ID_peptide","Accession","Description","GeneName","Annotated_Sequence","Modifications","Position_in_Master_Proteins")]))
