@@ -286,7 +286,8 @@ read_MQ_files <- function(anno_filename, pep_filename,
                             "Sample" = as.factor(input_files[["PEP"]]$`Raw file`), 
                             "Intensity" = input_files[["PEP"]]$Intensity)
   suppressWarnings({
-    psm_sig_raw <- dcast(psm_sig_raw, formula = ID_peptide~Sample, value.var = "Intensity", fun.aggregate = sum)
+    psm_sig_raw <- psm_sig_raw[, .(Intensity = sum(Intensity)), by = c("ID_peptide", "Sample")]
+    psm_sig_raw <- dcast(psm_sig_raw, formula = ID_peptide~Sample, value.var = "Intensity")
   })
   colnames(psm_sig_raw)[-1] <- input_files[["annotation"]][match(colnames(psm_sig_raw)[-1], input_files[["annotation"]]$Sample)]$Sample
   
@@ -336,8 +337,11 @@ read_MQ_files <- function(anno_filename, pep_filename,
   psm_long_dt <- melt(psm_sig_prot_raw, id.vars = "ID_peptide", variable.name = "sample", value.name = "counts")
   psm_long_dt <- merge(psm_long_dt, as.data.table(c_anno), by = "sample", all.x = TRUE)
   
-  psm_filter_dt <- psm_long_dt[, .(min_c = sum(is.na(counts))), by = .(ID_peptide, condition)]
-  psm_filter_dt <- psm_filter_dt[, .(passes_c = sum(min_c <= sig_thr)), by = ID_peptide]
+  psm_long_dt[, is_na := is.na(counts)]
+  psm_filter_dt <- psm_long_dt[, .(min_c = sum(is_na)), by = .(ID_peptide, condition)]
+  psm_filter_dt <- psm_filter_dt[, passes_c := min_c<=sig_thr]
+  psm_filter_dt <- psm_filter_dt[, .(passes_c = sum(passes_c)), by = ID_peptide]
+  
   
   filter_ID_peptide <- psm_filter_dt[passes_c > 0, ID_peptide]
   psm_sig_prot_df <- psm_sig_prot_raw[ID_peptide %in% filter_ID_peptide]
@@ -359,8 +363,11 @@ read_MQ_files <- function(anno_filename, pep_filename,
   psm_long_dt <- melt(psm_sig_pet_raw, id = "ID_peptide", variable.name = "sample", value.name = "counts")
   psm_long_dt <- merge(psm_long_dt, as.data.table(c_anno), by = "sample", all.x = TRUE)
   
-  psm_filter_dt <- psm_long_dt[, .(min_c = sum(is.na(counts))), by = .(ID_peptide, condition)]
-  psm_filter_dt <- psm_filter_dt[, .(passes_c = sum(min_c <= sig_thr)), by = ID_peptide]
+  psm_long_dt[, is_na := is.na(counts)]
+  psm_filter_dt <- psm_long_dt[, .(min_c = sum(is_na)), by = .(ID_peptide, condition)]
+  psm_filter_dt <- psm_filter_dt[, passes_c := min_c<=sig_thr]
+  psm_filter_dt <- psm_filter_dt[, .(passes_c = sum(passes_c)), by = ID_peptide]
+  
   
   filter_ID_peptide <- psm_filter_dt[passes_c > 0, ID_peptide]
   psm_sig_pet_df <- psm_sig_pet_raw[ID_peptide %in% filter_ID_peptide]
@@ -573,8 +580,10 @@ read_PD_files <- function(anno_filename, pep_filename, prot_filename,
   psm_long_dt <- melt(psm_sig_prot_raw, id.vars = "ID_peptide", variable.name = "sample", value.name = "counts")
   psm_long_dt <- merge(psm_long_dt, as.data.table(c_anno), by = "sample", all.x = TRUE)
   
-  psm_filter_dt <- psm_long_dt[, .(min_c = sum(is.na(counts))), by = .(ID_peptide, condition)]
-  psm_filter_dt <- psm_filter_dt[, .(passes_c = sum(min_c <= sig_thr)), by = ID_peptide]
+  psm_long_dt[, is_na := is.na(counts)]
+  psm_filter_dt <- psm_long_dt[, .(min_c = sum(is_na)), by = .(ID_peptide, condition)]
+  psm_filter_dt <- psm_filter_dt[, passes_c := min_c<=sig_thr]
+  psm_filter_dt <- psm_filter_dt[, .(passes_c = sum(passes_c)), by = ID_peptide]
   
   filter_ID_peptide <- psm_filter_dt[passes_c > 0, ID_peptide]
   psm_sig_prot_df <- psm_sig_prot_raw[ID_peptide %in% filter_ID_peptide]
@@ -596,8 +605,10 @@ read_PD_files <- function(anno_filename, pep_filename, prot_filename,
   psm_long_dt <- melt(psm_sig_pet_raw, id = "ID_peptide", variable.name = "sample", value.name = "counts")
   psm_long_dt <- merge(psm_long_dt, as.data.table(c_anno), by = "sample", all.x = TRUE)
   
-  psm_filter_dt <- psm_long_dt[, .(min_c = sum(is.na(counts))), by = .(ID_peptide, condition)]
-  psm_filter_dt <- psm_filter_dt[, .(passes_c = sum(min_c <= sig_thr)), by = ID_peptide]
+  psm_long_dt[, is_na := is.na(counts)]
+  psm_filter_dt <- psm_long_dt[, .(min_c = sum(is_na)), by = .(ID_peptide, condition)]
+  psm_filter_dt <- psm_filter_dt[, passes_c := min_c<=sig_thr]
+  psm_filter_dt <- psm_filter_dt[, .(passes_c = sum(passes_c)), by = ID_peptide]
   
   filter_ID_peptide <- psm_filter_dt[passes_c > 0, ID_peptide]
   psm_sig_pet_df <- psm_sig_pet_raw[ID_peptide %in% filter_ID_peptide]
@@ -753,7 +764,7 @@ read_MQ_prot_peptide_files <- function(anno_filename, pep_filename, prot_filenam
   input_files[["PROT"]] <- input_files[["PROT"]][!grepl("Keratin|keratin", `Fasta headers`) & !grepl("CON_|Keratin|keratin", `Majority protein IDs`), .(`Majority protein IDs`, `Fasta headers`)]
   input_files[["PROT"]][, `Leading razor protein` := tstrsplit(`Majority protein IDs`, "\\;", keep = 1)[[1]]]
   input_files[["PROT"]][, `Majority protein IDs` := NULL]
-  if(any(grepl("|", input_files[["PROT"]]$`Leading razor protein`))){
+  if(any(grepl("\\|", input_files[["PROT"]]$`Leading razor protein`))){
     input_files[["PROT"]][, `Leading razor protein` := tstrsplit(`Leading razor protein`, "\\|", keep = 2)[[1]]]
   }
   
@@ -778,7 +789,8 @@ read_MQ_prot_peptide_files <- function(anno_filename, pep_filename, prot_filenam
                             "Sample" = as.factor(input_files[["PROT_PEP"]]$`Raw file`), 
                             "Intensity" = input_files[["PROT_PEP"]]$Intensity)
   suppressWarnings({
-    psm_sig_raw <- dcast(psm_sig_raw, formula = ID_peptide~Sample, value.var = "Intensity", fun.aggregate = sum)
+    psm_sig_raw <- psm_sig_raw[, .(Intensity = sum(Intensity)), by = c("ID_peptide", "Sample")]
+    psm_sig_raw <- dcast(psm_sig_raw, formula = ID_peptide~Sample, value.var = "Intensity")
   })
   colnames(psm_sig_raw)[-1] <- input_files[["annotation"]][match(colnames(psm_sig_raw)[-1], input_files[["annotation"]]$Sample)]$Sample
   
@@ -826,9 +838,12 @@ read_MQ_prot_peptide_files <- function(anno_filename, pep_filename, prot_filenam
   
   psm_long_dt <- melt(psm_sig_prot_raw, id.vars = "ID_peptide", variable.name = "sample", value.name = "counts")
   psm_long_dt <- merge(psm_long_dt, as.data.table(c_anno), by = "sample", all.x = TRUE)
+
+  psm_long_dt[, is_na := is.na(counts)]
+  psm_filter_dt <- psm_long_dt[, .(min_c = sum(is_na)), by = .(ID_peptide, condition)]
+  psm_filter_dt <- psm_filter_dt[, passes_c := min_c<=sig_thr]
+  psm_filter_dt <- psm_filter_dt[, .(passes_c = sum(passes_c)), by = ID_peptide]
   
-  psm_filter_dt <- psm_long_dt[, .(min_c = sum(is.na(counts))), by = .(ID_peptide, condition)]
-  psm_filter_dt <- psm_filter_dt[, .(passes_c = sum(min_c <= sig_thr)), by = ID_peptide]
   
   filter_ID_peptide <- psm_filter_dt[passes_c > 0, ID_peptide]
   psm_sig_prot_df <- psm_sig_prot_raw[ID_peptide %in% filter_ID_peptide]
@@ -850,8 +865,11 @@ read_MQ_prot_peptide_files <- function(anno_filename, pep_filename, prot_filenam
   psm_long_dt <- melt(psm_sig_pet_raw, id = "ID_peptide", variable.name = "sample", value.name = "counts")
   psm_long_dt <- merge(psm_long_dt, as.data.table(c_anno), by = "sample", all.x = TRUE)
   
-  psm_filter_dt <- psm_long_dt[, .(min_c = sum(is.na(counts))), by = .(ID_peptide, condition)]
-  psm_filter_dt <- psm_filter_dt[, .(passes_c = sum(min_c <= sig_thr)), by = ID_peptide]
+  psm_long_dt[, is_na := is.na(counts)]
+  psm_filter_dt <- psm_long_dt[, .(min_c = sum(is_na)), by = .(ID_peptide, condition)]
+  psm_filter_dt <- psm_filter_dt[, passes_c := min_c<=sig_thr]
+  psm_filter_dt <- psm_filter_dt[, .(passes_c = sum(passes_c)), by = ID_peptide]
+  
   
   filter_ID_peptide <- psm_filter_dt[passes_c > 0, ID_peptide]
   psm_sig_pet_df <- psm_sig_pet_raw[ID_peptide %in% filter_ID_peptide]
@@ -996,7 +1014,8 @@ read_Spectronaut_files <- function(anno_filename, pep_filename,
                             "Sample" = as.factor(input_files[["PEP"]][, ..sample_col][[1]]), 
                             "Intensity" = input_files[["PEP"]]$PEP.Quantity)
   suppressWarnings({
-    psm_sig_raw <- dcast(psm_sig_raw, formula = ID_peptide~Sample, value.var = "Intensity", fun.aggregate = sum)
+    psm_sig_raw <- psm_sig_raw[, .(Intensity = sum(Intensity)), by = c("ID_peptide", "Sample")]
+    psm_sig_raw <- dcast(psm_sig_raw, formula = ID_peptide~Sample, value.var = "Intensity")
   })
   
   #Made the description of the mpeptides
@@ -1045,8 +1064,11 @@ read_Spectronaut_files <- function(anno_filename, pep_filename,
   psm_long_dt <- melt(psm_sig_prot_raw, id.vars = "ID_peptide", variable.name = "sample", value.name = "counts")
   psm_long_dt <- merge(psm_long_dt, as.data.table(c_anno), by = "sample", all.x = TRUE)
   
-  psm_filter_dt <- psm_long_dt[, .(min_c = sum(is.na(counts))), by = .(ID_peptide, condition)]
-  psm_filter_dt <- psm_filter_dt[, .(passes_c = sum(min_c <= sig_thr)), by = ID_peptide]
+  psm_long_dt[, is_na := is.na(counts)]
+  psm_filter_dt <- psm_long_dt[, .(min_c = sum(is_na)), by = .(ID_peptide, condition)]
+  psm_filter_dt <- psm_filter_dt[, passes_c := min_c<=sig_thr]
+  psm_filter_dt <- psm_filter_dt[, .(passes_c = sum(passes_c)), by = ID_peptide]
+  
   
   filter_ID_peptide <- psm_filter_dt[passes_c > 0, ID_peptide]
   psm_sig_prot_df <- psm_sig_prot_raw[ID_peptide %in% filter_ID_peptide]
@@ -1068,8 +1090,11 @@ read_Spectronaut_files <- function(anno_filename, pep_filename,
   psm_long_dt <- melt(psm_sig_pet_raw, id = "ID_peptide", variable.name = "sample", value.name = "counts")
   psm_long_dt <- merge(psm_long_dt, as.data.table(c_anno), by = "sample", all.x = TRUE)
   
-  psm_filter_dt <- psm_long_dt[, .(min_c = sum(is.na(counts))), by = .(ID_peptide, condition)]
-  psm_filter_dt <- psm_filter_dt[, .(passes_c = sum(min_c <= sig_thr)), by = ID_peptide]
+  psm_long_dt[, is_na := is.na(counts)]
+  psm_filter_dt <- psm_long_dt[, .(min_c = sum(is_na)), by = .(ID_peptide, condition)]
+  psm_filter_dt <- psm_filter_dt[, passes_c := min_c<=sig_thr]
+  psm_filter_dt <- psm_filter_dt[, .(passes_c = sum(passes_c)), by = ID_peptide]
+  
   
   filter_ID_peptide <- psm_filter_dt[passes_c > 0, ID_peptide]
   psm_sig_pet_df <- psm_sig_pet_raw[ID_peptide %in% filter_ID_peptide]
@@ -1206,7 +1231,8 @@ read_FragPipe_files <- function(anno_filename, pep_filename,
                             "Sample" = as.factor(input_files[["PEP"]]$`Sample`), 
                             "Intensity" = input_files[["PEP"]]$Intensity)
   suppressWarnings({
-    psm_sig_raw <- dcast(psm_sig_raw, formula = ID_peptide~Sample, value.var = "Intensity", fun.aggregate = sum)
+    psm_sig_raw <- psm_sig_raw[, .(Intensity = sum(Intensity)), by = c("ID_peptide", "Sample")]
+    psm_sig_raw <- dcast(psm_sig_raw, formula = ID_peptide~Sample, value.var = "Intensity")
   })
   
   #Made the description of the mpeptides
@@ -1255,8 +1281,11 @@ read_FragPipe_files <- function(anno_filename, pep_filename,
   psm_long_dt <- melt(psm_sig_prot_raw, id.vars = "ID_peptide", variable.name = "sample", value.name = "counts")
   psm_long_dt <- merge(psm_long_dt, as.data.table(c_anno), by = "sample", all.x = TRUE)
   
-  psm_filter_dt <- psm_long_dt[, .(min_c = sum(is.na(counts))), by = .(ID_peptide, condition)]
-  psm_filter_dt <- psm_filter_dt[, .(passes_c = sum(min_c <= sig_thr)), by = ID_peptide]
+  psm_long_dt[, is_na := is.na(counts)]
+  psm_filter_dt <- psm_long_dt[, .(min_c = sum(is_na)), by = .(ID_peptide, condition)]
+  psm_filter_dt <- psm_filter_dt[, passes_c := min_c<=sig_thr]
+  psm_filter_dt <- psm_filter_dt[, .(passes_c = sum(passes_c)), by = ID_peptide]
+  
   
   filter_ID_peptide <- psm_filter_dt[passes_c > 0, ID_peptide]
   psm_sig_prot_df <- psm_sig_prot_raw[ID_peptide %in% filter_ID_peptide]
@@ -1278,8 +1307,11 @@ read_FragPipe_files <- function(anno_filename, pep_filename,
   psm_long_dt <- melt(psm_sig_pet_raw, id = "ID_peptide", variable.name = "sample", value.name = "counts")
   psm_long_dt <- merge(psm_long_dt, as.data.table(c_anno), by = "sample", all.x = TRUE)
   
-  psm_filter_dt <- psm_long_dt[, .(min_c = sum(is.na(counts))), by = .(ID_peptide, condition)]
-  psm_filter_dt <- psm_filter_dt[, .(passes_c = sum(min_c <= sig_thr)), by = ID_peptide]
+  psm_long_dt[, is_na := is.na(counts)]
+  psm_filter_dt <- psm_long_dt[, .(min_c = sum(is_na)), by = .(ID_peptide, condition)]
+  psm_filter_dt <- psm_filter_dt[, passes_c := min_c<=sig_thr]
+  psm_filter_dt <- psm_filter_dt[, .(passes_c = sum(passes_c)), by = ID_peptide]
+  
   
   filter_ID_peptide <- psm_filter_dt[passes_c > 0, ID_peptide]
   psm_sig_pet_df <- psm_sig_pet_raw[ID_peptide %in% filter_ID_peptide]
@@ -1557,7 +1589,8 @@ read_phospho_MQ_files <- function(anno_filename, pep_filename, keep_only_phospho
                             "Sample" = as.factor(input_files[["PEP"]]$`Raw file`), 
                             "Intensity" = input_files[["PEP"]]$Intensity)
   suppressWarnings({
-    psm_sig_raw <- dcast(psm_sig_raw, formula = ID_peptide~Sample, value.var = "Intensity", fun.aggregate = sum)
+    psm_sig_raw <- psm_sig_raw[, .(Intensity = sum(Intensity)), by = c("ID_peptide", "Sample")]
+    psm_sig_raw <- dcast(psm_sig_raw, formula = ID_peptide~Sample, value.var = "Intensity")
   })
   colnames(psm_sig_raw)[-1] <- input_files[["annotation"]][match(colnames(psm_sig_raw)[-1], input_files[["annotation"]]$Sample)]$Sample
   
@@ -1607,8 +1640,11 @@ read_phospho_MQ_files <- function(anno_filename, pep_filename, keep_only_phospho
   psm_long_dt <- melt(psm_sig_prot_raw, id.vars = "ID_peptide", variable.name = "sample", value.name = "counts")
   psm_long_dt <- merge(psm_long_dt, as.data.table(c_anno), by = "sample", all.x = TRUE)
   
-  psm_filter_dt <- psm_long_dt[, .(min_c = sum(is.na(counts))), by = .(ID_peptide, condition)]
-  psm_filter_dt <- psm_filter_dt[, .(passes_c = sum(min_c <= sig_thr)), by = ID_peptide]
+  psm_long_dt[, is_na := is.na(counts)]
+  psm_filter_dt <- psm_long_dt[, .(min_c = sum(is_na)), by = .(ID_peptide, condition)]
+  psm_filter_dt <- psm_filter_dt[, passes_c := min_c<=sig_thr]
+  psm_filter_dt <- psm_filter_dt[, .(passes_c = sum(passes_c)), by = ID_peptide]
+  
   
   filter_ID_peptide <- psm_filter_dt[passes_c > 0, ID_peptide]
   psm_sig_prot_df <- psm_sig_prot_raw[ID_peptide %in% filter_ID_peptide]
@@ -1630,8 +1666,11 @@ read_phospho_MQ_files <- function(anno_filename, pep_filename, keep_only_phospho
   psm_long_dt <- melt(psm_sig_pet_raw, id = "ID_peptide", variable.name = "sample", value.name = "counts")
   psm_long_dt <- merge(psm_long_dt, as.data.table(c_anno), by = "sample", all.x = TRUE)
   
-  psm_filter_dt <- psm_long_dt[, .(min_c = sum(is.na(counts))), by = .(ID_peptide, condition)]
-  psm_filter_dt <- psm_filter_dt[, .(passes_c = sum(min_c <= sig_thr)), by = ID_peptide]
+  psm_long_dt[, is_na := is.na(counts)]
+  psm_filter_dt <- psm_long_dt[, .(min_c = sum(is_na)), by = .(ID_peptide, condition)]
+  psm_filter_dt <- psm_filter_dt[, passes_c := min_c<=sig_thr]
+  psm_filter_dt <- psm_filter_dt[, .(passes_c = sum(passes_c)), by = ID_peptide]
+  
   
   filter_ID_peptide <- psm_filter_dt[passes_c > 0, ID_peptide]
   psm_sig_pet_df <- psm_sig_pet_raw[ID_peptide %in% filter_ID_peptide]
@@ -1938,8 +1977,11 @@ read_phospho_PD_files <- function(anno_filename, pep_filename, prot_filename, ps
   psm_long_dt <- melt(psm_sig_prot_raw, id.vars = "ID_peptide", variable.name = "sample", value.name = "counts")
   psm_long_dt <- merge(psm_long_dt, as.data.table(c_anno), by = "sample", all.x = TRUE)
   
-  psm_filter_dt <- psm_long_dt[, .(min_c = sum(is.na(counts))), by = .(ID_peptide, condition)]
-  psm_filter_dt <- psm_filter_dt[, .(passes_c = sum(min_c <= sig_thr)), by = ID_peptide]
+  psm_long_dt[, is_na := is.na(counts)]
+  psm_filter_dt <- psm_long_dt[, .(min_c = sum(is_na)), by = .(ID_peptide, condition)]
+  psm_filter_dt <- psm_filter_dt[, passes_c := min_c<=sig_thr]
+  psm_filter_dt <- psm_filter_dt[, .(passes_c = sum(passes_c)), by = ID_peptide]
+  
   
   filter_ID_peptide <- psm_filter_dt[passes_c > 0, ID_peptide]
   psm_sig_prot_df <- psm_sig_prot_raw[ID_peptide %in% filter_ID_peptide]
@@ -1961,8 +2003,11 @@ read_phospho_PD_files <- function(anno_filename, pep_filename, prot_filename, ps
   psm_long_dt <- melt(psm_sig_pet_raw, id = "ID_peptide", variable.name = "sample", value.name = "counts")
   psm_long_dt <- merge(psm_long_dt, as.data.table(c_anno), by = "sample", all.x = TRUE)
   
-  psm_filter_dt <- psm_long_dt[, .(min_c = sum(is.na(counts))), by = .(ID_peptide, condition)]
-  psm_filter_dt <- psm_filter_dt[, .(passes_c = sum(min_c <= sig_thr)), by = ID_peptide]
+  psm_long_dt[, is_na := is.na(counts)]
+  psm_filter_dt <- psm_long_dt[, .(min_c = sum(is_na)), by = .(ID_peptide, condition)]
+  psm_filter_dt <- psm_filter_dt[, passes_c := min_c<=sig_thr]
+  psm_filter_dt <- psm_filter_dt[, .(passes_c = sum(passes_c)), by = ID_peptide]
+  
   
   filter_ID_peptide <- psm_filter_dt[passes_c > 0, ID_peptide]
   psm_sig_pet_df <- psm_sig_pet_raw[ID_peptide %in% filter_ID_peptide]
