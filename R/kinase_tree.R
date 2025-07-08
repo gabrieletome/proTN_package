@@ -1,6 +1,6 @@
 kinase_activity_calculation <- function(dirOutput_kinase, 
                                         formule_CORAL, 
-                                        comp, 
+                                        comparison, 
                                         dat_pep, 
                                         deps_pep_l_df, 
                                         psm_peptide_table, 
@@ -10,7 +10,7 @@ kinase_activity_calculation <- function(dirOutput_kinase,
   data("KinaseMotifs", envir = environment())
   data("PhosphoSitePlus", envir = environment())
   
-  deps_filtered <- deps_pep_l_df[comp == deps_pep_l_df$comp & deps_pep_l_df$class %in% c("+", "-"), .(id)]
+  deps_filtered <- deps_pep_l_df[comparison == deps_pep_l_df$comp & deps_pep_l_df$class %in% c("+", "-"), .(id)]
   selected_peptides <- psm_peptide_table[ID_peptide %in% deps_filtered$id,]
   tmp_dat_pep <- dat_pep[ID_peptide %in% selected_peptides$ID_peptide, ]
   tmp_dat_pep <- unique(tmp_dat_pep[selected_peptides[, c("ID_peptide","GeneName","Annotated_Sequence")], on="ID_peptide"][, ID_peptide := NULL])
@@ -34,7 +34,7 @@ kinase_activity_calculation <- function(dirOutput_kinase,
   
   mat.std <- standardise(mat)
   rownames(mat.std) <- toupper(sub("\\..*", "", rownames(mat.std)))
-  kssMat <- kinaseSubstrateScore_local(substrate.list, comp = comp, mat = mat.std, seqs=na.omit(ppe@Sequence), 5, 1, "human", TRUE, file.path(dirOutput_kinase, paste0(comp, "_kinase_heatmap.pdf")))
+  kssMat <- kinaseSubstrateScore_local(substrate.list, comp = comparison, mat = mat.std, seqs=na.omit(ppe@Sequence), 5, 1, "human", TRUE, file.path(dirOutput_kinase, paste0(comparison, "_kinase_heatmap.pdf")))
   set.seed(42)
   
   tryCatch({
@@ -44,7 +44,7 @@ kinase_activity_calculation <- function(dirOutput_kinase,
     design <- model.matrix(~0 + c_anno$condition)
     colnames(design) <- unique(c_anno$condition)
     rownames(design) <- c_anno$sample
-    contrast <- makeContrasts(contrasts = formule_CORAL[comp], levels = design)
+    contrast <- makeContrasts(contrasts = formule_CORAL[comparison], levels = design)
     
     # Differential analysis for the svg
     mean_kinase_activity <- lapply(rownames(contrast)[which((contrast != 0)[, 1])], 
@@ -56,13 +56,13 @@ kinase_activity_calculation <- function(dirOutput_kinase,
     
     dt <- as.data.table(kssMat$ksActivityMatrix, keep.rownames = "GeneName")
     message("Saving differential kinase activity.")
-    fwrite(as.data.table(kinase_Act, keep.rownames = "GeneName"), file = file.path(dirOutput_kinase, paste0(comp, "_kinase_activity_differential.txt")), col.names = FALSE, quote = FALSE)
+    fwrite(as.data.table(kinase_Act, keep.rownames = "GeneName"), file = file.path(dirOutput_kinase, paste0(comparison, "_kinase_activity_differential.txt")), col.names = FALSE, quote = FALSE)
     message("Saving kinase activity matrix.")
-    write_xlsx(dt, file.path(dirOutput_kinase, paste0(comp, "_kinase_activity_matrix.xlsx")), col_names = T)
+    write_xlsx(dt, file.path(dirOutput_kinase, paste0(comparison, "_kinase_activity_matrix.xlsx")), col_names = T)
     
     if(species == "Homo sapiens"){
       message("Preparing svg tree...")
-      renderSvg(comp, kinase_Act, dirOutput_kinase)
+      renderSvg(comparison, kinase_Act, dirOutput_kinase)
     }
     
     return(list(dt))
@@ -136,7 +136,7 @@ kinase_tree <- function(proteome_data, differential_results, formule_CORAL, spec
     message(paste0("\nDoing: ",comparison,"\n"))
     list_svg[[comparison]] <- kinase_activity_calculation(dirOutput_kinase = dirOutput_kinase, 
                                                           formule_CORAL = formule_CORAL, 
-                                                          comp = comparison, 
+                                                          comparison = comparison, 
                                                           dat_pep = dat_pep, 
                                                           deps_pep_l_df = deps_pep_l_df, 
                                                           psm_peptide_table = psm_peptide_table, 
