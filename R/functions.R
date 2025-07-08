@@ -926,7 +926,7 @@ limmafnc_dt <- function(type = "PROT", c_anno, dat_gene, psm_count_table, formul
   setkey(psm_count_table, gene)
   
   filt_contro_list <- Filter(function(i) {
-    all(str_extract_all(formule_contrast[i], "\\w+")[[1]] %in% colnames(design))
+    all(str_extract_all(formule_contrast[i], "\\w+")[[1]] %in% c(colnames(design), as.character(0:10)))
   }, seq_along(formule_contrast))
   
   formule_contrast <- formule_contrast[unlist(filt_contro_list)]
