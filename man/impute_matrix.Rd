@@ -4,12 +4,14 @@
 \alias{impute_matrix}
 \title{Matrix Imputation Function}
 \usage{
-impute_matrix(mat, c_anno)
+impute_matrix(mat, c_anno, type)
 }
 \arguments{
 \item{mat}{Data frame or matrix; the intensity matrix to be imputed. The first column must be a peptide ID column, and the rest should contain intensity values.}
 
 \item{c_anno}{Data frame; a data frame containing sample annotations, with columns for the sample ID and condition.}
+
+\item{type}{character; Type of imputation selected (\code{phosr}, \code{gaussian}, \code{missForest}, \code{pcaMethods}).}
 }
 \value{
 A data.table with the imputed intensity matrix, retaining the original peptide IDs.

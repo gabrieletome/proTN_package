@@ -4,10 +4,12 @@
 \alias{impute_intensity}
 \title{Intensity Imputation for Proteomics Data}
 \usage{
-impute_intensity(proteome_data)
+impute_intensity(proteome_data, type = "phosr")
 }
 \arguments{
 \item{proteome_data}{List; a list containing proteomics data. It must include either \code{c_anno} (sample annotations for proteome) or \code{c_anno_proteome} and \code{c_anno_phospho} (sample annotations for proteome and phosphoproteome, respectively). It also requires \code{psm_log_prot_df} and \code{psm_log_pet_df} (log-transformed intensity matrices for proteome and phosphoproteome).}
+
+\item{type}{character; Type of imputation selected (\code{phosr}, \code{gaussian}, \code{missForest}, \code{pcaMethods}). Default: \code{phosr}. NOTE: pcaMethods require data after normalization.}
 }
 \value{
 A list with the imputed proteomics data, including the updated \code{psm_log_prot_df} and \code{psm_log_pet_df} matrices.
@@ -16,6 +18,7 @@ A list with the imputed proteomics data, including the updated \code{psm_log_pro
 This function performs imputation of missing intensity values in a proteomics data matrix.
 It uses PhosR's imputation methods or falls back to median imputation if PhosR's method fails.
 The function works on intensity matrices for both proteome and phosphoproteome data.
+If select \code{pcaMethods} need to provide the normalized data from \code{normalization_ProTN}.
 }
 \examples{
 \dontrun{
