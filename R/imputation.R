@@ -35,8 +35,8 @@ impute_intensity <- function(proteome_data, type="phosr") {
         numeric_df <- proteome_data$dat_gene[, .(GeneName, is.na(.SD)), .SDcols = samples_pep$sample]
         numeric_df <- numeric_df[, .(GeneName,
                                      protein_impute_level = rowSums(.SD) / length(samples_pep$names_sample) * 100), .SDcols = samples_pep$names_sample]
-        psm_peptide <- copy(proteome_data$psm_peptide_table)
-        proteome_data$psm_peptide_table <- psm_peptide[numeric_df, on="GeneName"]
+        psm_prot <- copy(proteome_data$psm_anno_df)
+        proteome_data$psm_anno_df <- psm_prot[numeric_df, on= .(symbol = GeneName)]
         
         proteome_data$dat_gene <- impute_matrix(proteome_data$dat_gene, proteome_data$c_anno, type="pcaMethods_protein")
       } else{
@@ -49,10 +49,10 @@ impute_intensity <- function(proteome_data, type="phosr") {
       numeric_df <- proteome_data$psm_log_prot_df[, .(ID_peptide, is.na(.SD)), .SDcols = samples_pep$sample]
       numeric_df <- numeric_df[, .(ID_peptide,
                                    impute_level = rowSums(.SD) / length(samples_pep$names_sample) * 100), .SDcols = samples_pep$names_sample]
-      numeric_df <- numeric_df[proteome_data$psm_peptide_table[, c("ID_peptide","GeneName")], on="ID_peptide"]
-      numeric_df <- numeric_df[, .(protein_impute_level = mean(impute_level)), by="GeneName"]
-      psm_peptide <- copy(proteome_data$psm_peptide_table)
-      proteome_data$psm_peptide_table <- psm_peptide[numeric_df, on="GeneName"]
+      numeric_df <- numeric_df[proteome_data$psm_anno_df[, c("ID_peptide","symbol")], on="ID_peptide"]
+      numeric_df <- numeric_df[, .(protein_impute_level = mean(impute_level)), by="symbol"]
+      psm_prot <- copy(proteome_data$psm_anno_df)
+      proteome_data$psm_anno_df <- psm_prot[numeric_df, on="symbol"]
       
       proteome_data$psm_log_prot_df <- impute_matrix(mat = proteome_data$psm_log_prot_df, c_anno = proteome_data$c_anno, type=type)
     }
@@ -95,8 +95,8 @@ impute_intensity <- function(proteome_data, type="phosr") {
         numeric_df <- proteome_data$dat_gene[, .(GeneName, is.na(.SD)), .SDcols = samples_pep$sample]
         numeric_df <- numeric_df[, .(GeneName,
                                      protein_impute_level = rowSums(.SD) / length(samples_pep$names_sample) * 100), .SDcols = samples_pep$names_sample]
-        psm_peptide <- copy(proteome_data$psm_anno_df)
-        proteome_data$psm_anno_df <- psm_peptide[numeric_df, on = .(symbol = GeneName)]
+        psm_prot <- copy(proteome_data$psm_anno_df)
+        proteome_data$psm_anno_df <- psm_prot[numeric_df, on = .(symbol = GeneName)]
         
         
         proteome_data$dat_gene <- impute_matrix(proteome_data$dat_gene, proteome_data$c_anno_proteome, type="pcaMethods_protein")
@@ -112,8 +112,8 @@ impute_intensity <- function(proteome_data, type="phosr") {
                                    impute_level = rowSums(.SD) / length(samples_pep$names_sample) * 100), .SDcols = samples_pep$names_sample]
       numeric_df <- numeric_df[proteome_data$psm_anno_df[, c("ID_peptide","symbol")], on="ID_peptide"]
       numeric_df <- numeric_df[, .(protein_impute_level = mean(impute_level)), by="symbol"]
-      psm_peptide <- copy(proteome_data$psm_anno_df)
-      proteome_data$psm_anno_df <- psm_peptide[numeric_df, on = "symbol"]
+      psm_prot <- copy(proteome_data$psm_anno_df)
+      proteome_data$psm_anno_df <- psm_prot[numeric_df, on="symbol"]
       
       
       proteome_data$psm_log_prot_df <- impute_matrix(mat = proteome_data$psm_log_prot_df, c_anno = proteome_data$c_anno_proteome, type=type)

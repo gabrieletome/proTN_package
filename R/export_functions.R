@@ -45,7 +45,7 @@ save_abundance_tables <- function(proteome_data, dirOutput="results_ProTN", subf
                            "GeneName" = anno_uniprot$`Gene Names`)
     n_pep_prot <- unique(merge.data.table(as.data.table(tmp_anno[, .(Accession, Description, GeneName)]), 
                                           as.data.table(proteome_data$psm_anno_df)[, .(Accession, protein_impute_level, Num.Peptide = .N), by = symbol], 
-                                          by.x = "Accession", by.y = "Accession"))[, symbol:=NULL]
+                                          by.x = "Accession", by.y = "Accession"))
   } else{
     n_pep_prot <- unique(merge.data.table(as.data.table(proteome_data$psm_peptide_table[, .(Accession, Description, GeneName, protein_impute_level)]), 
                                           as.data.table(proteome_data$psm_anno_df)[, .(Num.Peptide = .N), by = symbol], 
@@ -54,8 +54,8 @@ save_abundance_tables <- function(proteome_data, dirOutput="results_ProTN", subf
   
 
   df_to_save <- list(
-    "protein_per_sample" = merge.data.table(n_pep_prot, expr_mat, by.x = "GeneName", by.y = "gene"),
-    "protein_per_condition" = merge.data.table(n_pep_prot, expr_avgse_df, by = "GeneName")
+    "protein_per_sample" = merge.data.table(n_pep_prot, expr_mat, by.x = "symbol", by.y = "gene")[, symbol := NULL],
+    "protein_per_condition" = merge.data.table(n_pep_prot, expr_avgse_df, by.x = "symbol", by.y = "GeneName")[, symbol := NULL]
   )
   
   # Process peptides
