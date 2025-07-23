@@ -44,10 +44,10 @@ save_abundance_tables <- function(proteome_data, dirOutput="results_ProTN", subf
                            "Description" = anno_uniprot$`Protein names`,
                            "GeneName" = anno_uniprot$`Gene Names`)
     n_pep_prot <- unique(merge.data.table(as.data.table(tmp_anno[, .(Accession, Description, GeneName)]), 
-                                          as.data.table(proteome_data$psm_anno_df)[, .(Accession, protein_impute_level, Num.Peptide = .N), by = symbol], 
+                                          as.data.table(proteome_data$psm_anno_df)[, .(Accession, Num.Peptide = .N), by = symbol], 
                                           by.x = "Accession", by.y = "Accession"))
   } else{
-    n_pep_prot <- unique(merge.data.table(as.data.table(proteome_data$psm_peptide_table[, .(Accession, Description, GeneName, protein_impute_level)]), 
+    n_pep_prot <- unique(merge.data.table(as.data.table(proteome_data$psm_peptide_table[, .(Accession, Description, GeneName)]), 
                                           as.data.table(proteome_data$psm_anno_df)[, .(Num.Peptide = .N), by = symbol], 
                                           by.x = "GeneName", by.y = "symbol"))
   }
