@@ -191,7 +191,7 @@ save_differential_analysis_table <- function(proteome_data, differential_results
     
     #Export table with SE e MEAN
     peptide_DE <- inner_join(psm_peptide_table, toPrint_pep, by=c("ID_peptide" = "id"))
-    colnames(peptide_DE)[1:10] <- c("Accession","Description","GeneName","Peptide_Sequence","Peptide_Modifications","Phosphorylation_percentage","ID_Peptide","Peptide_Tryptic","Protein_Impute_Level_%","Peptide_Impute_Level_%")
+    colnames(peptide_DE)[1:9] <- c("Accession","Description","GeneName","Peptide_Sequence","Peptide_Modifications","Phosphorylation_percentage","ID_Peptide","Peptide_Tryptic","Peptide_Impute_Level_%")
     df_to_save<-list("README"=readme_sheet,
                      "peptide_DE"=peptide_DE)
   } else{
@@ -213,7 +213,6 @@ save_differential_analysis_table <- function(proteome_data, differential_results
                                         "5. *Peptide_Modifications*: peptide modifications,",
                                         "6. *Peptide_Position*: start and end position of the peptide within the protein sequence, defined UniprotID,",
                                         "7. *Peptide_Tryptic*: peptide tryptic digestion status (fully tryptic, N-semi tryptic, C-semi tryptic, non tryptic)",
-                                        "8. *Protein_Impute_Level_%*: percentage of missing value at protein level",
                                         "9. *Peptide_Impute_Level_%*: percentage of missing value at peptide level",
                                         NA,
                                         "And for each comparison:",
@@ -225,14 +224,14 @@ save_differential_analysis_table <- function(proteome_data, differential_results
     ))
     
     #Export table with SE e MEAN
-    prot_id <- unique(psm_peptide_table[,c("Accession","GeneName")]) %>% group_by(GeneName) %>% summarize_all(toString) %>% left_join(unique(psm_peptide_table[,c("Accession","Description","GeneName","protein_impute_level")]), 
+    prot_id <- unique(psm_peptide_table[,c("Accession","GeneName")]) %>% group_by(GeneName) %>% summarize_all(toString) %>% left_join(unique(psm_peptide_table[,c("Accession","Description","GeneName")]), 
                                                                                                                                       by = "GeneName", 
                                                                                                                                       multiple = "first",
                                                                                                                                       suffix = c(".id", ".old"))
-    protein_DE <- unique(left_join(prot_id[,c("Accession.id","Description","GeneName","protein_impute_level")], toPrint, by=c("GeneName" = "GeneSymbol")))
-    colnames(protein_DE)[1:4] <- c("Accession","Description","GeneName","Protein_Impute_Level_%")
+    protein_DE <- unique(left_join(prot_id[,c("Accession.id","Description","GeneName")], toPrint, by=c("GeneName" = "GeneSymbol")))
+    colnames(protein_DE)[1:3] <- c("Accession","Description","GeneName")
     peptide_DE <- left_join(psm_peptide_table, toPrint_pep, by=c("ID_peptide" = "id"))
-    colnames(peptide_DE)[1:9] <- c("Accession","Description","GeneName","Peptide_Sequence","Peptide_Modifications","ID_Peptide","Peptide_Tryptic","Protein_Impute_Level_%","Peptide_Impute_Level_%")
+    colnames(peptide_DE)[1:8] <- c("Accession","Description","GeneName","Peptide_Sequence","Peptide_Modifications","ID_Peptide","Peptide_Tryptic","Peptide_Impute_Level_%")
     df_to_save<-list("README"=readme_sheet,
                      "protein_DE"=protein_DE,
                      "peptide_DE"=peptide_DE)
