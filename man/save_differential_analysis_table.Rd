@@ -9,7 +9,8 @@ save_differential_analysis_table(
   differential_results,
   dirOutput = "results_ProTN",
   subfolder = "table",
-  phospho_ctrl = FALSE
+  phospho_ctrl = FALSE,
+  phospho_analysis = FALSE
 )
 }
 \arguments{
@@ -22,6 +23,9 @@ save_differential_analysis_table(
 \item{subfolder}{The subfolder within \code{dirOutput} where the file will be saved. Default is "table".}
 
 \item{phospho_ctrl}{A logical flag to indicate if phospho control data should be excluded.
+Default is \code{FALSE}.}
+
+\item{phospho_analysis}{A logical flag to indicate if is a phosphorylation analysis.
 Default is \code{FALSE}.}
 }
 \description{

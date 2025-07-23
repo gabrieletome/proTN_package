@@ -311,7 +311,8 @@ read_MQ_files <- function(anno_filename, pep_filename,
   names(colour_vec)<-na.omit(c_anno$sample)
   
   # Add chunk peptide annotation
-  psm_anno_raw <- data.table("ID_peptide"=psm_peptide_table$ID_peptide,
+  psm_anno_raw <- data.table("Accession" = psm_peptide_table$Accession,
+                             "ID_peptide"=psm_peptide_table$ID_peptide,
                              "symbol"=psm_peptide_table$GeneName,
                              "sequence"=psm_peptide_table$Annotated_Sequence,
                              "modifications"=psm_peptide_table$Modifications)
@@ -554,7 +555,8 @@ read_PD_files <- function(anno_filename, pep_filename, prot_filename,
   names(colour_vec)<-na.omit(c_anno$sample)
   
   # Add chunk peptide annotation
-  psm_anno_raw <- data.table("ID_peptide"=psm_peptide_table$ID_peptide,
+  psm_anno_raw <- data.table("Accession" = psm_peptide_table$Accession,
+                             "ID_peptide"=psm_peptide_table$ID_peptide,
                              "symbol"=psm_peptide_table$GeneName,
                              "sequence"=psm_peptide_table$Annotated_Sequence,
                              "modifications"=psm_peptide_table$Modifications)
@@ -814,7 +816,8 @@ read_MQ_prot_peptide_files <- function(anno_filename, pep_filename, prot_filenam
   names(colour_vec)<-na.omit(c_anno$sample)
   
   # Add chunk peptide annotation
-  psm_anno_raw <- data.table("ID_peptide"=psm_peptide_table$ID_peptide,
+  psm_anno_raw <- data.table("Accession" = psm_peptide_table$Accession,
+                             "ID_peptide"=psm_peptide_table$ID_peptide,
                              "symbol"=psm_peptide_table$GeneName,
                              "sequence"=psm_peptide_table$Annotated_Sequence,
                              "modifications"=psm_peptide_table$Modifications)
@@ -1038,7 +1041,8 @@ read_Spectronaut_files <- function(anno_filename, pep_filename,
   names(colour_vec)<-na.omit(c_anno$sample)
   
   # Add chunk peptide annotation
-  psm_anno_raw <- data.table("ID_peptide"=psm_peptide_table$ID_peptide,
+  psm_anno_raw <- data.table("Accession" = psm_peptide_table$Accession,
+                             "ID_peptide"=psm_peptide_table$ID_peptide,
                              "symbol"=psm_peptide_table$GeneName,
                              "sequence"=psm_peptide_table$Annotated_Sequence,
                              "modifications"=psm_peptide_table$Modifications)
@@ -1255,7 +1259,8 @@ read_FragPipe_files <- function(anno_filename, pep_filename,
   names(colour_vec)<-na.omit(c_anno$sample)
   
   # Add chunk peptide annotation
-  psm_anno_raw <- data.table("ID_peptide"=psm_peptide_table$ID_peptide,
+  psm_anno_raw <- data.table("Accession" = psm_peptide_table$Accession,
+                             "ID_peptide"=psm_peptide_table$ID_peptide,
                              "symbol"=psm_peptide_table$GeneName,
                              "sequence"=psm_peptide_table$Annotated_Sequence,
                              "modifications"=psm_peptide_table$Modifications)
@@ -1614,7 +1619,8 @@ read_phospho_MQ_files <- function(anno_filename, pep_filename, keep_only_phospho
   names(colour_vec)<-na.omit(c_anno$sample)
   
   # Add chunk peptide annotation
-  psm_anno_raw <- data.table("ID_peptide"=psm_peptide_table$ID_peptide,
+  psm_anno_raw <- data.table("Accession" = psm_peptide_table$Accession,
+                             "ID_peptide"=psm_peptide_table$ID_peptide,
                              "symbol"=psm_peptide_table$GeneName,
                              "sequence"=psm_peptide_table$Annotated_Sequence,
                              "modifications"=psm_peptide_table$Modifications)
@@ -1951,7 +1957,8 @@ read_phospho_PD_files <- function(anno_filename, pep_filename, prot_filename, ps
   names(colour_vec)<-na.omit(c_anno$sample)
   
   # Add chunk peptide annotation
-  psm_anno_raw <- data.table("ID_peptide"=psm_peptide_table$ID_peptide,
+  psm_anno_raw <- data.table("Accession" = psm_peptide_table$Accession,
+                             "ID_peptide"=psm_peptide_table$ID_peptide,
                              "symbol"=psm_peptide_table$GeneName,
                              "sequence"=psm_peptide_table$Annotated_Sequence,
                              "modifications"=psm_peptide_table$Modifications)

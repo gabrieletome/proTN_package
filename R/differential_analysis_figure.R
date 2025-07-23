@@ -7,6 +7,7 @@
 #' @param data_type A character string indicating the type of data to plot. Must be either "protein" or "peptide".
 #' @param color_contrast A vector of colors to use for the plot (optional).
 #' @param phospho_ctrl A logical value indicating whether to include phospho-control comparisons in the plot (default is FALSE).
+#' @param size_text Numeric. Size text labels. Default: `4`
 #'
 #' @return A list containing the lollipop plot for differential expression results.
 #'
@@ -31,7 +32,7 @@
 #' @import ggthemes
 #' @export
 generate_differential_barplots <- function(differential_results, data_type="protein", 
-                                           color_contrast=NULL, phospho_ctrl = FALSE) {
+                                           color_contrast=NULL, phospho_ctrl = FALSE, size_text = 4) {
   if(("protein_results_long" %in% names(differential_results))){
     phospho_with_proteome = FALSE
   } else if(("peptide_results_long" %in% names(differential_results))){
@@ -82,6 +83,7 @@ generate_differential_barplots <- function(differential_results, data_type="prot
       fill_vec = col_vec,
       color_vec = col_vec,
       char_max = 30,
+      size_text = size_text,
       shape_vec = c(16, 21),
       position_dodge = 0
     )

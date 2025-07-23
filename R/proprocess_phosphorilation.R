@@ -5,6 +5,7 @@
 #'
 #' @param proteome_data A list containing `psm_peptide_table`, which includes peptide modification information.
 #' @param software Character. The software used for processing (`"PD"` for Proteome Discoverer, `"MQ"` for MaxQuant).
+#' @param size_text Numeric. Size of the label in the plot. Default: `3`
 #'
 #' @return A list containing:
 #'   - `dt`: A data table with phosphosite percentages.
@@ -19,7 +20,7 @@
 #' \dontrun{
 #'   phospho_plot <- create_phosphosite_plot(proteome_data, software="MQ")
 #' }
-create_phosphosite_plot <- function(proteome_data, software) {
+create_phosphosite_plot <- function(proteome_data, software, size_text=3) {
   psm_peptide_table <- copy(proteome_data$psm_peptide_table)
   
   if (software == "PD") {
@@ -59,7 +60,7 @@ create_phosphosite_plot <- function(proteome_data, software) {
                             shape_col = "Site", shape_vec = c(16,16,16),
                             color_col = "Site", color_vec = c("#F79256", "#FBD1A2", "#7DCFB6"), 
                             fill_col = "Site", fill_vec = c("#F79256", "#FBD1A2", "#7DCFB6"), 
-                            text_col = "label") + theme(legend.position = "none", axis.text.y = element_text(size = 14))
+                            text_col = "label", size_text=size_text) + theme(legend.position = "none", axis.text.y = element_text(size = 14))
   
   
   return(list("dt"=numeric_dt, "plot"=hs))

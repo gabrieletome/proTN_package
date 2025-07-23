@@ -38,9 +38,20 @@ save_abundance_tables <- function(proteome_data, dirOutput="results_ProTN", subf
   colnames(expr_avgse_df)[1] <- "GeneName"
   
   # Merge peptide information
-  n_pep_prot <- unique(merge.data.table(as.data.table(proteome_data$psm_peptide_table[, .(Accession, Description, GeneName, protein_impute_level)]), 
-                                        as.data.table(proteome_data$psm_anno_df)[, .(Num.Peptide = .N), by = symbol], 
-                                        by.x = "GeneName", by.y = "symbol"))
+  if(phospho_with_proteome){
+    data("anno_uniprot", envir = environment())
+    tmp_anno <- data.table("Accession" = anno_uniprot$`Leading razor protein`,
+                           "Description" = anno_uniprot$`Protein names`,
+                           "GeneName" = anno_uniprot$`Gene Names`)
+    n_pep_prot <- unique(merge.data.table(as.data.table(tmp_anno[, .(Accession, Description, GeneName)]), 
+                                          as.data.table(proteome_data$psm_anno_df)[, .(Accession, protein_impute_level, Num.Peptide = .N), by = symbol], 
+                                          by.x = "Accession", by.y = "Accession"))[, symbol:=NULL]
+  } else{
+    n_pep_prot <- unique(merge.data.table(as.data.table(proteome_data$psm_peptide_table[, .(Accession, Description, GeneName, protein_impute_level)]), 
+                                          as.data.table(proteome_data$psm_anno_df)[, .(Num.Peptide = .N), by = symbol], 
+                                          by.x = "GeneName", by.y = "symbol"))
+  }
+  
 
   df_to_save <- list(
     "protein_per_sample" = merge.data.table(n_pep_prot, expr_mat, by.x = "GeneName", by.y = "gene"),
@@ -92,9 +103,9 @@ save_abundance_tables <- function(proteome_data, dirOutput="results_ProTN", subf
   df_to_save <- list(
     "README" = readme_sheet,
     "protein_per_sample" = df_to_save$protein_per_sample,
-    "peptide_per_sample" = merge(proteome_data$psm_peptide_table, proteome_data$dat_pep, by = "ID_peptide"),
+    "peptide_per_sample" = merge(proteome_data$psm_peptide_table, proteome_data$dat_pep, by = "ID_peptide", all.y = T),
     "protein_per_condition" = df_to_save$protein_per_condition,
-    "peptide_per_condition" = merge.data.table(proteome_data$psm_peptide_table, expr_avgse_pep_df, by = "ID_peptide")
+    "peptide_per_condition" = merge.data.table(proteome_data$psm_peptide_table, expr_avgse_pep_df, by = "ID_peptide", all.y = T)
   )
   
   if(!dir.exists(dirOutput)){
@@ -127,6 +138,8 @@ save_abundance_tables <- function(proteome_data, dirOutput="results_ProTN", subf
 #' @param subfolder The subfolder within `dirOutput` where the file will be saved. Default is "table".
 #' @param phospho_ctrl A logical flag to indicate if phospho control data should be excluded.
 #'   Default is `FALSE`.
+#' @param phospho_analysis A logical flag to indicate if is a phosphorylation analysis.
+#'   Default is `FALSE`.
 #'
 #' @import writexl
 #' @importFrom dplyr left_join inner_join group_by summarize_all
@@ -140,7 +153,7 @@ save_abundance_tables <- function(proteome_data, dirOutput="results_ProTN", subf
 #' @export
 save_differential_analysis_table <- function(proteome_data, differential_results, 
                                              dirOutput="results_ProTN", subfolder="table",
-                                             phospho_ctrl = FALSE){
+                                             phospho_ctrl = FALSE, phospho_analysis = FALSE){
   if(("c_anno" %in% names(proteome_data))){
     phospho_with_proteome = FALSE
   } else if(("c_anno_phospho" %in% names(proteome_data))){
@@ -149,7 +162,7 @@ save_differential_analysis_table <- function(proteome_data, differential_results
     stop("Missing sample annotation!")
   }
   
-  if(phospho_with_proteome){
+  if(phospho_with_proteome | phospho_analysis){
     psm_peptide_table <- copy(proteome_data$psm_peptide_table)
     toPrint_pep<-copy(differential_results$peptide_results_wide)
     if(!phospho_ctrl){

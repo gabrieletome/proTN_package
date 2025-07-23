@@ -191,7 +191,7 @@ enrichment_lollipop <- function(input_df, # input dataframe
                                 text_col="overlap_size", # column for fill color, optional
                                 
                                 facet_col="anno_class", # column for facet, optional
-                                
+                                size_text=3,
                                 char_max = 50, # maximum number of chars in text
                                 sort_y = T # sort rows according to y?
 ){
@@ -246,7 +246,7 @@ enrichment_lollipop <- function(input_df, # input dataframe
   }
   
   if("text_col" %in% colnames(plot_df)){
-    lp <- lp + geom_text(aes(label=text_col, hjust=(-0.5)),fontface="italic", size=3, show.legend = F) +
+    lp <- lp + geom_text(aes(label=text_col, hjust=(-0.5)),fontface="italic", size=size_text, show.legend = F) +
       scale_x_continuous(expand = expansion(mult = c(.01, .1)))
   }
   
@@ -425,7 +425,7 @@ deps_b2b_lollipop <- function(input_df, # input dataframe
                               text_col="N", # column for fill color, optional
                               
                               facet_col=c("Down-regulated", "Up-regulated"), # column for facet, optional
-                              
+                              size_text=4,
                               char_max = 50, # maximum number of chars in text
                               sort_y = T, # sort rows according to y?
                               shift_mult = 1, # space left for middle labels (by default, if left to 1, equal to the space dedicated to the lollipop on each side)
@@ -477,10 +477,10 @@ deps_b2b_lollipop <- function(input_df, # input dataframe
                      aes(xmin = shift, xmax = shift+x_col, size=0.75))+
       geom_text(data = plot_df[plot_df$bb_col==f_left,],
                 aes(y = y_col, x = 0, label = y_col),
-                inherit.aes = F,size=4)+
+                inherit.aes = F,size=size_text)+
       geom_text(data = plot_df[plot_df$bb_col==f_right,],
                 aes(y = y_col, x = 0, label = y_col),
-                inherit.aes = F,size=4)+
+                inherit.aes = F,size=size_text)+
       scale_x_continuous(limits =c((-shift-max(break_vec)),(shift+max(break_vec))),
                          breaks = c(rev(-break_vec)-shift, break_vec+shift),
                          labels = c(as.character(rev(break_vec)),as.character(break_vec)))+
@@ -511,10 +511,10 @@ deps_b2b_lollipop <- function(input_df, # input dataframe
     if("text_col" %in% colnames(plot_df)){
       lp <- lp + geom_text(data = plot_df[plot_df$bb_col==f_left,],
                            aes(x = -(shift*13/10)-x_col, label=text_col, vjust=0),
-                           fontface="italic", size=4, show.legend = F) +
+                           fontface="italic", size=size_text, show.legend = F) +
         geom_text(data = plot_df[plot_df$bb_col==f_right,],
                   aes(x = (shift*13/10)+x_col, label=text_col, vjust=0),
-                  fontface="italic", size=4, show.legend = F)
+                  fontface="italic", size=size_text, show.legend = F)
     }
     
     if("shape_col" %in% colnames(plot_df)){
@@ -530,11 +530,11 @@ deps_b2b_lollipop <- function(input_df, # input dataframe
     }
     
     if(uniqueN(plot_df$y_col) == length(unique(plot_df$y_col))){
-      lp <- lp + geom_text(aes(x=shift, label=c("Up-regulated", rep("",nrow(plot_df)-1)), hjust=(-0.05), vjust=(-2), fontface=2, color="black"),size=4)
-      lp <- lp + geom_text(aes(x=-shift, label=c("Down-regulated", rep("",nrow(plot_df)-1)), hjust=(1.1), vjust=(-2), fontface=2, color="black"),size=4)
+      lp <- lp + geom_text(aes(x=shift, label=c("Up-regulated", rep("",nrow(plot_df)-1)), hjust=(-0.05), vjust=(-2), fontface=2, color="black"),size=size_text)
+      lp <- lp + geom_text(aes(x=-shift, label=c("Down-regulated", rep("",nrow(plot_df)-1)), hjust=(1.1), vjust=(-2), fontface=2, color="black"),size=size_text)
     } else{
-      lp <- lp + geom_text(aes(x=shift, label=c("Up-regulated", rep("",nrow(plot_df)-1)), hjust=(-0.05), vjust=(-2), fontface=2, color="black"),size=4, nudge_y = 2.5)
-      lp <- lp + geom_text(aes(x=-shift, label=c("Down-regulated", rep("",nrow(plot_df)-1)), hjust=(1.1), vjust=(-2), fontface=2, color="black"),size=4, nudge_y = 2.5)
+      lp <- lp + geom_text(aes(x=shift, label=c("Up-regulated", rep("",nrow(plot_df)-1)), hjust=(-0.05), vjust=(-2), fontface=2, color="black"),size=size_text, nudge_y = 2.5)
+      lp <- lp + geom_text(aes(x=-shift, label=c("Down-regulated", rep("",nrow(plot_df)-1)), hjust=(1.1), vjust=(-2), fontface=2, color="black"),size=size_text, nudge_y = 2.5)
     }
   } else{ # Plot for interactomics
     f_right<- levels(plot_df$bb_col)[1]
@@ -544,7 +544,7 @@ deps_b2b_lollipop <- function(input_df, # input dataframe
                      aes(xmin = shift, xmax = shift+x_col, size=0.75))+
       geom_text(data = plot_df[plot_df$bb_col==f_right,],
                 aes(y = y_col, x = 0, label = y_col),
-                inherit.aes = F,size=4)+
+                inherit.aes = F,size=size_text)+
       scale_x_continuous(limits =c(0,(shift+max(break_vec))),
                          breaks = c(break_vec+shift),
                          labels = c(as.character(break_vec)))+
@@ -572,7 +572,7 @@ deps_b2b_lollipop <- function(input_df, # input dataframe
       lp <- lp + 
         geom_text(data = plot_df[plot_df$bb_col==f_right,],
                   aes(x = (shift*13/10)+x_col, label=text_col, vjust=0),
-                  fontface="italic", size=4, show.legend = F)
+                  fontface="italic", size=size_text, show.legend = F)
     }
     
     if("shape_col" %in% colnames(plot_df)){
@@ -588,9 +588,9 @@ deps_b2b_lollipop <- function(input_df, # input dataframe
     }
     
     if(nrow(plot_df) == length(unique(plot_df$y_col))){
-      lp <- lp + geom_text(aes(x=shift, label=c("Up-regulated", rep("",nrow(plot_df)-1)), hjust=(-0.05), vjust=(-2), fontface=2, color="black"),size=4)
+      lp <- lp + geom_text(aes(x=shift, label=c("Up-regulated", rep("",nrow(plot_df)-1)), hjust=(-0.05), vjust=(-2), fontface=2, color="black"),size=size_text)
     } else{
-      lp <- lp + geom_text(aes(x=shift, label=c("Up-regulated", rep("",nrow(plot_df)-1)), hjust=(-0.05), vjust=(-2), fontface=2, color="black"),size=4, nudge_y = 2.5)
+      lp <- lp + geom_text(aes(x=shift, label=c("Up-regulated", rep("",nrow(plot_df)-1)), hjust=(-0.05), vjust=(-2), fontface=2, color="black"),size=size_text, nudge_y = 2.5)
     }
   }
   

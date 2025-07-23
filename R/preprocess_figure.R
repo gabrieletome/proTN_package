@@ -50,11 +50,13 @@ generate_abundance_subplot <- function(proteome_data) {
   numeric_df <- c_anno[order(c_anno$condition)]
   numeric_df <- numeric_df[.(numeric_df$sample), on = "sample"]
   
-  numeric_df[, numeric_values := colSums(is.na(psm_sig_prot_df))]
+  samples <- numeric_df$sample
+  numeric_df[, numeric_values := colSums(is.na(psm_sig_prot_df[, ..samples]))]
   numeric_df[, `Available` := 100 - (numeric_values / nrow(psm_sig_prot_df) * 100)]
   numeric_df[, `Missing` := 100 - `Available`]
   
   numeric_df <- melt(numeric_df, id.vars = c("sample"), measure.vars = c("Available","Missing"), variable.name = "Coverage", value.name = "% covered abundance")
+  numeric_df[, Coverage := factor(Coverage, levels = c("Missing","Available"))]
   
   plot <- ggplot(data = numeric_df, aes(x = factor(sample, levels = unique(sample)), 
                                         y = `% covered abundance`, 
@@ -63,8 +65,8 @@ generate_abundance_subplot <- function(proteome_data) {
     geom_bar(stat = "identity", width = 0.7, alpha = 0.8) +
     theme_bw(base_size = 16) +
     theme(axis.title.y = element_blank()) +
-    scale_fill_manual(values = c("Available"="darkgreen", "Missing"="darkred")) +
-    scale_colour_manual(values = c("Available"="darkgreen", "Missing"="darkred")) +
+    scale_fill_manual(values = c("Available"="#b0b0b0", "Missing"="darkred")) +
+    scale_colour_manual(values = c("Available"="#b0b0b0", "Missing"="darkred")) +
     theme(panel.grid.minor = element_blank(), panel.grid.major.y = element_blank()) +
     ylim(0, 100)
   

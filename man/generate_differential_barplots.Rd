@@ -8,7 +8,8 @@ generate_differential_barplots(
   differential_results,
   data_type = "protein",
   color_contrast = NULL,
-  phospho_ctrl = FALSE
+  phospho_ctrl = FALSE,
+  size_text = 4
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ generate_differential_barplots(
 \item{color_contrast}{A vector of colors to use for the plot (optional).}
 
 \item{phospho_ctrl}{A logical value indicating whether to include phospho-control comparisons in the plot (default is FALSE).}
+
+\item{size_text}{Numeric. Size text labels. Default: \code{4}}
 }
 \value{
 A list containing the lollipop plot for differential expression results.

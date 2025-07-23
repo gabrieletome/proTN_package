@@ -4,12 +4,14 @@
 \alias{create_phosphosite_plot}
 \title{Create Phosphosite Distribution Plot}
 \usage{
-create_phosphosite_plot(proteome_data, software)
+create_phosphosite_plot(proteome_data, software, size_text = 3)
 }
 \arguments{
 \item{proteome_data}{A list containing \code{psm_peptide_table}, which includes peptide modification information.}
 
 \item{software}{Character. The software used for processing (\code{"PD"} for Proteome Discoverer, \code{"MQ"} for MaxQuant).}
+
+\item{size_text}{Numeric. Size of the label in the plot. Default: \code{3}}
 }
 \value{
 A list containing:
