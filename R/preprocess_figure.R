@@ -444,7 +444,7 @@ plot_selected_proteins <- function(proteome_data, list_protein) {
             panel.border=element_rect(colour=c("grey40"),size=0.03*bs),
             strip.background=element_rect(fill="grey40",colour="grey40",size=0.03*bs),
             plot.title = element_text(hjust = 0.5))+
-      facet_wrap(~GeneName, scales = "free",ncol = if(length(prot_find)>4){round(length(prot_find)/1.9)}else{4})+
+      facet_wrap(~GeneName, scales = "fixed",ncol = if(length(prot_find)>4){round(length(prot_find)/1.9)}else{4})+
       labs(y="Abundance")
 
     return(list("dt" = prot_intensity_long, "plot" = g))

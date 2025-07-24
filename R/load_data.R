@@ -204,13 +204,13 @@ read_MQ_files <- function(anno_filename, pep_filename,
   #Clean files and merge
   colToKeep<-intersect(colnames(input_files[["annotation"]]), c(condition_col, sample_col, color_col, batch_col))
   if(!(condition_col %in% colToKeep)){
-    stop("\'Condition\' column missin in \'ANNOTATION\' file.")
+    stop("\'Condition\' column  in \'ANNOTATION\' file.")
   }
   if(!(sample_col %in% colToKeep)){
-    stop("\'Sample\' column missin in \'ANNOTATION\' file.")
+    stop("\'Sample\' column  in \'ANNOTATION\' file.")
   }
   if(batch_corr_exe & !(batch_col %in% colToKeep)){ 
-    stop(paste0("\'",batch_col,"\' column missin in \'ANNOTATION\' file with batch correction activated"))
+    stop(paste0("\'",batch_col,"\' column  in \'ANNOTATION\' file with batch correction activated"))
   }
   input_files[["annotation"]] <- input_files[["annotation"]][, ..colToKeep]
   setnames(input_files[["annotation"]], old = condition_col, new = "Condition")
@@ -450,13 +450,13 @@ read_PD_files <- function(anno_filename, pep_filename, prot_filename,
   #Clean files and merge
   colToKeep<-intersect(colnames(input_files[["annotation"]]), c("File ID",condition_col, sample_col, color_col, batch_col))
   if(!(condition_col %in% colToKeep)){
-    stop("\'Condition\' column missin in \'ANNOTATION\' file.")
+    stop("\'Condition\' column  in \'ANNOTATION\' file.")
   }
   if(!(sample_col %in% colToKeep)){
-    stop("\'Sample\' column missin in \'ANNOTATION\' file.")
+    stop("\'Sample\' column  in \'ANNOTATION\' file.")
   }
   if(batch_corr_exe & !(batch_col %in% colToKeep)){ 
-    stop(paste0("\'",batch_col,"\' column missin in \'ANNOTATION\' file with batch correction activated"))
+    stop(paste0("\'",batch_col,"\' column  in \'ANNOTATION\' file with batch correction activated"))
   }
   input_files[["annotation"]] <- input_files[["annotation"]][, ..colToKeep]
   setnames(input_files[["annotation"]], old = "File ID", new = "File_ID")
@@ -693,13 +693,13 @@ read_MQ_prot_peptide_files <- function(anno_filename, pep_filename, prot_filenam
   #Clean files and merge
   colToKeep<-intersect(colnames(input_files[["annotation"]]), c(condition_col, sample_col, color_col, batch_col))
   if(!(condition_col %in% colToKeep)){
-    stop("\'Condition\' column missin in \'ANNOTATION\' file.")
+    stop("\'Condition\' column  in \'ANNOTATION\' file.")
   }
   if(!(sample_col %in% colToKeep)){
-    stop("\'Sample\' column missin in \'ANNOTATION\' file.")
+    stop("\'Sample\' column  in \'ANNOTATION\' file.")
   }
   if(batch_corr_exe & !(batch_col %in% colToKeep)){ 
-    stop(paste0("\'",batch_col,"\' column missin in \'ANNOTATION\' file with batch correction activated"))
+    stop(paste0("\'",batch_col,"\' column  in \'ANNOTATION\' file with batch correction activated"))
   }
   input_files[["annotation"]] <- input_files[["annotation"]][, ..colToKeep]
   setnames(input_files[["annotation"]], old = condition_col, new = "Condition")
@@ -1175,13 +1175,13 @@ read_FragPipe_files <- function(anno_filename, pep_filename,
   #Clean files and merge
   colToKeep<-intersect(colnames(input_files[["annotation"]]), c(condition_col, sample_col, color_col, batch_col))
   if(!(condition_col %in% colToKeep)){
-    stop("\'Condition\' column missin in \'ANNOTATION\' file.")
+    stop("\'Condition\' column  in \'ANNOTATION\' file.")
   }
   if(!(sample_col %in% colToKeep)){
-    stop("\'Sample\' column missin in \'ANNOTATION\' file.")
+    stop("\'Sample\' column  in \'ANNOTATION\' file.")
   }
   if(batch_corr_exe & !(batch_col %in% colToKeep)){ 
-    stop(paste0("\'",batch_col,"\' column missin in \'ANNOTATION\' file with batch correction activated"))
+    stop(paste0("\'",batch_col,"\' column  in \'ANNOTATION\' file with batch correction activated"))
   }
   input_files[["annotation"]] <- input_files[["annotation"]][, ..colToKeep]
   setnames(input_files[["annotation"]], old = condition_col, new = "Condition")
@@ -1492,13 +1492,13 @@ read_phospho_MQ_files <- function(anno_filename, pep_filename, keep_only_phospho
   #Clean files and merge
   colToKeep<-intersect(colnames(input_files[["annotation"]]), c(condition_col, sample_col, color_col, batch_col))
   if(!(condition_col %in% colToKeep)){
-    stop("\'Condition\' column missin in \'ANNOTATION\' file.")
+    stop("\'Condition\' column  in \'ANNOTATION\' file.")
   }
   if(!(sample_col %in% colToKeep)){
-    stop("\'Sample\' column missin in \'ANNOTATION\' file.")
+    stop("\'Sample\' column  in \'ANNOTATION\' file.")
   }
   if(batch_corr_exe & !(batch_col %in% colToKeep)){ 
-    stop(paste0("\'",batch_col,"\' column missin in \'ANNOTATION\' file with batch correction activated"))
+    stop(paste0("\'",batch_col,"\' column  in \'ANNOTATION\' file with batch correction activated"))
   }
   input_files[["annotation"]] <- input_files[["annotation"]][, ..colToKeep]
   setnames(input_files[["annotation"]], old = condition_col, new = "Condition")
@@ -1767,13 +1767,13 @@ read_phospho_PD_files <- function(anno_filename, pep_filename, prot_filename, ps
   #Clean files and merge
   colToKeep<-intersect(colnames(input_files[["annotation"]]), c("File ID",condition_col, sample_col, color_col, batch_col))
   if(!(condition_col %in% colToKeep)){
-    stop("\'Condition\' column missin in \'ANNOTATION\' file.")
+    stop("\'Condition\' column  in \'ANNOTATION\' file.")
   }
   if(!(sample_col %in% colToKeep)){
-    stop("\'Sample\' column missin in \'ANNOTATION\' file.")
+    stop("\'Sample\' column  in \'ANNOTATION\' file.")
   }
   if(batch_corr_exe & !(batch_col %in% colToKeep)){ 
-    stop(paste0("\'",batch_col,"\' column missin in \'ANNOTATION\' file with batch correction activated"))
+    stop(paste0("\'",batch_col,"\' column  in \'ANNOTATION\' file with batch correction activated"))
   }
   input_files[["annotation"]] <- input_files[["annotation"]][, ..colToKeep]
   setnames(input_files[["annotation"]], old = "File ID", new = "File_ID")
