@@ -425,7 +425,7 @@ deps_b2b_lollipop <- function(input_df, # input dataframe
                               text_col="N", # column for fill color, optional
                               
                               facet_col=c("Down-regulated", "Up-regulated"), # column for facet, optional
-                              size_text=4,
+                              size_text=3,
                               char_max = 50, # maximum number of chars in text
                               sort_y = T, # sort rows according to y?
                               shift_mult = 1, # space left for middle labels (by default, if left to 1, equal to the space dedicated to the lollipop on each side)
@@ -545,7 +545,7 @@ deps_b2b_lollipop <- function(input_df, # input dataframe
       geom_text(data = plot_df[plot_df$bb_col==f_right,],
                 aes(y = y_col, x = 0, label = y_col),
                 inherit.aes = F,size=size_text)+
-      scale_x_continuous(limits =c(0,(shift+max(break_vec))),
+      scale_x_continuous(limits =c(-300,(shift+max(break_vec))),
                          breaks = c(break_vec+shift),
                          labels = c(as.character(break_vec)))+
       theme_tufte(base_size = 16)+
