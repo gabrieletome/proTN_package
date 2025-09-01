@@ -1756,7 +1756,7 @@ read_phospho_PD_files <- function(anno_filename, pep_filename, prot_filename, ps
   })
   # Read protein file
   input_files[["PSM"]] <- tryCatch({
-    as.data.table(read_xlsx(psm_file_filename))
+    as.data.table(read_xlsx(psm_file_filename, guess_max = 10000))
   }, error=function(cond){
     stop(paste0("Missing file. The file \'PSM\' is missing or not have the pattern in the filename or there are duplicates files."))
   })
@@ -1877,33 +1877,61 @@ read_phospho_PD_files <- function(anno_filename, pep_filename, prot_filename, ps
   psm_peptide_table <- as.data.table(unique(input_files[["PD_PEP_matrix"]][, c("ID_peptide","Accession","Description","GeneName","Annotated_Sequence","Modifications","Position_in_Master_Proteins")]))
   
   # Read PSM and filter Phospho Percentage
-  input_files[["PSM"]] <- input_files[["PSM"]][
-    !(`Annotated Sequence` %in% input_files[["PD_PEP_matrix"]]$Annotated_Sequence) &
-      grepl("Phospho|phospho", input_files[["PSM"]]$`ptmRS: Best Site Probabilities`) &
-      !is.na(input_files[["PSM"]]$`Precursor Abundance`),]
-  
-  input_files[["PEP"]][, Modifications:=gsub(" ", "_", Modifications)]
-  
-  input_files[["PSM"]] <- input_files[["PSM"]][unlist(lapply(str_extract_all(input_files[["PSM"]]$`ptmRS: Best Site Probabilities`,
-                                                                             "\\: \\d+\\.\\d+\\b|\\: \\d+\\b"),
-                                                             function(x){any(as.double(unlist(str_remove_all(unlist(x), "\\: "))) > phospho_thr*100)})),]
-  
-  # Keep only the first Uniprot code
-  input_files$PSM[, `Master Protein Accessions` := sapply(`Master Protein Accessions`, function(x) strsplit(x, ";")[[1]][1])]
-  
-  # Modify sequence to detect phosphorylated sites
-  pattern_sub <- lapply(regmatches(input_files$PSM$`ptmRS: Best Site Probabilities`, gregexpr("\\: \\d+\\.\\d+\\b|\\: \\d+\\b", 
-                                                                                              input_files$PSM$`ptmRS: Best Site Probabilities`)), 
-                        function(x) gsub("\\: ", "", x))
-  replacement <- lapply(pattern_sub, function(x) as.integer(as.numeric(x) > phospho_thr*100))
-  
-  input_files$PSM[, ID_peptide := unlist(lapply(1:length(input_files$PSM$`ptmRS: Best Site Probabilities`),
-                                                function(x){
-                                                  stri_replace_all_regex(input_files$PSM$`ptmRS: Best Site Probabilities`[x],
-                                                                         pattern_sub[[x]],
-                                                                         as.character(replacement[[x]]),
-                                                                         vectorize_all = F)}))]
-  
+  if("ptmRS: Best Site Probabilities" %in% names(input_files[["PSM"]])){
+    input_files[["PSM"]] <- input_files[["PSM"]][
+      !(`Annotated Sequence` %in% input_files[["PD_PEP_matrix"]]$Annotated_Sequence) &
+        grepl("Phospho|phospho", input_files[["PSM"]]$`ptmRS: Best Site Probabilities`) &
+        !is.na(input_files[["PSM"]]$`Precursor Abundance`),]
+    
+    input_files[["PEP"]][, Modifications:=gsub(" ", "_", Modifications)]
+    
+    input_files[["PSM"]] <- input_files[["PSM"]][unlist(lapply(str_extract_all(input_files[["PSM"]]$`ptmRS: Best Site Probabilities`,
+                                                                               "\\: \\d+\\.\\d+\\b|\\: \\d+\\b"),
+                                                               function(x){any(as.double(unlist(str_remove_all(unlist(x), "\\: "))) > phospho_thr*100)})),]
+    
+    # Keep only the first Uniprot code
+    input_files$PSM[, `Master Protein Accessions` := sapply(`Master Protein Accessions`, function(x) strsplit(x, ";")[[1]][1])]
+    
+    # Modify sequence to detect phosphorylated sites
+    pattern_sub <- lapply(regmatches(input_files$PSM$`ptmRS: Best Site Probabilities`, gregexpr("\\: \\d+\\.\\d+\\b|\\: \\d+\\b", 
+                                                                                                input_files$PSM$`ptmRS: Best Site Probabilities`)), 
+                          function(x) gsub("\\: ", "", x))
+    replacement <- lapply(pattern_sub, function(x) as.integer(as.numeric(x) > phospho_thr*100))
+    
+    input_files$PSM[, ID_peptide := unlist(lapply(1:length(input_files$PSM$`ptmRS: Best Site Probabilities`),
+                                                  function(x){
+                                                    stri_replace_all_regex(input_files$PSM$`ptmRS: Best Site Probabilities`[x],
+                                                                           pattern_sub[[x]],
+                                                                           as.character(replacement[[x]]),
+                                                                           vectorize_all = F)}))]
+  } else if("PhosphoRS: Best Site Probabilities" %in% names(input_files[["PSM"]])){
+    input_files[["PSM"]] <- input_files[["PSM"]][
+      !(`Annotated Sequence` %in% input_files[["PD_PEP_matrix"]]$Annotated_Sequence) &
+        grepl("Phospho|phospho", input_files[["PSM"]]$`PhosphoRS: Best Site Probabilities`) &
+        !is.na(input_files[["PSM"]]$`Precursor Abundance`),]
+    
+    input_files[["PEP"]][, Modifications:=gsub(" ", "_", Modifications)]
+    
+    input_files[["PSM"]] <- input_files[["PSM"]][unlist(lapply(str_extract_all(input_files[["PSM"]]$`PhosphoRS: Best Site Probabilities`,
+                                                                               "\\: \\d+\\.\\d+\\b|\\: \\d+\\b"),
+                                                               function(x){any(as.double(unlist(str_remove_all(unlist(x), "\\: "))) > phospho_thr*100)})),]
+    
+    # Keep only the first Uniprot code
+    input_files$PSM[, `Master Protein Accessions` := sapply(`Master Protein Accessions`, function(x) strsplit(x, ";")[[1]][1])]
+    
+    # Modify sequence to detect phosphorylated sites
+    pattern_sub <- lapply(regmatches(input_files$PSM$`PhosphoRS: Best Site Probabilities`, gregexpr("\\: \\d+\\.\\d+\\b|\\: \\d+\\b", 
+                                                                                                input_files$PSM$`PhosphoRS: Best Site Probabilities`)), 
+                          function(x) gsub("\\: ", "", x))
+    replacement <- lapply(pattern_sub, function(x) as.integer(as.numeric(x) > phospho_thr*100))
+    
+    input_files$PSM[, ID_peptide := unlist(lapply(1:length(input_files$PSM$`PhosphoRS: Best Site Probabilities`),
+                                                  function(x){
+                                                    stri_replace_all_regex(input_files$PSM$`PhosphoRS: Best Site Probabilities`[x],
+                                                                           pattern_sub[[x]],
+                                                                           as.character(replacement[[x]]),
+                                                                           vectorize_all = F)}))]
+  }
   
   colnames(input_files$PSM) <- gsub(" ", "_", colnames(input_files$PSM))
   input_files$PSM[, Annotated_Sequence := toupper(Annotated_Sequence)]
