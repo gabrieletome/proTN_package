@@ -523,7 +523,7 @@ heatmap_selected_proteins <- function(proteome_data, list_protein) {
     
     bs = 23
     g<-pheatmap(mat_plot, 
-                color = colorRampPalette(c("#B2182B","white","#2166AC"))(101), 
+                color = colorRampPalette(c("#B2182B","#FFE66D","#2166AC"))(101), 
                 breaks = breaks,
                 cluster_cols = T, cluster_rows = F,
                 annotation_col = annotation,

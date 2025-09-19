@@ -12,6 +12,7 @@ STRINGdb_network(
   subfold_net = "STRINGdb",
   phospho_ctrl = FALSE,
   score_thr = 700,
+  algorithm = "fastgreedy",
   shiny = FALSE
 )
 }
@@ -30,6 +31,8 @@ or peptide level. It should include \code{protein_results_long} or \code{peptide
 \item{phospho_ctrl}{Logical. Whether to include phospho-control comparisons (default: \code{FALSE}).}
 
 \item{score_thr}{Numeric. Threshold score for STRINGdb edge. (default: \code{700})}
+
+\item{algorithm}{Character. STRINGdb clustering algorithm. Select between: \code{fastgreedy} (default), \code{walktrap}, \code{spinglass}, \code{edge.betweenness}.}
 
 \item{shiny}{Logical. Return results for the shiny app (default: \code{FALSE})}
 }
