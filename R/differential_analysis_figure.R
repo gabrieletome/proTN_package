@@ -228,6 +228,117 @@ generate_volcano_plots <- function(differential_results, data_type=NULL,
 }
 
 
+#' Abundance vs Fold Change
+#'
+#' This function generates ...
+#'
+#' @param proteome_data A list containing proteome data, including sample annotation and either protein or peptide data matrices.
+#' @param differential_results A list containing the differential analysis results.
+#' @param type Character; specifies the type of data to plot. Options are "protein" or "peptide".
+#' @param condition Character. Specify the condition to represent.
+#' @param comparison Character, Specify the comparison to represent.
+#' @param col_vec Character. Vector with 3 colors.
+#'
+#' @return A list containing:
+#'   \item{dt}{Data table containing the coordinates for each sample.}
+#'   \item{plot}{ggplot2 object representing the MDS plot with sample labels and color-coded conditions.}
+#'
+#' @examples
+#' \dontrun{
+#' result <- ma_plot(differential_results, proteome_data, type, condition, comparison)
+#' print(result$plot)
+#' }
+#'
+#' @import data.table
+#' @import ggplot2
+#' @import ggrastr
+#' @export
+ma_plot <- function(differential_results, proteome_data, type, condition, comparison, col_vec = NULL){
+  if(("protein_results_long" %in% names(differential_results))){
+    phospho_with_proteome = FALSE
+  } else if(!("protein_results_long" %in% names(differential_results)) & 
+            ("peptide_results_long" %in% names(differential_results))){
+    phospho_with_proteome = TRUE
+    type="peptide"
+  } else{
+    stop("Error in differential results paramenter! Verify the presence of protein_results_long or peptide_results_long")
+  }
+  
+  deps_l_df <- if (type == "protein"){ 
+    copy(differential_results$protein_results_long)
+  } else if(type == "peptide") { 
+    copy(differential_results$peptide_results_long)
+  } else{stop("type MUST be \"protein\" or \"peptide\"")}
+  
+  if(phospho_with_proteome){
+    compToKeep <- unique(grep("_Phospho_CTRL", deps_l_df$comp, value = T, invert = T))
+    deps_l_df <- deps_l_df[comp %in% compToKeep]
+  }
+  deps_l_df_filt <- deps_l_df[comp %in% comparison]
+  
+  if(type == "protein"){
+    abundance_dt <- copy(proteome_data$dat_gene)
+    abundance_dt_plot <- melt(abundance_dt, id.vars = "GeneName", variable.name = "sample", value.name = "Abundance")
+    setnames(abundance_dt_plot, old = "GeneName", new = "id")
+    
+    if(phospho_with_proteome){
+      c_anno <- copy(proteome_data$c_anno_proteome)
+    } else{
+      c_anno <- copy(proteome_data$c_anno)
+    }
+  } else if(type == "peptide"){
+    abundance_dt <- copy(proteome_data$dat_pep)
+    abundance_dt_plot <- melt(abundance_dt, id.vars = "ID_peptide", variable.name = "sample", value.name = "Abundance")
+    setnames(abundance_dt_plot, old = "ID_peptide", new = "id")
+    
+    if(phospho_with_proteome){
+      c_anno <- copy(proteome_data$c_anno_phospho)
+    } else{
+      c_anno <- copy(proteome_data$c_anno)
+    }
+    
+  } else{
+    stop("Invalid type parameter. Must be \"protein\" or \"peptide\"")
+  }
+  
+  abundance_dt_plot <- abundance_dt_plot[c_anno, on = "sample"]
+  cond = condition
+  abundance_dt_plot_filt <- abundance_dt_plot[condition == cond]
+  abundance_dt_plot_filt_mean <- abundance_dt_plot_filt[, .(Abundance = mean(Abundance)), by = c("id","condition")]
+  
+  plot_dt <- merge.data.table(abundance_dt_plot_filt_mean, deps_l_df_filt, by.x = "id", by.y = "id")
+  plot_dt[, class := factor(class, levels = c("+","-","="))]
+  
+  xmin = -(max(abs(plot_dt$log2_FC))*1.1)
+  xmax = (max(abs(plot_dt$log2_FC))*1.1)
+  ymin = -(max(abs(plot_dt$Abundance))*1.1)
+  ymax = (max(abs(plot_dt$Abundance))*1.1)
+  
+  if(is.null(col_vec)){
+    col_vec = c("-" = "#008752", "=" = "#CCCCCC", "+" = "#0078AE")
+  } else if(length(col_vec) < 3){
+    warning("Required 3 colors required. Using default")
+    col_vec = c("-" = "#008752", "=" = "#CCCCCC", "+" = "#0078AE")
+  }
+  
+  # TODO se condition == NULL, media di tutte le condizioni
+  
+  gg <- ggplot(plot_dt, aes(x = log2_FC, y = Abundance, fill = class, color = class)) +
+    geom_point_rast(alpha = 0.75, shape = 16, size = 4) +
+    theme_bw(base_size = 14) +
+    xlab(paste0(comparison," log2FC")) +
+    xlim(c(xmin, xmax)) +
+    ylab(paste0("Mean abundance ",cond)) +
+    ylim(c(ymin, ymax)) +
+    scale_color_manual(values = col_vec) +
+    scale_fill_manual(values = col_vec)
+    
+    
+  return(list("dt" = plot_dt, "plot" = gg))
+  
+}
+
+
 
 #' MDS Plot
 #'
