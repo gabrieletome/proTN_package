@@ -328,7 +328,6 @@ read_MQ_files <- function(anno_filename, pep_filename,
   psm_anno_raw$id<- paste(psm_anno_raw$symbol,psm_anno_raw$rank,psm_anno_raw$card,sep="_")
   psm_anno_raw <- as.data.table(psm_anno_raw)
   
-  
   # Convert to data.table
   psm_sig_prot_raw <- as.data.table(psm_sig_raw)
   psm_sig_pet_raw <- as.data.table(psm_sig_raw)
@@ -355,8 +354,8 @@ read_MQ_files <- function(anno_filename, pep_filename,
   psm_log_prot_df[, (setdiff(names(psm_log_prot_df), "ID_peptide")) := lapply(.SD, log2), .SDcols = setdiff(names(psm_log_prot_df), "ID_peptide")]
   
   # Filter proteins with only 1 peptID_peptidee
-  filter_df_single_pep <- psm_anno_df[, .N, by = symbol][N >= min_peptide_protein]
-  filter_df_single_pep <- merge(filter_df_single_pep, psm_anno_df, by = "symbol")[, ID_peptide]
+  psm_anno_df[, N_peptide := .N, by = symbol]
+  filter_df_single_pep <- psm_anno_df[N_peptide >= min_peptide_protein, ID_peptide]
   psm_log_prot_df <- psm_log_prot_df[ID_peptide %in% filter_df_single_pep]
   psm_anno_df <- psm_anno_df[ID_peptide %in% filter_df_single_pep]
   
@@ -400,15 +399,10 @@ read_MQ_files <- function(anno_filename, pep_filename,
   psm_log_pet_df <- copy(psm_sig_pet_df)
   psm_log_pet_df[, (setdiff(names(psm_log_pet_df), "ID_peptide")) := lapply(.SD, log2), .SDcols = setdiff(names(psm_log_pet_df), "ID_peptide")]
   
-  # Filter proteins with only 1 peptID_peptidee
-  filter_df_single_pep <- psm_anno_df[, .N, by = symbol][N >= min_peptide_protein]
-  filter_df_single_pep <- merge(filter_df_single_pep, psm_anno_df, by = "symbol")[, symbol]
-  filter_df_single_pep <- psm_peptide_table[GeneName %in% filter_df_single_pep, ID_peptide]
-  
   psm_log_pet_df <- psm_log_pet_df[ID_peptide %in% filter_df_single_pep]
   psm_peptide_table <- psm_peptide_table[ID_peptide %in% filter_df_single_pep]
   
-  message(paste0("N Proteins (after filter): ", uniqueN(psm_anno_df$symbol)))
+  message(paste0("N Proteins (after filter): ", uniqueN(psm_peptide_table$Accession)))
   message(paste0("N Peptides (after filter): ", uniqueN(psm_peptide_table$ID_peptide)))
   
   return(list("c_anno" = c_anno,
@@ -600,8 +594,8 @@ read_PD_files <- function(anno_filename, pep_filename, prot_filename,
   psm_log_prot_df[, (setdiff(names(psm_log_prot_df), "ID_peptide")) := lapply(.SD, log2), .SDcols = setdiff(names(psm_log_prot_df), "ID_peptide")]
   
   # Filter proteins with only 1 peptID_peptidee
-  filter_df_single_pep <- psm_anno_df[, .N, by = symbol][N >= min_peptide_protein]
-  filter_df_single_pep <- merge(filter_df_single_pep, psm_anno_df, by = "symbol")[, ID_peptide]
+  psm_anno_df[, N_peptide := .N, by = symbol]
+  filter_df_single_pep <- psm_anno_df[N_peptide >= min_peptide_protein, ID_peptide]
   psm_log_prot_df <- psm_log_prot_df[ID_peptide %in% filter_df_single_pep]
   psm_anno_df <- psm_anno_df[ID_peptide %in% filter_df_single_pep]
   
@@ -645,15 +639,10 @@ read_PD_files <- function(anno_filename, pep_filename, prot_filename,
   psm_log_pet_df <- copy(psm_sig_pet_df)
   psm_log_pet_df[, (setdiff(names(psm_log_pet_df), "ID_peptide")) := lapply(.SD, log2), .SDcols = setdiff(names(psm_log_pet_df), "ID_peptide")]
   
-  # Filter proteins with only 1 peptID_peptidee
-  filter_df_single_pep <- psm_anno_df[, .N, by = symbol][N >= min_peptide_protein]
-  filter_df_single_pep <- merge(filter_df_single_pep, psm_anno_df, by = "symbol")[, symbol]
-  filter_df_single_pep <- psm_peptide_table[GeneName %in% filter_df_single_pep, ID_peptide]
-  
   psm_log_pet_df <- psm_log_pet_df[ID_peptide %in% filter_df_single_pep]
   psm_peptide_table <- psm_peptide_table[ID_peptide %in% filter_df_single_pep]
   
-  message(paste0("N Proteins (after filter): ", uniqueN(psm_anno_df$symbol)))
+  message(paste0("N Proteins (after filter): ", uniqueN(psm_peptide_table$Accession)))
   message(paste0("N Peptides (after filter): ", uniqueN(psm_peptide_table$ID_peptide)))
   
   return(list("c_anno" = c_anno,
@@ -863,8 +852,8 @@ read_MQ_prot_peptide_files <- function(anno_filename, pep_filename, prot_filenam
   psm_log_prot_df[, (setdiff(names(psm_log_prot_df), "ID_peptide")) := lapply(.SD, log2), .SDcols = setdiff(names(psm_log_prot_df), "ID_peptide")]
   
   # Filter proteins with only 1 peptID_peptidee
-  filter_df_single_pep <- psm_anno_df[, .N, by = symbol][N >= min_peptide_protein]
-  filter_df_single_pep <- merge(filter_df_single_pep, psm_anno_df, by = "symbol")[, ID_peptide]
+  psm_anno_df[, N_peptide := .N, by = symbol]
+  filter_df_single_pep <- psm_anno_df[N_peptide >= min_peptide_protein, ID_peptide]
   psm_log_prot_df <- psm_log_prot_df[ID_peptide %in% filter_df_single_pep]
   psm_anno_df <- psm_anno_df[ID_peptide %in% filter_df_single_pep]
   
@@ -908,15 +897,11 @@ read_MQ_prot_peptide_files <- function(anno_filename, pep_filename, prot_filenam
   psm_log_pet_df <- copy(psm_sig_pet_df)
   psm_log_pet_df[, (setdiff(names(psm_log_pet_df), "ID_peptide")) := lapply(.SD, log2), .SDcols = setdiff(names(psm_log_pet_df), "ID_peptide")]
   
-  # Filter proteins with only 1 peptID_peptidee
-  filter_df_single_pep <- psm_anno_df[, .N, by = symbol][N >= min_peptide_protein]
-  filter_df_single_pep <- merge(filter_df_single_pep, psm_anno_df, by = "symbol")[, symbol]
-  filter_df_single_pep <- psm_peptide_table[GeneName %in% filter_df_single_pep, ID_peptide]
   
   psm_log_pet_df <- psm_log_pet_df[ID_peptide %in% filter_df_single_pep]
   psm_peptide_table <- psm_peptide_table[ID_peptide %in% filter_df_single_pep]
   
-  message(paste0("N Proteins (after filter): ", uniqueN(psm_anno_df$symbol)))
+  message(paste0("N Proteins (after filter): ", uniqueN(psm_peptide_table$Accession)))
   message(paste0("N Peptides (after filter): ", uniqueN(psm_peptide_table$ID_peptide)))
   
   return(list("c_anno" = c_anno,
@@ -1091,8 +1076,8 @@ read_Spectronaut_files <- function(anno_filename, pep_filename,
   psm_log_prot_df[, (setdiff(names(psm_log_prot_df), "ID_peptide")) := lapply(.SD, log2), .SDcols = setdiff(names(psm_log_prot_df), "ID_peptide")]
   
   # Filter proteins with only 1 peptID_peptidee
-  filter_df_single_pep <- psm_anno_df[, .N, by = symbol][N >= min_peptide_protein]
-  filter_df_single_pep <- merge(filter_df_single_pep, psm_anno_df, by = "symbol")[, ID_peptide]
+  psm_anno_df[, N_peptide := .N, by = symbol]
+  filter_df_single_pep <- psm_anno_df[N_peptide >= min_peptide_protein, ID_peptide]
   psm_log_prot_df <- psm_log_prot_df[ID_peptide %in% filter_df_single_pep]
   psm_anno_df <- psm_anno_df[ID_peptide %in% filter_df_single_pep]
   
@@ -1136,15 +1121,11 @@ read_Spectronaut_files <- function(anno_filename, pep_filename,
   psm_log_pet_df <- copy(psm_sig_pet_df)
   psm_log_pet_df[, (setdiff(names(psm_log_pet_df), "ID_peptide")) := lapply(.SD, log2), .SDcols = setdiff(names(psm_log_pet_df), "ID_peptide")]
   
-  # Filter proteins with only 1 peptID_peptidee
-  filter_df_single_pep <- psm_anno_df[, .N, by = symbol][N >= min_peptide_protein]
-  filter_df_single_pep <- merge(filter_df_single_pep, psm_anno_df, by = "symbol")[, symbol]
-  filter_df_single_pep <- psm_peptide_table[GeneName %in% filter_df_single_pep, ID_peptide]
   
   psm_log_pet_df <- psm_log_pet_df[ID_peptide %in% filter_df_single_pep]
   psm_peptide_table <- psm_peptide_table[ID_peptide %in% filter_df_single_pep]
   
-  message(paste0("N Proteins (after filter): ", uniqueN(psm_anno_df$symbol)))
+  message(paste0("N Proteins (after filter): ", uniqueN(psm_peptide_table$Accession)))
   message(paste0("N Peptides (after filter): ", uniqueN(psm_peptide_table$ID_peptide)))
   
   return(list("c_anno" = c_anno,
@@ -1311,8 +1292,8 @@ read_FragPipe_files <- function(anno_filename, pep_filename,
   psm_log_prot_df[, (setdiff(names(psm_log_prot_df), "ID_peptide")) := lapply(.SD, log2), .SDcols = setdiff(names(psm_log_prot_df), "ID_peptide")]
   
   # Filter proteins with only 1 peptID_peptidee
-  filter_df_single_pep <- psm_anno_df[, .N, by = symbol][N >= min_peptide_protein]
-  filter_df_single_pep <- merge(filter_df_single_pep, psm_anno_df, by = "symbol")[, ID_peptide]
+  psm_anno_df[, N_peptide := .N, by = symbol]
+  filter_df_single_pep <- psm_anno_df[N_peptide >= min_peptide_protein, ID_peptide]
   psm_log_prot_df <- psm_log_prot_df[ID_peptide %in% filter_df_single_pep]
   psm_anno_df <- psm_anno_df[ID_peptide %in% filter_df_single_pep]
   
@@ -1350,15 +1331,11 @@ read_FragPipe_files <- function(anno_filename, pep_filename,
   psm_log_pet_df <- copy(psm_sig_pet_df)
   psm_log_pet_df[, (setdiff(names(psm_log_pet_df), "ID_peptide")) := lapply(.SD, log2), .SDcols = setdiff(names(psm_log_pet_df), "ID_peptide")]
   
-  # Filter proteins with only 1 peptID_peptidee
-  filter_df_single_pep <- psm_anno_df[, .N, by = symbol][N >= min_peptide_protein]
-  filter_df_single_pep <- merge(filter_df_single_pep, psm_anno_df, by = "symbol")[, symbol]
-  filter_df_single_pep <- psm_peptide_table[GeneName %in% filter_df_single_pep, ID_peptide]
   
   psm_log_pet_df <- psm_log_pet_df[ID_peptide %in% filter_df_single_pep]
   psm_peptide_table <- psm_peptide_table[ID_peptide %in% filter_df_single_pep]
   
-  message(paste0("N Proteins (after filter): ", uniqueN(psm_anno_df$symbol)))
+  message(paste0("N Proteins (after filter): ", uniqueN(psm_peptide_table$Accession)))
   message(paste0("N Peptides (after filter): ", uniqueN(psm_peptide_table$ID_peptide)))
   
   return(list("c_anno" = c_anno,
@@ -1673,8 +1650,8 @@ read_phospho_MQ_files <- function(anno_filename, pep_filename, keep_only_phospho
   psm_log_prot_df[, (setdiff(names(psm_log_prot_df), "ID_peptide")) := lapply(.SD, log2), .SDcols = setdiff(names(psm_log_prot_df), "ID_peptide")]
   
   # Filter proteins with only 1 peptID_peptidee
-  filter_df_single_pep <- psm_anno_df[, .N, by = symbol][N >= min_peptide_protein]
-  filter_df_single_pep <- merge(filter_df_single_pep, psm_anno_df, by = "symbol")[, ID_peptide]
+  psm_anno_df[, N_peptide := .N, by = symbol]
+  filter_df_single_pep <- psm_anno_df[N_peptide >= min_peptide_protein, ID_peptide]
   psm_log_prot_df <- psm_log_prot_df[ID_peptide %in% filter_df_single_pep]
   psm_anno_df <- psm_anno_df[ID_peptide %in% filter_df_single_pep]
   
@@ -1719,15 +1696,10 @@ read_phospho_MQ_files <- function(anno_filename, pep_filename, keep_only_phospho
   psm_log_pet_df <- copy(psm_sig_pet_df)
   psm_log_pet_df[, (setdiff(names(psm_log_pet_df), "ID_peptide")) := lapply(.SD, log2), .SDcols = setdiff(names(psm_log_pet_df), "ID_peptide")]
   
-  # Filter proteins with only 1 peptID_peptidee
-  filter_df_single_pep <- psm_anno_df[, .N, by = symbol][N >= min_peptide_protein]
-  filter_df_single_pep <- merge(filter_df_single_pep, psm_anno_df, by = "symbol")[, symbol]
-  filter_df_single_pep <- psm_peptide_table[GeneName %in% filter_df_single_pep, ID_peptide]
-  
   psm_log_pet_df <- psm_log_pet_df[ID_peptide %in% filter_df_single_pep]
   psm_peptide_table <- psm_peptide_table[ID_peptide %in% filter_df_single_pep]
   
-  message(paste0("N Proteins (after filter): ", uniqueN(psm_anno_df$symbol)))
+  message(paste0("N Proteins (after filter): ", uniqueN(psm_peptide_table$Accession)))
   message(paste0("N Peptides (after filter): ", uniqueN(psm_peptide_table$`Phospho_%`)))
   
   return(list("c_anno" = c_anno,
@@ -2042,8 +2014,8 @@ read_phospho_PD_files <- function(anno_filename, pep_filename, prot_filename, ps
   psm_log_prot_df[, (setdiff(names(psm_log_prot_df), "ID_peptide")) := lapply(.SD, log2), .SDcols = setdiff(names(psm_log_prot_df), "ID_peptide")]
   
   # Filter proteins with only 1 peptID_peptidee
-  filter_df_single_pep <- psm_anno_df[, .N, by = symbol][N >= min_peptide_protein]
-  filter_df_single_pep <- merge(filter_df_single_pep, psm_anno_df, by = "symbol")[, ID_peptide]
+  psm_anno_df[, N_peptide := .N, by = symbol]
+  filter_df_single_pep <- psm_anno_df[N_peptide >= min_peptide_protein, ID_peptide]
   psm_log_prot_df <- psm_log_prot_df[ID_peptide %in% filter_df_single_pep]
   psm_anno_df <- psm_anno_df[ID_peptide %in% filter_df_single_pep]
   
@@ -2087,15 +2059,11 @@ read_phospho_PD_files <- function(anno_filename, pep_filename, prot_filename, ps
   psm_log_pet_df <- copy(psm_sig_pet_df)
   psm_log_pet_df[, (setdiff(names(psm_log_pet_df), "ID_peptide")) := lapply(.SD, log2), .SDcols = setdiff(names(psm_log_pet_df), "ID_peptide")]
   
-  # Filter proteins with only 1 peptID_peptidee
-  filter_df_single_pep <- psm_anno_df[, .N, by = symbol][N >= min_peptide_protein]
-  filter_df_single_pep <- merge(filter_df_single_pep, psm_anno_df, by = "symbol")[, symbol]
-  filter_df_single_pep <- psm_peptide_table[GeneName %in% filter_df_single_pep, ID_peptide]
   
   psm_log_pet_df <- psm_log_pet_df[ID_peptide %in% filter_df_single_pep]
   psm_peptide_table <- psm_peptide_table[ID_peptide %in% filter_df_single_pep]
   
-  message(paste0("N Proteins (after filter): ", uniqueN(psm_anno_df$symbol)))
+  message(paste0("N Proteins (after filter): ", uniqueN(psm_peptide_table$Accession)))
   message(paste0("N Peptides (after filter): ", uniqueN(psm_peptide_table$ID_peptide)))
   
   return(list("c_anno" = c_anno,

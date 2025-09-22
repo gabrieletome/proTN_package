@@ -2142,7 +2142,7 @@ substrateList = function(phosScoringMatrices, top, cs, inclusion) {
 }
 
 
-#' @import e1071
+#' @importFrom e1071 svm
 #' @noRd
 multiAdaSampling <- function(train.mat, test.mat,
                              label, kernelType, iter = 5) {
@@ -2156,7 +2156,7 @@ multiAdaSampling <- function(train.mat, test.mat,
   for (i in seq_len(iter)) {
     tmp <- X
     rownames(tmp) <- NULL
-    model <- e1071::svm(tmp, factor(Y),
+    model <- svm(tmp, factor(Y),
                         kernel = kernelType, probability = TRUE)
     prob.mat <- attr(predict(model, train.mat,
                              decision.values = FALSE, probability = TRUE),

@@ -179,7 +179,7 @@ differential_analysis <- function(proteome_data, formule_contrast,
     
     message("Differentiation analysis in progress...")
     dat_gene <- copy(proteome_data$dat_gene)
-    psm_count_table <- data.table(table(proteome_data$psm_anno_df$symbol))
+    psm_count_table <- unique(proteome_data$psm_anno_df[, c("symbol","N_peptide")])
     
     # Process proteins
     expr_mat <- copy(proteome_data$dat_gene)
