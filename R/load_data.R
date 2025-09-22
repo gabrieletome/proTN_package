@@ -216,6 +216,8 @@ read_MQ_files <- function(anno_filename, pep_filename,
   setnames(input_files[["annotation"]], old = condition_col, new = "Condition")
   setnames(input_files[["annotation"]], old = sample_col, new = "Sample")
   
+  # Cast to string if all condition are numeric
+  input_files[["annotation"]][, Condition := as.character(Condition)]
   # Check if conditions start with number. It generate problem later in DEqMS
   if(any(str_starts(input_files[["annotation"]]$Condition, "[0-9]"))){
     input_files[["annotation"]][(str_starts(Condition, "[0-9]")), Condition := str_c("X.", Condition)]
@@ -463,6 +465,8 @@ read_PD_files <- function(anno_filename, pep_filename, prot_filename,
   setnames(input_files[["annotation"]], old = condition_col, new = "Condition")
   setnames(input_files[["annotation"]], old = sample_col, new = "Sample")
   
+  # Cast to string if all condition are numeric
+  input_files[["annotation"]][, Condition := as.character(Condition)]
   # Check if conditions start with number. It generate problem later in DEqMS
   if(any(str_starts(input_files[["annotation"]]$Condition, "[0-9]"))){
     input_files[["annotation"]][(str_starts(Condition, "[0-9]")), Condition := str_c("X.", Condition)]
@@ -705,6 +709,8 @@ read_MQ_prot_peptide_files <- function(anno_filename, pep_filename, prot_filenam
   setnames(input_files[["annotation"]], old = condition_col, new = "Condition")
   setnames(input_files[["annotation"]], old = sample_col, new = "Sample")
   
+  # Cast to string if all condition are numeric
+  input_files[["annotation"]][, Condition := as.character(Condition)]
   # Check if conditions start with number. It generate problem later in DEqMS
   if(any(str_starts(input_files[["annotation"]]$Condition, "[0-9]"))){
     input_files[["annotation"]][(str_starts(Condition, "[0-9]")), Condition := str_c("X.", Condition)]
@@ -973,6 +979,8 @@ read_Spectronaut_files <- function(anno_filename, pep_filename,
   setnames(input_files[["annotation"]], old = condition_col, new = "Condition")
   setnames(input_files[["annotation"]], old = sample_col, new = "Sample")
   
+  # Cast to string if all condition are numeric
+  input_files[["annotation"]][, Condition := as.character(Condition)]
   # Check if conditions start with number. It generate problem later in DEqMS
   if(any(str_starts(input_files[["annotation"]]$Condition, "[0-9]"))){
     input_files[["annotation"]][(str_starts(Condition, "[0-9]")), Condition := str_c("X.", Condition)]
@@ -1187,6 +1195,8 @@ read_FragPipe_files <- function(anno_filename, pep_filename,
   setnames(input_files[["annotation"]], old = condition_col, new = "Condition")
   setnames(input_files[["annotation"]], old = sample_col, new = "Sample")
   
+  # Cast to string if all condition are numeric
+  input_files[["annotation"]][, Condition := as.character(Condition)]
   # Check if conditions start with number. It generate problem later in DEqMS
   if(any(str_starts(input_files[["annotation"]]$Condition, "[0-9]"))){
     input_files[["annotation"]][(str_starts(Condition, "[0-9]")), Condition := str_c("X.", Condition)]
@@ -1504,6 +1514,8 @@ read_phospho_MQ_files <- function(anno_filename, pep_filename, keep_only_phospho
   setnames(input_files[["annotation"]], old = condition_col, new = "Condition")
   setnames(input_files[["annotation"]], old = sample_col, new = "Sample")
   
+  # Cast to string if all condition are numeric
+  input_files[["annotation"]][, Condition := as.character(Condition)]
   # Check if conditions start with number. It generate problem later in DEqMS
   if(any(str_starts(input_files[["annotation"]]$Condition, "[0-9]"))){
     input_files[["annotation"]][(str_starts(Condition, "[0-9]")), Condition := str_c("X.", Condition)]
@@ -1731,7 +1743,7 @@ read_phospho_PD_files <- function(anno_filename, pep_filename, prot_filename, ps
                                   keep_only_phosphomodification = T, phospho_thr = 0.75,
                                   condition_col="Condition", sample_col="Sample", 
                                   color_col="Color", batch_corr_exe = FALSE, batch_col="batch",
-                                  filt_absent_value = 0, min_peptide_protein = min_peptide_protein){
+                                  filt_absent_value = 0, min_peptide_protein = 0){
   input_files <- list()
   
   message("Reading files...")
@@ -1779,6 +1791,9 @@ read_phospho_PD_files <- function(anno_filename, pep_filename, prot_filename, ps
   setnames(input_files[["annotation"]], old = "File ID", new = "File_ID")
   setnames(input_files[["annotation"]], old = condition_col, new = "Condition")
   setnames(input_files[["annotation"]], old = sample_col, new = "Sample")
+  
+  # Cast to string if all condition are numeric
+  input_files[["annotation"]][, Condition := as.character(Condition)]
   
   # Check if conditions start with number. It generate problem later in DEqMS
   if(any(str_starts(input_files[["annotation"]]$Condition, "[0-9]"))){

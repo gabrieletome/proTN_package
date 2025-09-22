@@ -2,6 +2,7 @@
 
 export(STRINGdb_network)
 export(batch_correction)
+export(complexity_plot)
 export(create_phosphosite_plot)
 export(differential_analysis)
 export(enrichment_figure)

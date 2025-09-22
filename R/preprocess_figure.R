@@ -142,6 +142,102 @@ generate_peptide_distribution_subplot <- function(proteome_data) {
 }
 
 
+#' Complexity Plot
+#'
+#' This function generates a complecity plot of raw abundance. Provide the data before normalization and imputation
+#'
+#' @param proteome_data A list containing `c_anno` or `c_anno_phospho`, `psm_log_prot_df`, and `psm_log_pet_df`.
+#' @param phospho_with_proteome Logical. Whether to include phosphoproteome data alongside proteome data (default: `FALSE`).
+#' @param col_vec Vector. Vector of 4 color. Default: "#008752", "#59C7A3", "#95F2D9", "#0078AE"
+#'
+#' @return A list containing:
+#'   - `dt`: Data table for abundance.
+#'   - `plot`: A ggplot2 object visualizing abundance.
+#' @export
+#'
+#' @import data.table
+#' @import ggplot2
+#'
+#' @examples
+#' \dontrun{
+#'   abundance_plot <- complexity_plot(proteome_data)
+#' }
+complexity_plot <- function(proteome_data, phospho_with_proteome=FALSE, col_vec=c("#008752", "#59C7A3", "#95F2D9", "#0078AE")) {
+  if(("c_anno" %in% names(proteome_data))){
+    phospho_with_proteome = FALSE
+  } else if(("c_anno_phospho" %in% names(proteome_data))){
+    phospho_with_proteome = TRUE
+  } else{
+    stop("Missing sample annotation!")
+  }
+  
+  result <- list()
+  if(phospho_with_proteome){
+    prot_list <- list("c_anno" = proteome_data$c_anno_proteome, "psm_log_prot_df" = proteome_data$psm_log_prot_df)
+    res_prot <- complexity_subplot(proteome_data = prot_list, col_vec = col_vec)
+    phospho_list <- list("c_anno" = proteome_data$c_anno_phospho, "psm_log_prot_df" = proteome_data$psm_log_pet_df)
+    res_phospho <- complexity_subplot(proteome_data = phospho_list, col_vec = col_vec)
+    result <- list("proteome_dt" = res_prot$dt, "proteome_plot" = res_prot$plot,
+                   "phospho_dt" = res_phospho$dt, "phospho_plot" = res_phospho$plot)
+  } else{
+    result <- complexity_subplot(proteome_data, col_vec = col_vec)
+  }
+  
+  return(result)
+}
+
+complexity_subplot <- function(proteome_data, col_vec=NULL) {
+  psm_plot_dt <- proteome_data$psm_log_prot_df
+  plot_dt <- melt(psm_plot_dt, id.vars = "ID_peptide", variable.name = "sample", value.name = "intensity")
+  plot_dt[, raw_intensity := 2^intensity]
+  plot_dt <- na.omit(plot_dt)
+  
+  # Order by intensity and comulative sum
+  plot_dt <- plot_dt[order(raw_intensity, decreasing = T)]
+  plot_dt <- plot_dt[, cum_intensity := cumsum(raw_intensity)/sum(raw_intensity), by = sample]
+  
+  plot_dt[cum_intensity < quantile(c(0, max(cum_intensity)), probs = 0.25), category := "1", by = sample
+          ][cum_intensity >= quantile(c(0, max(cum_intensity)), probs = 0.25) & cum_intensity < quantile(c(0, max(cum_intensity)), probs = 0.50), category := "2", by = sample
+          ][cum_intensity >= quantile(c(0, max(cum_intensity)), probs = 0.50) & cum_intensity < quantile(c(0, max(cum_intensity)), probs = 0.75), category := "3", by = sample
+          ][cum_intensity >= quantile(c(0, max(cum_intensity)), probs = 0.75), category := "4", by = sample]
+  plot_dt[, ID_peptide := as.character(ID_peptide)]
+  plot_dt[, peptide_rank := seq_len(.N)[order(cum_intensity)], by = sample]
+
+  if(is.null(col_vec)){
+    col_vec = c("#008752", "#59C7A3", "#95F2D9", "#0078AE")
+  } else if(length(col_vec) < 4){
+    warning("Minimum 4 colors required. Using default")
+    col_vec = c("#008752", "#59C7A3", "#95F2D9", "#0078AE")
+  }
+  
+  cat_counts <- plot_dt[, .N, by = .(sample, category)]
+  cat_counts <- merge(cat_counts,
+                      plot_dt[, .(xpos = quantile(peptide_rank, 0.5)), by = sample],
+                      by = "sample")
+  cat_counts[, ypos := 0.15*as.numeric(category)]
+  
+  plot <- ggplot(data = plot_dt, aes(x = peptide_rank, y = cum_intensity, color = category, fill = category)) +
+    geom_point_rast(alpha = 0.8) +
+    theme_bw(base_size = 14) +
+    theme(legend.position = "none", 
+          axis.text.x = element_blank(), strip.background = element_blank()) +
+    labs(x = "Peptides") +
+    scale_y_continuous(name="Cumulative sum of raw intensity", limits=c(0, 1), 
+                       breaks = c(0, 0.25, 0.50, 0.75, 1), labels = c("0%","25%","50%","75%","100%")) +
+    scale_color_manual(values = col_vec) +
+    scale_fill_manual(values = col_vec) +
+    geom_text(data = cat_counts,
+              aes(x = xpos, y = ypos, label = paste0("n=", N), color = category),
+              inherit.aes = FALSE, hjust = 0, vjust = 1, fontface = "bold", size = 4) +
+    theme(panel.grid.minor = element_blank(),
+          panel.grid.major.x = element_blank(), 
+          axis.ticks.x = element_blank()) +
+    facet_wrap(~sample, ncol=4, scales="free")
+  
+  return(list("dt" = plot_dt, "plot" = plot))
+}
+
+
 #' Plot Abundance Distribution
 #'
 #' This function generates a violin and boxplot representation of log2-normalized abundance values for proteins or peptides
