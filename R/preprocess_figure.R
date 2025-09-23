@@ -631,3 +631,146 @@ heatmap_selected_proteins <- function(proteome_data, list_protein) {
     return(NULL)
   }
 }
+
+#' correlation Heatmap of Selected Proteins
+#'
+#' This function generates a ...
+#'
+#' @param proteome_data A list containing proteome data, including gene intensity data and sample annotations.
+#' @param replicate Character. A Sample or a Condition to represent in the heatmap.
+#' @param mode Character. Mode of proteins selection. Choose between: `correlation`: show only protein with correlation > thr (DEFAULT); `protein_list`: show only protein provided in input.
+#' @param cov_thr Double. Numeric threshold of correlation. (Default: 0.9)
+#' @param protein_list A character vector of gene names to be plotted.
+#' @param algorithm Character. Pearson or Spearman (Default: Pearson).
+#'
+#' @return A list containing:
+#'   \item{dt}{Data table of protein intensity values and the corresponding sample and condition information.}
+#'   \item{plot}{ggplot2 object representing the protein abundance plot for the selected proteins.}
+#'
+#' @examples
+#' \dontrun{
+#' result <- correlation_heatmap(proteome_data, list_protein = c("ProteinA", "ProteinB"))
+#' print(result$plot)
+#' }
+#'
+#' @import data.table
+#' @import ggplot2
+#' @import stringr
+#' @export
+correlation_heatmap <- function(proteome_data, replicate, mode="correlation", cov_thr = 0.9999, protein_list = NULL, algorithm = "pearson") {
+  if(("c_anno" %in% names(proteome_data))){
+    phospho_with_proteome = FALSE
+  } else if(("c_anno_phospho" %in% names(proteome_data))){
+    phospho_with_proteome = TRUE
+  } else{
+    stop("Missing sample annotation!")
+  }
+  
+  if(phospho_with_proteome){
+    dat_gene <- copy(proteome_data$dat_pep)
+    dat_gene[, GeneName := tstrsplit(ID_peptide, "_", keep = 1)[[1]]][, ID_peptide := NULL]
+    c_anno = copy(proteome_data$c_anno_phospho)
+  } else{
+    dat_gene <- copy(proteome_data$dat_gene)
+    c_anno = copy(proteome_data$c_anno)
+  }
+  
+  # Verify if sample is condition or sample
+  if(replicate %in% c_anno$condition){
+    message("Detected condition. The replicate will be summarized by mean.")
+    method = "cond"
+    cols <- c_anno[condition == replicate, sample]
+  } else if(replicate %in% c_anno$sample){
+    message("Detected single replicate.")
+    method = "samp"
+    cols <- replicate
+  } else{
+    stop("Sample is not a condition nor a replicate. Provide a valid condition or replicate")
+  }
+  
+  #cols_to_keep <- c("GeneName", cols)
+  cols_to_keep <- c("GeneName",c_anno$sample)
+  dt_filt <- dat_gene[, ..cols_to_keep]
+  dt_filt_mean <- dt_filt[, .(mean = rowMeans(.SD)), by = "GeneName"]
+  
+  cols_to_keep <- c_anno$sample
+  t_dt_filt <- t(as.data.frame(dt_filt[, ..cols_to_keep], row.names = dt_filt$GeneName))
+  cov_res <- cor(t_dt_filt, method = algorithm)
+  
+  if(mode == "correlation"){
+    cov_res_c <- cov_res
+    diag(cov_res_c) <- 0
+    
+    quant_thr <- quantile(cov_res_c, probs = cov_thr)
+    
+    # Proteins passing filter
+    gene_filt <- unique(rownames(which(abs(cov_res_c) >= quant_thr, arr.ind = TRUE)))
+    cols <- c("GeneName",gene_filt)
+    
+    diag(cov_res_c) <- 1
+    cov_res_filt <- as.data.table(cov_res_c, keep.rownames = "GeneName")
+    cov_res_filt <- cov_res_filt[GeneName %in% gene_filt, ..cols]
+    
+    mat_plot <- as.data.frame(cov_res_filt[,-1], row.names = cov_res_filt$GeneName)
+
+    cc <- unique(c_anno$color)
+    names(cc) <- unique(c_anno$condition)
+    cc <- list(condition = cc)
+    
+    breaks <- sort(c(-(max(abs(mat_plot))-((max(abs(mat_plot))*(1/50))*(0:49))), 
+                     0, 
+                     max(abs(mat_plot))-((max(abs(mat_plot))*(1/50))*(0:49))))
+    
+    bs = 23
+    g<-pheatmap(mat_plot, 
+                color = colorRampPalette(c("#B2182B","#FFFFFF","#2166AC"))(101), 
+                breaks = breaks, border_color = NA,
+                cluster_cols = T, cluster_rows = T)
+    
+  } else if(mode == "protein_list"){
+    if(is.null(protein_list)){
+      stop("For protein_list mode MUST provide a list of proteins.")
+    }
+    
+    prot_find <- unique(c(
+      intersect(protein_list, dat_gene$GeneName),
+      intersect(str_to_title(protein_list), dat_gene$GeneName),
+      intersect(str_to_upper(protein_list), dat_gene$GeneName),
+      intersect(str_to_lower(protein_list), dat_gene$GeneName)
+    ))
+    
+    if (length(prot_find) > 0) {
+      message("Selected proteins with available abundances: \n")
+      message(paste(prot_find, collapse = ", "))
+      
+      cols <- c("GeneName",prot_find)
+      
+      cov_res_filt <- as.data.table(cov_res, keep.rownames = "GeneName")
+      cov_res_filt <- cov_res_filt[GeneName %in% prot_find, ..cols]
+      
+      mat_plot <- as.data.frame(cov_res_filt[,-1], row.names = cov_res_filt$GeneName)
+
+      cc <- unique(c_anno$color)
+      names(cc) <- unique(c_anno$condition)
+      cc <- list(condition = cc)
+      
+      breaks <- sort(c(-(max(abs(mat_plot))-((max(abs(mat_plot))*(1/50))*(0:49))), 
+                       0, 
+                       max(abs(mat_plot))-((max(abs(mat_plot))*(1/50))*(0:49))))
+      
+      bs = 23
+      g<-pheatmap(mat_plot, 
+                  color = colorRampPalette(c("#B2182B","#FFFFFF","#2166AC"))(101), 
+                  breaks = breaks, border_color = NA,
+                  cluster_cols = T, cluster_rows = T)
+      
+    } else {
+      warning("Selected proteins not found in the normalized matrix. Check the spell of the proteins.")
+      return(NULL)
+    }
+  } else{
+    stop("Select a valid mode between: 'covariance' and 'protein_list'.")
+  }
+  return(list("dt" = cov_res_filt, "plot" = g))
+  
+}
