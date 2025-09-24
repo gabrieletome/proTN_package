@@ -231,8 +231,10 @@ generate_volcano_plots <- function(differential_results, data_type=NULL,
 #' Generate an UpSet plot for differential results
 #'
 #' @param differential_results A list containing peptide_results_long data.table.
+#' @param type Character; specifies the type of data to plot. Options are "protein" or "peptide".
 #' @param DE_class Character, one of "all", "up", "down". Specifies which class to plot.
 #' @param nintersects Integer, number of intersections to display.
+#' @param remove_zero Logical, If TRUE (default) remove intersection with 0 proteins.
 #' @param order.intersect.by Character, order intersections by "size", "name", or "none".
 #' @param order.set.by Character, order sets by "size", "name", or "none".
 #' @param relative_height Numeric, relative height of the plot.

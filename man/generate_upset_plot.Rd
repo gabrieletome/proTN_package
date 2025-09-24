@@ -29,9 +29,13 @@ generate_upset_plot(
 \arguments{
 \item{differential_results}{A list containing peptide_results_long data.table.}
 
+\item{type}{Character; specifies the type of data to plot. Options are "protein" or "peptide".}
+
 \item{DE_class}{Character, one of "all", "up", "down". Specifies which class to plot.}
 
 \item{nintersects}{Integer, number of intersections to display.}
+
+\item{remove_zero}{Logical, If TRUE (default) remove intersection with 0 proteins.}
 
 \item{order.intersect.by}{Character, order intersections by "size", "name", or "none".}
 

@@ -1,6 +1,6 @@
 Package: proTN
 Title: Integrative package for the analysis of MS proteomics and phospho-proteomics data
-Version: 0.2.8.6
+Version: 0.2.8.7
 Authors@R: c(
     person("Gabriele", "Tomè", email = "gabriele.tome@unitn.it", role = c("aut", "cre")),
     person("Toma", "Tebaldi", email = "toma.tebaldi@unitn.it", role = "aut"),
@@ -52,6 +52,8 @@ Imports:
 	PhosR,
 	proBatch,
 	GGally,
+	ggrastr,
+	ggVennDiagram,
 	circlize,
 	e1071,
 	igraph,
