@@ -338,8 +338,8 @@ generate_upset_plot <- function(differential_results, type="protein", DE_class =
 #' @param proteome_data A list containing proteome data, including sample annotation and either protein or peptide data matrices.
 #' @param differential_results A list containing the differential analysis results.
 #' @param type Character; specifies the type of data to plot. Options are "protein" or "peptide".
-#' @param condition Character. Specify the condition to represent.
-#' @param comparison Character, Specify the comparison to represent.
+#' @param condition Character; Specify the condition or conditions to represent.
+#' @param comparison Character; Specify the comparison to represent.
 #' @param col_vec Character. Vector with 3 colors.
 #'
 #' @return A list containing:
@@ -405,9 +405,15 @@ ma_plot <- function(differential_results, proteome_data, type, condition, compar
   }
   
   abundance_dt_plot <- abundance_dt_plot[c_anno, on = "sample"]
+  
   cond = condition
-  abundance_dt_plot_filt <- abundance_dt_plot[condition == cond]
+  abundance_dt_plot_filt <- abundance_dt_plot[condition %in% cond]
   abundance_dt_plot_filt_mean <- abundance_dt_plot_filt[, .(Abundance = mean(Abundance)), by = c("id","condition")]
+  if(length(condition) > 1){
+    message("Multiple conditions provided. Computing mean of the abundance.")
+    abundance_dt_plot_filt_mean <- abundance_dt_plot_filt_mean[, .(Abundance = mean(Abundance)), by = c("id")]
+    cond = "of conditions"
+  }
   
   plot_dt <- merge.data.table(abundance_dt_plot_filt_mean, deps_l_df_filt, by.x = "id", by.y = "id")
   plot_dt[, class := factor(class, levels = c("+","-","="))]
@@ -426,7 +432,7 @@ ma_plot <- function(differential_results, proteome_data, type, condition, compar
   
   # TODO se condition == NULL, media di tutte le condizioni
   
-  gg <- ggplot(plot_dt, aes(x = log2_FC, y = Abundance, fill = class, color = class)) +
+  gg <- ggplot(plot_dt, aes(x = log2_FC, y = Abundance, fill = class, color = class, text = paste('</br>Gene: ', id,'</br>Log2_FC: ', log2_FC, '</br>Abundance: ', Abundance))) +
     geom_point_rast(alpha = 0.75, shape = 16, size = 4) +
     theme_bw(base_size = 14) +
     xlab(paste0(comparison," log2FC")) +

@@ -20,9 +20,9 @@ ma_plot(
 
 \item{type}{Character; specifies the type of data to plot. Options are "protein" or "peptide".}
 
-\item{condition}{Character. Specify the condition to represent.}
+\item{condition}{Character; Specify the condition or conditions to represent.}
 
-\item{comparison}{Character, Specify the comparison to represent.}
+\item{comparison}{Character; Specify the comparison to represent.}
 
 \item{col_vec}{Character. Vector with 3 colors.}
 }
