@@ -228,6 +228,226 @@ generate_volcano_plots <- function(differential_results, data_type=NULL,
 }
 
 
+#' Generate an UpSet plot for differential results
+#'
+#' @param differential_results A list containing peptide_results_long data.table.
+#' @param type Character; specifies the type of data to plot. Options are "protein" or "peptide".
+#' @param DE_class Character, one of "all", "up", "down". Specifies which class to plot.
+#' @param nintersects Integer, number of intersections to display.
+#' @param remove_zero Logical, If TRUE (default) remove intersection with 0 proteins.
+#' @param order.intersect.by Character, order intersections by "size", "name", or "none".
+#' @param order.set.by Character, order sets by "size", "name", or "none".
+#' @param relative_height Numeric, relative height of the plot.
+#' @param relative_width Numeric, relative width of the plot.
+#' @param top.bar.color Character, color for the top bar.
+#' @param top.bar.y.label Character, label for the top bar y-axis.
+#' @param top.bar.show.numbers Logical, show numbers on top bar.
+#' @param top.bar.numbers.size Numeric, size of numbers on top bar.
+#' @param sets.bar.color Character, color for the sets bar.
+#' @param sets.bar.show.numbers Logical, show numbers on sets bar.
+#' @param sets.bar.x.label Character, label for the sets bar x-axis.
+#' @param intersection.matrix.color Character, color for the intersection matrix.
+#' @param specific Logical, show specific intersections.
+#' @param ... Additional arguments passed to ggVennDiagram::plot_upset.
+#'
+#' @return A list containing:
+#'   \item{list}{List containing the gene names of each comparison.}
+#'   \item{plot}{ggplot2 object representing the MDS plot with sample labels and color-coded conditions.}
+#'
+#' @examples
+#' \dontrun{
+#' result <- generate_upset_plot(differential_results, type)
+#' print(result$plot)
+#' }
+#'
+#' @import data.table
+#' @import ggplot2
+#' @import ggVennDiagram
+#' @export
+generate_upset_plot <- function(differential_results, type="protein", DE_class = "all", nintersects = NULL, remove_zero = TRUE,
+                                order.intersect.by = "size", order.set.by = "size", 
+                                relative_height = 3, relative_width = 0.3, top.bar.color = "#0078AEAA", 
+                                top.bar.y.label = NULL, top.bar.show.numbers = TRUE, top.bar.numbers.size = 3, 
+                                sets.bar.color = "#7f7f7fAA", sets.bar.show.numbers = FALSE, 
+                                sets.bar.x.label = "Set Size", intersection.matrix.color = "#0078AEAA", 
+                                specific = TRUE, ...) {
+  
+  if(("protein_results_long" %in% names(differential_results))){
+    phospho_with_proteome = FALSE
+  } else if(!("protein_results_long" %in% names(differential_results)) & 
+            ("peptide_results_long" %in% names(differential_results))){
+    phospho_with_proteome = TRUE
+    type="peptide"
+  } else{
+    stop("Error in differential results paramenter! Verify the presence of protein_results_long or peptide_results_long")
+  }
+  
+  deps_l_df <- if (type == "protein"){ 
+    copy(differential_results$protein_results_long)
+  } else if(type == "peptide") { 
+    copy(differential_results$peptide_results_long)
+  } else{stop("type MUST be \"protein\" or \"peptide\"")}
+  
+  if(phospho_with_proteome){
+    compToKeep <- unique(grep("_Phospho_CTRL", deps_l_df$comp, value = T, invert = T))
+    deps_l_df <- deps_l_df[comp %in% compToKeep]
+  }
+  
+  comp_list <- list()
+  for (c in unique(deps_l_df$comp)) {
+    if (DE_class == "up") {
+      message("Selecting only up-regulated comparison")
+      comp_list[[c]] <- deps_l_df[comp == c & class == "+", unique(id)]
+    } else if (DE_class == "down") {
+      message("Selecting only down-regulated comparison")
+      comp_list[[c]] <- deps_l_df[comp == c & class == "-", unique(id)]
+    } else if( DE_class == "all") {
+      message("Selecting both up- and down-regulated comparison")
+      comp_list[[c]] <- deps_l_df[comp == c & class != "=", unique(id)]
+    } else {
+      stop("Provide a valid DE_class: all, up or down.")
+    }
+  }
+  
+  if(is.null(nintersects)){
+    if(remove_zero){
+      message("Removing the zero intersection from the plot.")
+      sets_venn <- as.data.table(venn_region(process_data(Venn(comp_list))))
+      nintersects <- nrow(sets_venn[count!=0])
+    }
+  }
+  
+  p_upset <- plot_upset(
+    Venn(comp_list), 
+    nintersects = nintersects, 
+    order.intersect.by = order.intersect.by, order.set.by = order.set.by, 
+    relative_height = relative_height, relative_width = relative_width, top.bar.color = top.bar.color, 
+    top.bar.y.label = top.bar.y.label, top.bar.show.numbers = top.bar.show.numbers, top.bar.numbers.size = top.bar.numbers.size, 
+    sets.bar.color = sets.bar.color, sets.bar.show.numbers = sets.bar.show.numbers, 
+    sets.bar.x.label = sets.bar.x.label, intersection.matrix.color = intersection.matrix.color, 
+    specific = specific)
+  
+  return(list(plot = p_upset, list = comp_list))
+}
+
+
+#' Abundance vs Fold Change
+#'
+#' This function generates ...
+#'
+#' @param proteome_data A list containing proteome data, including sample annotation and either protein or peptide data matrices.
+#' @param differential_results A list containing the differential analysis results.
+#' @param type Character; specifies the type of data to plot. Options are "protein" or "peptide".
+#' @param condition Character; Specify the condition or conditions to represent.
+#' @param comparison Character; Specify the comparison to represent.
+#' @param col_vec Character. Vector with 3 colors.
+#'
+#' @return A list containing:
+#'   \item{dt}{Data table containing the coordinates for each sample.}
+#'   \item{plot}{ggplot2 object representing the MDS plot with sample labels and color-coded conditions.}
+#'
+#' @examples
+#' \dontrun{
+#' result <- ma_plot(differential_results, proteome_data, type, condition, comparison)
+#' print(result$plot)
+#' }
+#'
+#' @import data.table
+#' @import ggplot2
+#' @import ggrastr
+#' @export
+ma_plot <- function(differential_results, proteome_data, type, condition, comparison, col_vec = NULL){
+  if(("protein_results_long" %in% names(differential_results))){
+    phospho_with_proteome = FALSE
+  } else if(!("protein_results_long" %in% names(differential_results)) & 
+            ("peptide_results_long" %in% names(differential_results))){
+    phospho_with_proteome = TRUE
+    type="peptide"
+  } else{
+    stop("Error in differential results paramenter! Verify the presence of protein_results_long or peptide_results_long")
+  }
+  
+  deps_l_df <- if (type == "protein"){ 
+    copy(differential_results$protein_results_long)
+  } else if(type == "peptide") { 
+    copy(differential_results$peptide_results_long)
+  } else{stop("type MUST be \"protein\" or \"peptide\"")}
+  
+  if(phospho_with_proteome){
+    compToKeep <- unique(grep("_Phospho_CTRL", deps_l_df$comp, value = T, invert = T))
+    deps_l_df <- deps_l_df[comp %in% compToKeep]
+  }
+  deps_l_df_filt <- deps_l_df[comp %in% comparison]
+  
+  if(type == "protein"){
+    abundance_dt <- copy(proteome_data$dat_gene)
+    abundance_dt_plot <- melt(abundance_dt, id.vars = "GeneName", variable.name = "sample", value.name = "Abundance")
+    setnames(abundance_dt_plot, old = "GeneName", new = "id")
+    
+    if(phospho_with_proteome){
+      c_anno <- copy(proteome_data$c_anno_proteome)
+    } else{
+      c_anno <- copy(proteome_data$c_anno)
+    }
+  } else if(type == "peptide"){
+    abundance_dt <- copy(proteome_data$dat_pep)
+    abundance_dt_plot <- melt(abundance_dt, id.vars = "ID_peptide", variable.name = "sample", value.name = "Abundance")
+    setnames(abundance_dt_plot, old = "ID_peptide", new = "id")
+    
+    if(phospho_with_proteome){
+      c_anno <- copy(proteome_data$c_anno_phospho)
+    } else{
+      c_anno <- copy(proteome_data$c_anno)
+    }
+    
+  } else{
+    stop("Invalid type parameter. Must be \"protein\" or \"peptide\"")
+  }
+  
+  abundance_dt_plot <- abundance_dt_plot[c_anno, on = "sample"]
+  
+  cond = condition
+  abundance_dt_plot_filt <- abundance_dt_plot[condition %in% cond]
+  abundance_dt_plot_filt_mean <- abundance_dt_plot_filt[, .(Abundance = mean(Abundance)), by = c("id","condition")]
+  if(length(condition) > 1){
+    message("Multiple conditions provided. Computing mean of the abundance.")
+    abundance_dt_plot_filt_mean <- abundance_dt_plot_filt_mean[, .(Abundance = mean(Abundance)), by = c("id")]
+    cond = "of conditions"
+  }
+  
+  plot_dt <- merge.data.table(abundance_dt_plot_filt_mean, deps_l_df_filt, by.x = "id", by.y = "id")
+  plot_dt[, class := factor(class, levels = c("+","-","="))]
+  
+  xmin = -(max(abs(plot_dt$log2_FC))*1.1)
+  xmax = (max(abs(plot_dt$log2_FC))*1.1)
+  ymin = -(max(abs(plot_dt$Abundance))*1.1)
+  ymax = (max(abs(plot_dt$Abundance))*1.1)
+  
+  if(is.null(col_vec)){
+    col_vec = c("-" = "#008752", "=" = "#CCCCCC", "+" = "#0078AE")
+  } else if(length(col_vec) < 3){
+    warning("Required 3 colors required. Using default")
+    col_vec = c("-" = "#008752", "=" = "#CCCCCC", "+" = "#0078AE")
+  }
+  
+  # TODO se condition == NULL, media di tutte le condizioni
+  
+  gg <- ggplot(plot_dt, aes(x = log2_FC, y = Abundance, fill = class, color = class, text = paste('</br>Gene: ', id,'</br>Log2_FC: ', log2_FC, '</br>Abundance: ', Abundance))) +
+    geom_point_rast(alpha = 0.75, shape = 16, size = 4) +
+    theme_bw(base_size = 14) +
+    xlab(paste0(comparison," log2FC")) +
+    xlim(c(xmin, xmax)) +
+    ylab(paste0("Mean abundance ",cond)) +
+    ylim(c(ymin, ymax)) +
+    scale_color_manual(values = col_vec) +
+    scale_fill_manual(values = col_vec)
+    
+    
+  return(list("dt" = plot_dt, "plot" = gg))
+  
+}
+
+
 
 #' MDS Plot
 #'

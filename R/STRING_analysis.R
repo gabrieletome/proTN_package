@@ -11,6 +11,7 @@
 #' @param subfold_net Character. Subfolder for STRINGdb network results (default: `"STRINGdb"`).
 #' @param phospho_ctrl Logical. Whether to include phospho-control comparisons (default: `FALSE`).
 #' @param score_thr Numeric. Threshold score for STRINGdb edge. (default: `700`)
+#' @param algorithm Character. STRINGdb clustering algorithm. Select between: `fastgreedy` (default), `walktrap`, `spinglass`, `edge.betweenness`.
 #' @param shiny Logical. Return results for the shiny app (default: `FALSE`)
 #'
 #' @return A data frame with STRINGdb network results.
@@ -26,7 +27,7 @@
 #' }
 STRINGdb_network <- function(differential_results, species="Homo sapiens", 
                              dirOutput="results_ProTN", subfold_Fig="pics", subfold_net="STRINGdb",
-                             phospho_ctrl = FALSE, score_thr = 700, shiny=FALSE){
+                             phospho_ctrl = FALSE, score_thr = 700, algorithm = "fastgreedy", shiny=FALSE){
   #Read Taxonomy
   codtax <- fread(system.file("extdata", "subset_tax.csv", package = "proTN"))
   tryCatch({
@@ -52,6 +53,11 @@ STRINGdb_network <- function(differential_results, species="Homo sapiens",
     stop("Error in differential results paramenter! Verify the presence of protein_results_long or peptide_results_long")
   }
   
+  if(!(algorithm %in% c("fastgreedy", "walktrap", "spinglass", "edge.betweenness"))){
+    warning("Warning: cluster algorithm not in the list. Set to default: fastgreedy")
+    algorithm = "fastgreedy"
+  }
+  
   res <- select_regulated_genes(deps_l_df)
   
   dirOutput_net=NULL
@@ -67,9 +73,9 @@ STRINGdb_network <- function(differential_results, species="Homo sapiens",
   
   if (!is.null(dirOutput_net)) {
     if(shiny){
-      stringdb_results <- process_string_network_shiny(g_sel_comp = res$g_sel_comp, dirOutput_net, taxonomy_NCBI, score_thr)
+      stringdb_results <- process_string_network_shiny(g_sel_comp = res$g_sel_comp, deps_l_df, dirOutput_net, taxonomy_NCBI, score_thr)
     } else{
-      stringdb_results <- process_string_network(g_sel_comp = res$g_sel_comp, dirOutput_net, taxonomy_NCBI, score_thr)
+      stringdb_results <- process_string_network(g_sel_comp = res$g_sel_comp, deps_l_df, dirOutput_net, taxonomy_NCBI, algorithm, score_thr)
     }
     return(stringdb_results)
   }else{
@@ -96,35 +102,76 @@ select_regulated_genes <- function(deps_l_df) {
 }
 
 # Function to process STRING network for each comparison
-process_string_network <- function(g_sel_comp, dirOutput_net, taxonomy_NCBI, score_thr = 700) {
+process_string_network <- function(g_sel_comp, deps_l_df, dirOutput_net, taxonomy_NCBI, algorithm="fastgreedy", score_thr = 700) {
   string_folder <- system.file("extdata", package = "proTN")
   string_db <- STRINGdb$new(version="12", species=taxonomy_NCBI, score_threshold=score_thr, input_directory=string_folder)
   
   stringdb_results <- list()
-  for (comp in names(g_sel_comp)) {
-    gene_name <- unique(g_sel_comp[[comp]])
+  for (comparison in names(g_sel_comp)) {
+    gene_name <- unique(g_sel_comp[[comparison]])
     setnames(gene_name, "id", "gene_id")
     string_mapped <- string_db$map(gene_name, "gene_id", removeUnmappedRows = TRUE)
     if(nrow(string_mapped) > 0){
+      # Get interactions
       links_string <- as.data.table(string_db$get_interactions(string_mapped$STRING_id))
       links_string[, `:=`(
-        from = string_mapped$gene_id[match(from, string_mapped$STRING_id)],
-        to = string_mapped$gene_id[match(to, string_mapped$STRING_id)]
+        from_genename = string_mapped$gene_id[match(from, string_mapped$STRING_id)],
+        to_genename = string_mapped$gene_id[match(to, string_mapped$STRING_id)]
       )]
-      string_gene_df <- unique(data.table(gene1 = links_string$from, gene2 = links_string$to, weight = links_string$combined_score))
+      string_gene_df <- unique(data.table(strindbID_1 = links_string$from, stringdbID_2 = links_string$to,
+                                          genename_1 = links_string$from_genename, genename_2 = links_string$to_genename, 
+                                          score = links_string$combined_score))
+        
       if (nrow(string_gene_df) > 0) {
-        fwrite(string_gene_df, file = paste0(dirOutput_net, "/", gsub(comp, pattern = "\\/", replacement="vs"), "_connection.txt"), sep = "\t")
+        # Save edges
+        fwrite(string_gene_df, 
+               file = paste0(dirOutput_net, "/", gsub(comparison, pattern = "\\/", replacement="vs"), "_edges.tsv"), 
+               sep = "\t")
+        # Save nodes
+        # Get cluters
+        list_cluster <- lapply(string_db$get_clusters(string_mapped$STRING_id, algorithm = algorithm), function(x){data.table("stringID" = x)})
+        dt_cluster <- rbindlist(list_cluster, idcol = "cluster")
+        nodes_dt <- merge.data.table(string_mapped, dt_cluster, by.x = "STRING_id", by.y = "stringID")
+        # Add differential info
+        deps_l_df_filt <- deps_l_df[comp == comparison & id %in% nodes_dt$gene_id,]
+        nodes_dt <- merge.data.table(nodes_dt, deps_l_df_filt, by.x = "gene_id", by.y = "id")
+        # Agg gene info
+        # anno_gene <- anno_uniprot[, c("Gene Names","Protein names")]
+        # setnames(anno_gene, new = c("genename", "description"))
+        # nodes_dt <- merge.data.table(anno_gene, nodes_dt, by.x = "genename", by.y = "gene_id")[, .SD[1], by="genename"]
+        
+        fwrite(nodes_dt, 
+               file = paste0(dirOutput_net, "/", gsub(comparison, pattern = "\\/", replacement="vs"), "_nodes.tsv"), 
+               sep = "\t")
+        
+        # Plot network
         link <- paste0("https://string-db.org/cgi/network?identifiers=", paste(unique(string_mapped$STRING_id), collapse = "%0d"), "&species=", taxonomy_NCBI, "&required_score=",score_thr)
         string_db$plot_network(string_mapped, required_score = score_thr)
-        pdf(file = paste0(dirOutput_net,"/", comp, "_network.pdf"), width = 150, height = 150)
+        pdf(file = paste0(dirOutput_net,"/", comparison, "_network.pdf"), width = 150, height = 150)
         string_db$plot_network(string_mapped, required_score = score_thr)
         dev.off()
         
-        stringdb_results[[comp]] <- string_gene_df
+        stringdb_results[[comparison]] <- string_gene_df
       } else {
         warning("No interaction detected between the proteins with the score_thr selected. Usually too few proteins or threshold too high (suggest: 700).")
+        # Save nodes
+        # Get cluters
+        list_cluster <- lapply(string_db$get_clusters(string_mapped$STRING_id, algorithm = algorithm), function(x){data.table("stringID" = x)})
+        dt_cluster <- rbindlist(list_cluster, idcol = "cluster")
+        nodes_dt <- merge.data.table(string_mapped, dt_cluster, by.x = "STRING_id", by.y = "stringID")
+        # Add differential info
+        deps_l_df_filt <- deps_l_df[comp == comparison & id %in% nodes_dt$gene_id,]
+        nodes_dt <- merge.data.table(nodes_dt, deps_l_df_filt, by.x = "gene_id", by.y = "id")
+        # Agg gene info
+        # anno_gene <- anno_uniprot[, c("Gene Names","Protein names")]
+        # setnames(anno_gene, new = c("genename", "description"))
+        # nodes_dt <- merge.data.table(anno_gene, nodes_dt, by.x = "genename", by.y = "gene_id")[, .SD[1], by="genename"]
+        
+        fwrite(nodes_dt, 
+               file = paste0(dirOutput_net, "/", gsub(comparison, pattern = "\\/", replacement="vs"), "_nodes.tsv"), 
+               sep = "\t")
         string_db$plot_network(string_mapped, required_score = score_thr)
-        pdf(file = paste0(dirOutput_net,"/", comp, "_network.pdf"), width = 150, height = 150)
+        pdf(file = paste0(dirOutput_net,"/", comparison, "_network.pdf"), width = 150, height = 150)
         string_db$plot_network(string_mapped, required_score = score_thr)
         dev.off()
       }
@@ -137,7 +184,7 @@ process_string_network <- function(g_sel_comp, dirOutput_net, taxonomy_NCBI, sco
 }
 
 # Function to process STRING network for each comparison in shiny
-process_string_network_shiny <- function(g_sel_comp, dirOutput_net, taxonomy_NCBI, score_thr = 700) {
+process_string_network_shiny <- function(g_sel_comp, deps_l_df, dirOutput_net, taxonomy_NCBI, score_thr = 700) {
   string_folder <- system.file("extdata", package = "proTN")
   string_db <- STRINGdb$new(version="12", species=taxonomy_NCBI, score_threshold=score_thr, input_directory=string_folder)
   
@@ -148,12 +195,33 @@ process_string_network_shiny <- function(g_sel_comp, dirOutput_net, taxonomy_NCB
     string_mapped <- string_db$map(gene_name, "gene_id", removeUnmappedRows = TRUE)
     links_string <- as.data.table(string_db$get_interactions(string_mapped$STRING_id))
     links_string[, `:=`(
-      from = string_mapped$gene_id[match(from, string_mapped$STRING_id)],
-      to = string_mapped$gene_id[match(to, string_mapped$STRING_id)]
+      from_genename = string_mapped$gene_id[match(from, string_mapped$STRING_id)],
+      to_genename = string_mapped$gene_id[match(to, string_mapped$STRING_id)]
     )]
-    string_gene_df <- unique(data.table(gene1 = links_string$from, gene2 = links_string$to, weight = links_string$combined_score))
+    string_gene_df <- unique(data.table(strindbID_1 = links_string$from, stringdbID_2 = links_string$to,
+                                        genename_1 = links_string$from_genename, genename_2 = links_string$to_genename, 
+                                        score = links_string$combined_score))
     if (nrow(string_gene_df) > 0) {
-      fwrite(string_gene_df, file = paste0(dirOutput_net, "/", gsub(comp, pattern = "\\/", replacement="vs"), "_connection.txt"), sep = "\t")
+      # Save edges
+      fwrite(string_gene_df, 
+             file = paste0(dirOutput_net, "/", gsub(comparison, pattern = "\\/", replacement="vs"), "_edges.tsv"), 
+             sep = "\t")
+      # Save nodes
+      # Get cluters
+      list_cluster <- lapply(string_db$get_clusters(string_mapped$STRING_id, algorithm = algorithm), function(x){data.table("stringID" = x)})
+      dt_cluster <- rbindlist(list_cluster, idcol = "cluster")
+      nodes_dt <- merge.data.table(string_mapped, dt_cluster, by.x = "STRING_id", by.y = "stringID")
+      # Add differential info
+      deps_l_df_filt <- deps_l_df[comp == comparison & id %in% nodes_dt$gene_id,]
+      nodes_dt <- merge.data.table(nodes_dt, deps_l_df_filt, by.x = "gene_id", by.y = "id")
+      # Agg gene info
+      # anno_gene <- anno_uniprot[, c("Gene Names","Protein names")]
+      # setnames(anno_gene, new = c("genename", "description"))
+      # nodes_dt <- merge.data.table(anno_gene, nodes_dt, by.x = "genename", by.y = "gene_id")[, .SD[1], by="genename"]
+      
+      fwrite(nodes_dt, 
+             file = paste0(dirOutput_net, "/", gsub(comparison, pattern = "\\/", replacement="vs"), "_nodes.tsv"), 
+             sep = "\t")
       stringdb_results[[comp]] <- unique(string_mapped$STRING_id)
     } else {
       stop("No strong interaction detected between the proteins. Usually too few proteins.")
