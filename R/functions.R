@@ -545,7 +545,7 @@ deps_b2b_lollipop <- function(input_df, # input dataframe
       geom_text(data = plot_df[plot_df$bb_col==f_right,],
                 aes(y = y_col, x = 0, label = y_col),
                 inherit.aes = F,size=size_text)+
-      scale_x_continuous(limits =c(-300,(shift+max(break_vec))),
+      scale_x_continuous(limits =c(-20,(shift+max(break_vec))),
                          breaks = c(break_vec+shift),
                          labels = c(as.character(break_vec)))+
       theme_tufte(base_size = 16)+
