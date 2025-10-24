@@ -4,10 +4,12 @@
 \alias{normalization_ProTN}
 \title{Normalize Data}
 \usage{
-normalization_ProTN(proteome_data)
+normalization_ProTN(proteome_data, spatial_data = FALSE)
 }
 \arguments{
 \item{proteome_data}{A list containing proteome data, including peptide annotations, protein-level data, and peptide-level data.}
+
+\item{spatial_data}{Logical. TRUE if is spatial dataset}
 }
 \value{
 A list containing the normalized proteome data:

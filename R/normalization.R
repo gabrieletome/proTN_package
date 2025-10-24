@@ -4,6 +4,7 @@
 #' It also performs median centering for peptide-level log2 data.
 #'
 #' @param proteome_data A list containing proteome data, including peptide annotations, protein-level data, and peptide-level data.
+#' @param spatial_data Logical. TRUE if is spatial dataset
 #'
 #' @return A list containing the normalized proteome data:
 #'   \item{dat_gene}{Data table containing the protein-level normalized data.}
@@ -17,11 +18,19 @@
 #' @import data.table
 #' @import DEqMS
 #' @export
-normalization_ProTN <- function(proteome_data) {
+normalization_ProTN <- function(proteome_data, spatial_data = FALSE) {
 
   # Summarize into proteins and normalize by median
-  dat_psm <- merge.data.table(proteome_data$psm_anno_df[, .(ID_peptide, symbol)], proteome_data$psm_log_prot_df, by = "ID_peptide")
-  proteome_data$dat_gene <- as.data.table(medianSweeping(dat_psm, group_col = 2), keep.rownames = "GeneName")
+  if(spatial_data){
+    
+    # Median centering log2 table for peptides
+    dat_psm <- copy(proteome_data$psm_log_prot_df)
+    dat_psm <- as.data.frame(dat_psm[,-1], row.names = as.character(dat_psm$ID_peptide))
+    proteome_data$dat_gene <- as.data.table(equalMedianNormalization(dat_psm), keep.rownames = "GeneName")
+  } else{
+    dat_psm <- merge.data.table(proteome_data$psm_anno_df[, .(ID_peptide, symbol)], proteome_data$psm_log_prot_df, by = "ID_peptide")
+    proteome_data$dat_gene <- as.data.table(medianSweeping(dat_psm, group_col = 2), keep.rownames = "GeneName")
+  }
   
   # Median centering log2 table for peptides
   dat_pep <- copy(proteome_data$psm_log_pet_df)

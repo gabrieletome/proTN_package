@@ -47,7 +47,11 @@ generate_abundance_subplot <- function(proteome_data) {
   psm_sig_prot_df <- copy(proteome_data$psm_log_prot_df)
   psm_sig_prot_df[, ID_peptide := NULL]
   
-  numeric_df <- c_anno[order(c_anno$condition)]
+  if("condition" %in% names(c_anno)){
+    numeric_df <- c_anno[order(c_anno$condition)]
+  } else{
+    numeric_df <- c_anno
+  }
   numeric_df <- numeric_df[.(numeric_df$sample), on = "sample"]
   
   samples <- numeric_df$sample
