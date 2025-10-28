@@ -204,32 +204,37 @@ differential_analysis <- function(proteome_data, formule_contrast,
     deps_l_df <- deps_df$degs_l_df
     deps_w_df <- deps_df$degs_w_df
     
-    dat_pep <- copy(proteome_data$dat_pep)
-    psm_count_table <- data.table(table(proteome_data$dat_pep$ID_peptide))
     
-    # Process peptides
-    expr_mat <- copy(proteome_data$dat_pep)
-    expr_l_df <- melt(expr_mat, id.vars = "ID_peptide", variable.name = "sample", value.name = "expr")
-    expr_l_df <- expr_l_df[c_anno, on = "sample"]
-    expr_cond_df <- expr_l_df[, .(N = .N, avg = mean(expr), sd = sd(expr), CV = sd(expr) / mean(expr), se = sd(expr) / sqrt(.N)), by = .(condition, ID_peptide)]
+    if("dat_pep" %in% names(proteome_data)){
+      dat_pep <- copy(proteome_data$dat_pep)
+      psm_count_table <- data.table(table(proteome_data$dat_pep$ID_peptide))
+      
+      # Process peptides
+      expr_mat <- copy(proteome_data$dat_pep)
+      expr_l_df <- melt(expr_mat, id.vars = "ID_peptide", variable.name = "sample", value.name = "expr")
+      expr_l_df <- expr_l_df[c_anno, on = "sample"]
+      expr_cond_df <- expr_l_df[, .(N = .N, avg = mean(expr), sd = sd(expr), CV = sd(expr) / mean(expr), se = sd(expr) / sqrt(.N)), by = .(condition, ID_peptide)]
+      
+      expr_avg_pep_df <- dcast(expr_cond_df[, .(ID_peptide, condition, avg)], ID_peptide ~ condition, value.var = "avg")
+      colnames(expr_avg_pep_df)[-1] <- paste0(colnames(expr_avg_pep_df)[-1], "_avg")
+      expr_se_pep_df <- dcast(expr_cond_df[, .(ID_peptide, condition, se)], ID_peptide ~ condition, value.var = "se")
+      colnames(expr_se_pep_df)[-1] <- paste0(colnames(expr_se_pep_df)[-1], "_se")
+      expr_cv_pep_df <- dcast(expr_cond_df[, .(ID_peptide, condition, CV)], ID_peptide ~ condition, value.var = "CV")
+      colnames(expr_cv_pep_df)[-1] <- paste0(colnames(expr_cv_pep_df)[-1], "_Coef_Variant_(%)")
+      
+      expr_avgse_pep_df <- Reduce(merge, list(expr_avg_pep_df, expr_se_pep_df, expr_cv_pep_df))
+      
+      deps_pep_df <- limmafnc_dt("PEP", c_anno = c_anno, dat_gene = dat_pep, psm_count_table = psm_count_table, formule_contrast = formule_contrast,
+                                 expr_avgse_df = expr_avgse_df, signal_thr = signal_thr, fc_thr = fc_thr, pval_thr = pval_thr, pval_fdr = pval_fdr, interactomics = interactomics)
+      
+      deps_pep_l_df <- deps_pep_df$degs_l_df
+      deps_pep_w_df <- deps_pep_df$degs_w_df
+      
+      return(list(protein_results_long = deps_l_df, protein_results_wide = deps_w_df, 
+                  peptide_results_long = deps_pep_l_df, peptide_results_wide = deps_pep_w_df))
+    }
     
-    expr_avg_pep_df <- dcast(expr_cond_df[, .(ID_peptide, condition, avg)], ID_peptide ~ condition, value.var = "avg")
-    colnames(expr_avg_pep_df)[-1] <- paste0(colnames(expr_avg_pep_df)[-1], "_avg")
-    expr_se_pep_df <- dcast(expr_cond_df[, .(ID_peptide, condition, se)], ID_peptide ~ condition, value.var = "se")
-    colnames(expr_se_pep_df)[-1] <- paste0(colnames(expr_se_pep_df)[-1], "_se")
-    expr_cv_pep_df <- dcast(expr_cond_df[, .(ID_peptide, condition, CV)], ID_peptide ~ condition, value.var = "CV")
-    colnames(expr_cv_pep_df)[-1] <- paste0(colnames(expr_cv_pep_df)[-1], "_Coef_Variant_(%)")
-    
-    expr_avgse_pep_df <- Reduce(merge, list(expr_avg_pep_df, expr_se_pep_df, expr_cv_pep_df))
-    
-    deps_pep_df <- limmafnc_dt("PEP", c_anno = c_anno, dat_gene = dat_pep, psm_count_table = psm_count_table, formule_contrast = formule_contrast,
-                               expr_avgse_df = expr_avgse_df, signal_thr = signal_thr, fc_thr = fc_thr, pval_thr = pval_thr, pval_fdr = pval_fdr, interactomics = interactomics)
-    
-    deps_pep_l_df <- deps_pep_df$degs_l_df
-    deps_pep_w_df <- deps_pep_df$degs_w_df
-    
-    return(list(protein_results_long = deps_l_df, protein_results_wide = deps_w_df, 
-                peptide_results_long = deps_pep_l_df, peptide_results_wide = deps_pep_w_df))
+    return(list(protein_results_long = deps_l_df, protein_results_wide = deps_w_df))
   }
   return(NULL)
 }

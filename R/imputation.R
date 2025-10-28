@@ -75,47 +75,49 @@ impute_intensity <- function(proteome_data, type="phosr") {
     }
     
     ## PEPTIDES
-    if(type=="pcaMethods"){
-      if("dat_pep" %in% names(proteome_data)){
+    if("dat_pep" %in% names(proteome_data) | "psm_log_pet_df" %in% names(proteome_data)){
+      if(type=="pcaMethods"){
+        if("dat_pep" %in% names(proteome_data)){
+          # Add missing values
+          samples_pep <- data.table("sample" = proteome_data$c_anno$sample, 
+                                    "names_sample" =make.names(proteome_data$c_anno$sample))
+          numeric_df <- proteome_data$dat_pep[, .(ID_peptide, is.na(.SD)), .SDcols = samples_pep$sample]
+          numeric_df <- numeric_df[, .(ID_peptide,
+                                       impute_level = rowSums(.SD) / length(samples_pep$names_sample) * 100), .SDcols = samples_pep$names_sample]
+          psm_peptide <- copy(proteome_data$psm_peptide_table)
+          proteome_data$psm_peptide_table <- psm_peptide[numeric_df, on="ID_peptide"]
+          
+          proteome_data$dat_pep <- impute_matrix(proteome_data$dat_pep, proteome_data$c_anno, type=type)
+        } else{
+          stop("'pcaMethods' selected, please provide the normalized data after 'normalization_ProTN'")
+        }
+      } else{
         # Add missing values
+        # Take correct data.table if pre-normalized or raw data
+        if("dat_pep" %in% names(proteome_data)){
+          message("Imputing normalized data...")
+          dt_to_impute <- copy(proteome_data$dat_pep)
+        } else{
+          message("Imputing raw data...")
+          dt_to_impute <- copy(proteome_data$psm_log_pet_df)
+        }
+        
         samples_pep <- data.table("sample" = proteome_data$c_anno$sample, 
                                   "names_sample" =make.names(proteome_data$c_anno$sample))
-        numeric_df <- proteome_data$dat_pep[, .(ID_peptide, is.na(.SD)), .SDcols = samples_pep$sample]
+        numeric_df <- dt_to_impute[, .(ID_peptide, is.na(.SD)), .SDcols = samples_pep$sample]
         numeric_df <- numeric_df[, .(ID_peptide,
                                      impute_level = rowSums(.SD) / length(samples_pep$names_sample) * 100), .SDcols = samples_pep$names_sample]
         psm_peptide <- copy(proteome_data$psm_peptide_table)
         proteome_data$psm_peptide_table <- psm_peptide[numeric_df, on="ID_peptide"]
         
-        proteome_data$dat_pep <- impute_matrix(proteome_data$dat_pep, proteome_data$c_anno, type=type)
-      } else{
-        stop("'pcaMethods' selected, please provide the normalized data after 'normalization_ProTN'")
-      }
-    } else{
-      # Add missing values
-      # Take correct data.table if pre-normalized or raw data
-      if("dat_pep" %in% names(proteome_data)){
-        message("Imputing normalized data...")
-        dt_to_impute <- copy(proteome_data$dat_pep)
-      } else{
-        message("Imputing raw data...")
-        dt_to_impute <- copy(proteome_data$psm_log_pet_df)
-      }
-      
-      samples_pep <- data.table("sample" = proteome_data$c_anno$sample, 
-                                "names_sample" =make.names(proteome_data$c_anno$sample))
-      numeric_df <- dt_to_impute[, .(ID_peptide, is.na(.SD)), .SDcols = samples_pep$sample]
-      numeric_df <- numeric_df[, .(ID_peptide,
-                                   impute_level = rowSums(.SD) / length(samples_pep$names_sample) * 100), .SDcols = samples_pep$names_sample]
-      psm_peptide <- copy(proteome_data$psm_peptide_table)
-      proteome_data$psm_peptide_table <- psm_peptide[numeric_df, on="ID_peptide"]
-      
-      
-      if("dat_pep" %in% names(proteome_data)){
-        dt_imputed <- impute_matrix(mat = dt_to_impute, c_anno = proteome_data$c_anno, type=type)
         
-        proteome_data$dat_pep <- dt_imputed
-      } else{
-        proteome_data$psm_log_pet_df <- copy(proteome_data$psm_log_prot_df)
+        if("dat_pep" %in% names(proteome_data)){
+          dt_imputed <- impute_matrix(mat = dt_to_impute, c_anno = proteome_data$c_anno, type=type)
+          
+          proteome_data$dat_pep <- dt_imputed
+        } else{
+          proteome_data$psm_log_pet_df <- copy(proteome_data$psm_log_prot_df)
+        }
       }
     }
   } else if(("c_anno_proteome" %in% names(proteome_data)) & ("c_anno_phospho" %in% names(proteome_data))){
@@ -169,49 +171,50 @@ impute_intensity <- function(proteome_data, type="phosr") {
     }
     
     ## PEPTIDES
-    if(type=="pcaMethods"){
-      # Add missing values
-      if("dat_pep" %in% names(proteome_data)){
+    if("dat_pep" %in% names(proteome_data) | "psm_log_pet_df" %in% names(proteome_data)){
+      if(type=="pcaMethods"){
+        # Add missing values
+        if("dat_pep" %in% names(proteome_data)){
+          samples_pep <- data.table("sample" = proteome_data$c_anno_phospho$sample, 
+                                    "names_sample" =make.names(proteome_data$c_anno_phospho$sample))
+          numeric_df <- proteome_data$dat_pep[, .(ID_peptide, is.na(.SD)), .SDcols = samples_pep$sample]
+          numeric_df <- numeric_df[, .(ID_peptide,
+                                       impute_level = rowSums(.SD) / length(samples_pep$names_sample) * 100), .SDcols = samples_pep$names_sample]
+          psm_peptide <- copy(proteome_data$psm_peptide_table)
+          proteome_data$psm_peptide_table <- psm_peptide[numeric_df, on="ID_peptide"]
+          
+          proteome_data$dat_pep <- impute_matrix(proteome_data$dat_pep, proteome_data$c_anno_phospho, type=type)
+        } else{
+          stop("'pcaMethods' selected, please provide the normalized data after 'normalization_ProTN'")
+        }
+      } else{
+        # Add missing values
+        # Take correct data.table if pre-normalized or raw data
+        if("dat_pep" %in% names(proteome_data)){
+          message("Imputing normalized data...")
+          dt_to_impute <- copy(proteome_data$dat_pep)
+        } else{
+          message("Imputing raw data...")
+          dt_to_impute <- copy(proteome_data$psm_log_pet_df)
+        }
+        
         samples_pep <- data.table("sample" = proteome_data$c_anno_phospho$sample, 
                                   "names_sample" =make.names(proteome_data$c_anno_phospho$sample))
-        numeric_df <- proteome_data$dat_pep[, .(ID_peptide, is.na(.SD)), .SDcols = samples_pep$sample]
+        numeric_df <- dt_to_impute[, .(ID_peptide, is.na(.SD)), .SDcols = samples_pep$sample]
         numeric_df <- numeric_df[, .(ID_peptide,
                                      impute_level = rowSums(.SD) / length(samples_pep$names_sample) * 100), .SDcols = samples_pep$names_sample]
         psm_peptide <- copy(proteome_data$psm_peptide_table)
         proteome_data$psm_peptide_table <- psm_peptide[numeric_df, on="ID_peptide"]
         
-        proteome_data$dat_pep <- impute_matrix(proteome_data$dat_pep, proteome_data$c_anno_phospho, type=type)
-      } else{
-        stop("'pcaMethods' selected, please provide the normalized data after 'normalization_ProTN'")
-      }
-    } else{
-      # Add missing values
-      # Take correct data.table if pre-normalized or raw data
-      if("dat_pep" %in% names(proteome_data)){
-        message("Imputing normalized data...")
-        dt_to_impute <- copy(proteome_data$dat_pep)
-      } else{
-        message("Imputing raw data...")
-        dt_to_impute <- copy(proteome_data$psm_log_pet_df)
-      }
-      
-      samples_pep <- data.table("sample" = proteome_data$c_anno_phospho$sample, 
-                                "names_sample" =make.names(proteome_data$c_anno_phospho$sample))
-      numeric_df <- dt_to_impute[, .(ID_peptide, is.na(.SD)), .SDcols = samples_pep$sample]
-      numeric_df <- numeric_df[, .(ID_peptide,
-                                   impute_level = rowSums(.SD) / length(samples_pep$names_sample) * 100), .SDcols = samples_pep$names_sample]
-      psm_peptide <- copy(proteome_data$psm_peptide_table)
-      proteome_data$psm_peptide_table <- psm_peptide[numeric_df, on="ID_peptide"]
-      
-      dt_imputed <- impute_matrix(mat = dt_to_impute, c_anno = proteome_data$c_anno_phospho, type=type)
-      
-      if("dat_pep" %in% names(proteome_data)){
-        proteome_data$dat_pep <- dt_imputed
-      } else{
-        proteome_data$psm_log_pet_df <- dt_imputed
+        dt_imputed <- impute_matrix(mat = dt_to_impute, c_anno = proteome_data$c_anno_phospho, type=type)
+        
+        if("dat_pep" %in% names(proteome_data)){
+          proteome_data$dat_pep <- dt_imputed
+        } else{
+          proteome_data$psm_log_pet_df <- dt_imputed
+        }
       }
     }
-    
     
   } else{
     stop("Missing sample annotation!")

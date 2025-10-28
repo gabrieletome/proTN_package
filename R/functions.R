@@ -472,9 +472,9 @@ deps_b2b_lollipop <- function(input_df, # input dataframe
     
     lp<- ggplot(plot_df, aes(y = y_col))+
       geom_linerange(data = plot_df[plot_df$bb_col==f_left,],
-                     aes(xmin = -shift, xmax = -shift-x_col, size=0.75))+
+                     aes(xmin = -shift, xmax = -shift-x_col, size=0.35))+
       geom_linerange(data = plot_df[plot_df$bb_col==f_right,],
-                     aes(xmin = shift, xmax = shift+x_col, size=0.75))+
+                     aes(xmin = shift, xmax = shift+x_col, size=0.35))+
       geom_text(data = plot_df[plot_df$bb_col==f_left,],
                 aes(y = y_col, x = 0, label = y_col),
                 inherit.aes = F,size=size_text)+
@@ -541,7 +541,7 @@ deps_b2b_lollipop <- function(input_df, # input dataframe
     
     lp<- ggplot(plot_df, aes(y = y_col))+
       geom_linerange(data = plot_df[plot_df$bb_col==f_right,],
-                     aes(xmin = shift, xmax = shift+x_col, size=0.75))+
+                     aes(xmin = shift, xmax = shift+x_col, size=0.35))+
       geom_text(data = plot_df[plot_df$bb_col==f_right,],
                 aes(y = y_col, x = 0, label = y_col),
                 inherit.aes = F,size=size_text)+

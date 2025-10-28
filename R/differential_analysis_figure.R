@@ -33,6 +33,9 @@
 #' @export
 generate_differential_barplots <- function(differential_results, data_type="protein", 
                                            color_contrast=NULL, phospho_ctrl = FALSE, size_text = 4) {
+  if(data_type == "peptide" & !("peptide_results_long" %in% names(differential_results))){
+    stop("Working directly on proteins. The figure is not available")
+  }
   if(("protein_results_long" %in% names(differential_results))){
     phospho_with_proteome = FALSE
   } else if(("peptide_results_long" %in% names(differential_results))){
@@ -135,6 +138,9 @@ generate_differential_barplots <- function(differential_results, data_type="prot
 generate_volcano_plots <- function(differential_results, data_type=NULL, 
                                    comparison=NULL, fc_thr=0.75, pval_fdr = "p_val", 
                                    pval_thr=0.05, color_contrast=NULL, interactomics = FALSE) {
+  if(data_type == "peptide" & !("peptide_results_long" %in% names(differential_results))){
+    stop("Working directly on proteins. The figure is not available")
+  }
   if(is.null(comparison)){
     stop("Provide a valid comparison")
   }
@@ -264,13 +270,16 @@ generate_volcano_plots <- function(differential_results, data_type=NULL,
 #' @import ggplot2
 #' @import ggVennDiagram
 #' @export
-generate_upset_plot <- function(differential_results, type="protein", DE_class = "all", nintersects = NULL, remove_zero = TRUE,
+generate_upset_plot <- function(differential_results, type="protein", DE_class = "all", nintersects = 20, remove_zero = TRUE,
                                 order.intersect.by = "size", order.set.by = "size", 
                                 relative_height = 3, relative_width = 0.3, top.bar.color = "#0078AEAA", 
                                 top.bar.y.label = NULL, top.bar.show.numbers = TRUE, top.bar.numbers.size = 3, 
                                 sets.bar.color = "#7f7f7fAA", sets.bar.show.numbers = FALSE, 
                                 sets.bar.x.label = "Set Size", intersection.matrix.color = "#0078AEAA", 
                                 specific = TRUE, ...) {
+  if(type == "peptide" & !("peptide_results_long" %in% names(differential_results))){
+    stop("Working directly on proteins. The figure is not available")
+  }
   
   if(("protein_results_long" %in% names(differential_results))){
     phospho_with_proteome = FALSE
@@ -309,12 +318,17 @@ generate_upset_plot <- function(differential_results, type="protein", DE_class =
     }
   }
   
-  if(is.null(nintersects)){
-    if(remove_zero){
-      message("Removing the zero intersection from the plot.")
-      sets_venn <- as.data.table(venn_region(process_data(Venn(comp_list))))
-      nintersects <- nrow(sets_venn[count!=0])
-    }
+  if(nintersects == 20){
+    tryCatch({
+      if(remove_zero){
+        message("Removing the zero intersection from the plot.")
+        sets_venn <- as.data.table(venn_region(process_data(Venn(comp_list))))
+        nintersects <- nrow(sets_venn[count!=0])
+      }
+    }, error = function(x){
+      warning("Too many comparison for the Venn. Set nintersects to 20")
+      nintersects = 20
+    })
   }
   
   p_upset <- plot_upset(
@@ -357,6 +371,10 @@ generate_upset_plot <- function(differential_results, type="protein", DE_class =
 #' @import ggrastr
 #' @export
 ma_plot <- function(differential_results, proteome_data, type, condition, comparison, col_vec = NULL){
+  if(type == "peptide" & !("peptide_results_long" %in% names(differential_results))){
+    stop("Working directly on proteins. The figure is not available")
+  }
+  
   if(("protein_results_long" %in% names(differential_results))){
     phospho_with_proteome = FALSE
   } else if(!("protein_results_long" %in% names(differential_results)) & 
@@ -473,6 +491,11 @@ ma_plot <- function(differential_results, proteome_data, type, condition, compar
 #' @import ggrepel
 #' @export
 mds_differential_analysis_plot <- function(differential_analysis, proteome_data, type){
+  
+  if(type == "peptide" & !("peptide_results_long" %in% names(differential_results))){
+    stop("Working directly on proteins. The figure is not available")
+  }
+  
   if(("protein_results_long" %in% names(differential_analysis))){
     phospho_with_proteome = FALSE
   } else if(!("protein_results_long" %in% names(differential_analysis)) & 
@@ -532,6 +555,11 @@ mds_differential_analysis_plot <- function(differential_analysis, proteome_data,
 #' @import ggrepel
 #' @export
 pca_differential_analysis_plot <- function(differential_analysis, proteome_data, type){
+  
+  if(type == "peptide" & !("peptide_results_long" %in% names(differential_results))){
+    stop("Working directly on proteins. The figure is not available")
+  }
+  
   if(("protein_results_long" %in% names(differential_analysis))){
     phospho_with_proteome = FALSE
   } else if(!("protein_results_long" %in% names(differential_analysis)) & 

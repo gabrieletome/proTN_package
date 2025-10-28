@@ -110,7 +110,11 @@ kinase_activity_calculation <- function(dirOutput_kinase,
 #' @export
 kinase_tree <- function(proteome_data, differential_results, formule_CORAL, species="Homo sapiens", 
                         dirOutput = "results_ProTN", subfold="pics", phospho_ctrl = FALSE, phosR_thr = 0.7) {
-
+  
+  if(!("dat_pep" %in% names(proteome_data))){
+    stop("Working directly on proteins. The figure is not available")
+  }
+  
   dir.create(file.path( dirOutput, subfold, "kinaseTree"), showWarnings = FALSE, recursive = T)
   dirOutput_kinase <- file.path(dirOutput, subfold, "kinaseTree")
   

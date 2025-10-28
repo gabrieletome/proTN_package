@@ -95,6 +95,10 @@ generate_abundance_subplot <- function(proteome_data) {
 #' result <- generate_peptide_distribution_plot(proteome_data)
 #' }
 generate_peptide_distribution_plot <- function(proteome_data, phospho_with_proteome=FALSE) {
+  if(!("psm_log_pet_df" %in% names(proteome_data))){
+    stop("Working directly on proteins. The figure is not available")
+  }
+  
   if(("c_anno" %in% names(proteome_data))){
     phospho_with_proteome = FALSE
   } else if(("c_anno_phospho" %in% names(proteome_data))){
@@ -258,6 +262,10 @@ complexity_subplot <- function(proteome_data, col_vec=NULL) {
 #' result <- plot_abundance_distribution(proteome_data, type = "protein")
 #' }
 plot_abundance_distribution <- function(proteome_data, type) {
+  if(type == "peptide" & !("dat_pep" %in% names(proteome_data))){
+    stop("Working directly on proteins. The figure is not available")
+  }
+  
   if(("c_anno" %in% names(proteome_data))){
     phospho_with_proteome = FALSE
   } else if(("c_anno_proteome" %in% names(proteome_data)) & ("c_anno_phospho" %in% names(proteome_data))){
@@ -334,6 +342,10 @@ plot_abundance_distribution <- function(proteome_data, type) {
 #' @import ggrepel
 #' @export
 mds_plot <- function(proteome_data, type) {
+  if(type == "peptide" & !("dat_pep" %in% names(proteome_data))){
+    stop("Working directly on proteins. The figure is not available")
+  }
+  
   if(("c_anno" %in% names(proteome_data))){
     phospho_with_proteome = FALSE
   } else if(("c_anno_proteome" %in% names(proteome_data)) & ("c_anno_phospho" %in% names(proteome_data))){
@@ -404,6 +416,9 @@ mds_plot <- function(proteome_data, type) {
 #' @import ggrepel
 #' @export
 pca_plot <- function(proteome_data, type) {
+  if(type == "peptide" & !("dat_pep" %in% names(proteome_data))){
+    stop("Working directly on proteins. The figure is not available")
+  }
   if(("c_anno" %in% names(proteome_data))){
     phospho_with_proteome = FALSE
   } else if(("c_anno_proteome" %in% names(proteome_data)) & ("c_anno_phospho" %in% names(proteome_data))){

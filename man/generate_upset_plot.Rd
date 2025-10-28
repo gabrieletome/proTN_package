@@ -8,7 +8,7 @@ generate_upset_plot(
   differential_results,
   type = "protein",
   DE_class = "all",
-  nintersects = NULL,
+  nintersects = 20,
   remove_zero = TRUE,
   order.intersect.by = "size",
   order.set.by = "size",
