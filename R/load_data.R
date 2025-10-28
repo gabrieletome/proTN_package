@@ -2246,6 +2246,7 @@ read_phospho_proteome_proteomics <- function(software,
   return(phospho_proteome_data)
 }
 
+
 #' Read Spatial Proteomics Data
 #'
 #' This function reads Spatial proteomics data from files based on the specified software (Proteome Discoverer or MaxQuant). 
@@ -2255,6 +2256,11 @@ read_phospho_proteome_proteomics <- function(software,
 #' @param folder Character; the folder containing the data files.
 #' @param use_proteinGroups_MQ Logical; Only for MaxQuant. If FALSE it expect the evidence.txt file, if TRUE require peptide.txt and proteinGroups.txt files. Default is FALSE-
 #' @param peptide_filename Character; the name or pattern of the peptide file. Default is "pep".
+#' @param annotation_filename Character; the name or pattern of the annotation file. Default is "annotation".
+#' @param sample_col Character; the column name representing sample information in the annotation file. Default is "Sample".
+#' @param color_col Character; the column name representing color information for the plot in the annotation file. Default is "Color".
+#' @param row_plate_col Character; the column name representing y coordinate of the sample in the annotation file. Default is "y".
+#' @param column_plate_col Character; the column name representing y coordinate of the sample in the annotation file. Default is "x".
 #' @param proteinGroup_filename Character; the name or pattern of the protein group file. Default is "prot".
 #' @param filt_absent_value Numeric; the value used to filter out absent data. Default is 0.
 #' @param min_peptide_protein Numeric; the value used to filter out protein by N peptide. Default is 0.
@@ -2274,7 +2280,7 @@ read_phospho_proteome_proteomics <- function(software,
 #' @export
 read_spatial_proteomics <- function(software, folder, use_proteinGroups_MQ = TRUE, 
                                     annotation_filename = "annotation", peptide_filename = "pep", proteinGroup_filename = "prot",
-                                    sample_col="Sample", color_col="Color", row_plate_col = "row", column_plate_col = "col",
+                                    sample_col="Sample", color_col="Color", row_plate_col = "y", column_plate_col = "x",
                                     filt_absent_value = 0,min_peptide_protein = 0){
   if(!(software %in% c("MQ"))){
     stop("Valid software is required. Write MQ.",
@@ -2313,7 +2319,11 @@ read_spatial_proteomics <- function(software, folder, use_proteinGroups_MQ = TRU
     message("Reading MaxQuant files (peptides.txt & proteinGroups.txt)...")
     proteome_data = read_spatial_MQ_prot_peptide_files(anno_filename, pep_filename, prot_filename,
                                                        filt_absent_value = filt_absent_value, 
-                                                       min_peptide_protein = min_peptide_protein)
+                                                       min_peptide_protein = min_peptide_protein,
+                                                       sample_col = sample_col,
+                                                       color_col = color_col,
+                                                       row_plate_col = row_plate_col,
+                                                       column_plate_col = column_plate_col)
   }
   
   return(proteome_data)
@@ -2322,6 +2332,7 @@ read_spatial_proteomics <- function(software, folder, use_proteinGroups_MQ = TRU
 
 # Read MaxQuant files Spatial proteomics
 read_spatial_MQ_prot_peptide_files <- function(anno_filename, pep_filename, prot_filename,
+                                               sample_col, color_col, row_plate_col, column_plate_col, 
                                        filt_absent_value = 0, min_peptide_protein = 0){
   input_files <- list()
   
@@ -2351,12 +2362,26 @@ read_spatial_MQ_prot_peptide_files <- function(anno_filename, pep_filename, prot
   message("File read.")
   message("Starting preprocessing...")
   
+  #Clean files and merge
+  colToKeep<-intersect(colnames(input_files[["annotation"]]), c(sample_col, color_col, row_plate_col, column_plate_col))
+  if(!(sample_col %in% colToKeep)){
+    stop("\'Sample\' column  in \'ANNOTATION\' file.")
+  }
+  if(!(row_plate_col %in% colToKeep)){
+    stop("\'Row plate position\' column  in \'ANNOTATION\' file.")
+  }
+  if(!(column_plate_col %in% colToKeep)){
+    stop("\'Column plate position\' column  in \'ANNOTATION\' file.")
+  }
+  input_files[["annotation"]] <- input_files[["annotation"]][, ..colToKeep]
+  setnames(input_files[["annotation"]], old = sample_col, new = "Sample")
+  setnames(input_files[["annotation"]], old = row_plate_col, new = "y")
+  setnames(input_files[["annotation"]], old = column_plate_col, new = "x")
   
   
   # Extract ID cell and annotation
   intensity_cols <- grep("LFQ intensity", names(input_files[["PROT"]]), value = T)
   samples <- stri_replace_all(intensity_cols, regex = "LFQ intensity ", replacement = "")
-  input_files[["annotation"]] <- data.table("Sample" = samples)
   message(paste0("Detected ",nrow(input_files[["annotation"]])," cells"))
   
   # Manage Peptide file

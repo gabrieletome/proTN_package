@@ -8,8 +8,13 @@ read_spatial_proteomics(
   software,
   folder,
   use_proteinGroups_MQ = TRUE,
+  annotation_filename = "annotation",
   peptide_filename = "pep",
   proteinGroup_filename = "prot",
+  sample_col = "Sample",
+  color_col = "Color",
+  row_plate_col = "y",
+  column_plate_col = "x",
   filt_absent_value = 0,
   min_peptide_protein = 0
 )
@@ -21,9 +26,19 @@ read_spatial_proteomics(
 
 \item{use_proteinGroups_MQ}{Logical; Only for MaxQuant. If FALSE it expect the evidence.txt file, if TRUE require peptide.txt and proteinGroups.txt files. Default is FALSE-}
 
+\item{annotation_filename}{Character; the name or pattern of the annotation file. Default is "annotation".}
+
 \item{peptide_filename}{Character; the name or pattern of the peptide file. Default is "pep".}
 
 \item{proteinGroup_filename}{Character; the name or pattern of the protein group file. Default is "prot".}
+
+\item{sample_col}{Character; the column name representing sample information in the annotation file. Default is "Sample".}
+
+\item{color_col}{Character; the column name representing color information for the plot in the annotation file. Default is "Color".}
+
+\item{row_plate_col}{Character; the column name representing y coordinate of the sample in the annotation file. Default is "y".}
+
+\item{column_plate_col}{Character; the column name representing y coordinate of the sample in the annotation file. Default is "x".}
 
 \item{filt_absent_value}{Numeric; the value used to filter out absent data. Default is 0.}
 

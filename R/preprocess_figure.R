@@ -118,20 +118,24 @@ generate_abundance_plate_plot <- function(proteome_data) {
   numeric_df[, `Available` := 100 - (numeric_values / nrow(psm_sig_prot_df) * 100)]
   numeric_df[, `Missing` := 100 - `Available`]
   
-  numeric_df <- melt(numeric_df, id.vars = c("sample"), measure.vars = c("Missing"), variable.name = "Coverage", value.name = "% covered abundance")
+  numeric_df <- melt(numeric_df, id.vars = c("sample","x","y"), measure.vars = c("Missing"), variable.name = "Coverage", value.name = "% covered abundance")
   numeric_df[, Coverage := factor(Coverage, levels = c("Missing","Available"))]
   
-  plot <- ggplot(data = numeric_df, aes(x = factor(sample, levels = unique(sample)), 
-                                        y = `% covered abundance`, 
-                                        fill = `% covered abundance`, colour = `% covered abundance`)) +
-    geom_tile(stat = "identity") +
+  plot <- ggplot(data = numeric_df, aes(x = x, 
+                                        y = y)) +
+    geom_tile(colour= "black", fill= "white", size = 0.1 ) +
+    geom_point(aes(color = `% covered abundance`), size = 12-(nrow(numeric_df)/96), shape = 16) +
     theme_bw(base_size = 16) +
-    theme(axis.title.y = element_blank()) +
-    scale_fill_manual(values = c("Available"="#b0b0b0", "Missing"="darkred")) +
-    scale_colour_manual(values = c("Available"="#b0b0b0", "Missing"="darkred")) +
-    theme(panel.grid.minor = element_blank(), panel.grid.major.y = element_blank()) +
-    ylim(0, 100)
-  
+    scale_fill_gradient(low = "#D5EEFB", high = "#039be5") +
+    scale_color_gradient(low = "#D5EEFB", high = "#039be5") +
+    theme(axis.title.y = element_blank(), axis.title.x = element_blank(),
+          axis.ticks = element_blank()) +
+    theme(panel.grid.minor = element_blank(), panel.grid.major = element_blank(),
+          plot.background=element_blank(), panel.border=element_blank()) +
+    scale_y_continuous(breaks = unique(numeric_df$y)) +
+    scale_x_continuous(breaks = unique(numeric_df$x)) +
+    scale_size(range=c(1,2))
+
   return(list("dt" = numeric_df, "plot" = plot))
 }
 
