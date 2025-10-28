@@ -2272,14 +2272,19 @@ read_phospho_proteome_proteomics <- function(software,
 #' @import stringi
 #' @import stringr
 #' @export
-read_spatial_proteomics <- function(software, folder, use_proteinGroups_MQ = TRUE,
-                                    peptide_filename = "pep", proteinGroup_filename = "prot",
+read_spatial_proteomics <- function(software, folder, use_proteinGroups_MQ = TRUE, 
+                                    annotation_filename = "annotation", peptide_filename = "pep", proteinGroup_filename = "prot",
+                                    sample_col="Sample", color_col="Color", row_plate_col = "row", column_plate_col = "col",
                                     filt_absent_value = 0,min_peptide_protein = 0){
   if(!(software %in% c("MQ"))){
     stop("Valid software is required. Write MQ.",
          "\tMQ: MaxQuant")
   }
   
+  anno_filename = list.files(folder, pattern = annotation_filename, full.names = T, ignore.case = T)
+  if(length(anno_filename) > 1){
+    stop("Multiple annotation files with same pattern")
+  } 
   pep_filename = list.files(folder, pattern = peptide_filename, full.names = T, ignore.case = T)
   if(is.null(pep_filename) | length(pep_filename) > 1){
     stop("Missing file peptide or wrong peptide filename parameter or multiple files with same pattern")
@@ -2301,12 +2306,12 @@ read_spatial_proteomics <- function(software, folder, use_proteinGroups_MQ = TRU
   proteome_data = NULL
   if(software == "MQ" & !use_proteinGroups_MQ){
     message("Reading MaxQuant files (evidence.txt)...")
-    proteome_data = read_spatial_MQ_files(pep_filename,
+    proteome_data = read_spatial_MQ_files(anno_filename, pep_filename,
                                           filt_absent_value = filt_absent_value,
                                           min_peptide_protein = min_peptide_protein)
   } else if(software == "MQ" & use_proteinGroups_MQ){
     message("Reading MaxQuant files (peptides.txt & proteinGroups.txt)...")
-    proteome_data = read_spatial_MQ_prot_peptide_files(pep_filename, prot_filename,
+    proteome_data = read_spatial_MQ_prot_peptide_files(anno_filename, pep_filename, prot_filename,
                                                        filt_absent_value = filt_absent_value, 
                                                        min_peptide_protein = min_peptide_protein)
   }
@@ -2316,11 +2321,19 @@ read_spatial_proteomics <- function(software, folder, use_proteinGroups_MQ = TRU
 
 
 # Read MaxQuant files Spatial proteomics
-read_spatial_MQ_prot_peptide_files <- function(pep_filename, prot_filename,
+read_spatial_MQ_prot_peptide_files <- function(anno_filename, pep_filename, prot_filename,
                                        filt_absent_value = 0, min_peptide_protein = 0){
   input_files <- list()
   
   message("Reading files...")
+  
+  if(!is.null(anno_filename)){
+    input_files[["annotation"]] <- tryCatch({
+      as.data.table(read_xlsx(anno_filename))
+    }, error=function(cond){
+      stop(paste0("Missing file. The file \'ANNOTATION\' is missing or not have the pattern in the filename or there are duplicates files."))
+    })
+  }
   
   # Read peptide file
   input_files[["PEP"]] <- tryCatch({
@@ -2337,6 +2350,8 @@ read_spatial_MQ_prot_peptide_files <- function(pep_filename, prot_filename,
   })
   message("File read.")
   message("Starting preprocessing...")
+  
+  
   
   # Extract ID cell and annotation
   intensity_cols <- grep("LFQ intensity", names(input_files[["PROT"]]), value = T)

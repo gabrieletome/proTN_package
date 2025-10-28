@@ -77,6 +77,72 @@ generate_abundance_subplot <- function(proteome_data) {
   return(list("dt" = numeric_df, "plot" = plot))
 }
 
+#' Generate Abundance Plot for the plate of Spatial Proteomics
+#'
+#' This function generates an abundance plot.
+#'
+#' @param proteome_data A list containing `c_anno` or `c_anno_phospho`, `psm_log_prot_df`, and `psm_log_pet_df`.
+#'
+#' @return A list containing:
+#'   - `dt`: Data table for abundance.
+#'   - `plot`: A ggplot2 object visualizing abundance.
+#' @export
+#'
+#' @import data.table
+#' @import ggplot2
+#'
+#' @examples
+#' \dontrun{
+#'   abundance_plot <- generate_abundance_plate_plot(proteome_data)
+#' }
+generate_abundance_plate_plot <- function(proteome_data) {
+  if(("c_anno" %in% names(proteome_data))){
+    phospho_with_proteome = FALSE
+  } else{
+    stop("Missing sample annotation!")
+  }
+  
+  type_plate <- list(6 = c(2,3),
+                     12 = c(3,4),
+                     24 = c(4,6),
+                     48 = c(6,8),
+                     96 = c(8,12),
+                     384 = c(16,24),
+                     1536 = c(32,48))
+  
+  c_anno <- copy(proteome_data$c_anno)
+  psm_sig_prot_df <- copy(proteome_data$psm_log_prot_df)
+  psm_sig_prot_df[, ID_peptide := NULL]
+  
+  if("condition" %in% names(c_anno)){
+    numeric_df <- c_anno[order(c_anno$condition)]
+  } else{
+    numeric_df <- c_anno
+  }
+  numeric_df <- numeric_df[.(numeric_df$sample), on = "sample"]
+  
+  samples <- numeric_df$sample
+  numeric_df[, numeric_values := colSums(is.na(psm_sig_prot_df[, ..samples]))]
+  numeric_df[, `Available` := 100 - (numeric_values / nrow(psm_sig_prot_df) * 100)]
+  numeric_df[, `Missing` := 100 - `Available`]
+  
+  numeric_df <- melt(numeric_df, id.vars = c("sample"), measure.vars = c("Missing"), variable.name = "Coverage", value.name = "% covered abundance")
+  numeric_df[, Coverage := factor(Coverage, levels = c("Missing","Available"))]
+  
+  plot <- ggplot(data = numeric_df, aes(x = factor(sample, levels = unique(sample)), 
+                                        y = `% covered abundance`, 
+                                        fill = `% covered abundance`, colour = `% covered abundance`)) +
+    geom_tile(stat = "identity") +
+    theme_bw(base_size = 16) +
+    theme(axis.title.y = element_blank()) +
+    scale_fill_manual(values = c("Available"="#b0b0b0", "Missing"="darkred")) +
+    scale_colour_manual(values = c("Available"="#b0b0b0", "Missing"="darkred")) +
+    theme(panel.grid.minor = element_blank(), panel.grid.major.y = element_blank()) +
+    ylim(0, 100)
+  
+  return(list("dt" = numeric_df, "plot" = plot))
+}
+
 
 #' Generate Peptide Distribution Plot
 #'
