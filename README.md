@@ -55,6 +55,19 @@ devtools::install_github("symbioticMe/proBatch", dependencies = T)
 devtools::install_github("PYangLab/PhosR", dependencies = T)
 ```
 
+NOTE 2: For spatial proteomics is required the packages `terra` and `spdep` that can generate an error during the installation in Linux. To solve use the following code:
+
+``` bash
+sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
+sudo apt-get update
+sudo apt-get install libgdal-dev libgeos-dev libproj-dev libtbb-dev libnetcdf-dev
+```
+
+``` r
+install.packages("terra")
+install.packages("spdep")
+```
+
 ## Case study example
 
 The example used for the vignettes can be open with the `extract_example` function:
@@ -96,7 +109,7 @@ ProTN is an integrative pipeline that analyze DDA proteomics data obtained from 
 
 ![image](www/images/Workflow_ProTN.svg)
 
-#### Set settings for the execution and read the raw data from loaded files
+#### Set settings for the execution and read the raw data from loaded files {#set-settings-for-the-execution-and-read-the-raw-data-from-loaded-files}
 
 ProTN analyse the results of Proteome Discoverer and MaxQuant. The essential parameters and files to run ProTN are: (additional details on the input can be found in the ProTN info tab)
 
@@ -107,113 +120,124 @@ ProTN analyse the results of Proteome Discoverer and MaxQuant. The essential par
     -   **FP**: FragPipe
 
 ##### File required for Proteome Discoverer
+
 -   `Annotation file`: This file provides metadata for the samples analyzed. It must be an Excel file with the following required columns:
 
-    | Column Name | Description                                                               |
-    | ----------- | ------------------------------------------------------------------------- |
-    | `File ID`   | Identifier used in column headers of the peptide file. |
-    | `Condition` | Experimental group name. Used for comparisons.                            |
-    | `Sample`    | Clean sample name used downstream.                                        |
-    | `color`     | (Optional) Plot color. Defaults are applied if missing.                   |
-    | `batch`     | (Optional) Batch ID for batch effect correction.                          |
+    | Column Name | Description                                             |
+    |-------------|---------------------------------------------------------|
+    | `File ID`   | Identifier used in column headers of the peptide file.  |
+    | `Condition` | Experimental group name. Used for comparisons.          |
+    | `Sample`    | Clean sample name used downstream.                      |
+    | `color`     | (Optional) Plot color. Defaults are applied if missing. |
+    | `batch`     | (Optional) Batch ID for batch effect correction.        |
+
 -   `Peptides file`: Excel table with annotated peptides and abundance values.
 
-    | Column Name                    | Description                                                   |
-    | ------------------------------ | ------------------------------------------------------------- |
-    | `Master Protein Accessions`    | Maps peptide to protein; only first ID is kept.               |
-    | `Annotated Sequence`           | Amino acid sequence including PTM annotations.                |
-    | `Modifications`                | Post-translational modifications. |
-    | `Positions in Master Proteins` | Position of peptide in the protein sequence.                  |
-    | `Abundance: <File ID>`          | Intensity/abundance for each sample. One column per sample.   |
+    | Column Name | Description |
+    |------------------------|------------------------------------------------|
+    | `Master Protein Accessions` | Maps peptide to protein; only first ID is kept. |
+    | `Annotated Sequence` | Amino acid sequence including PTM annotations. |
+    | `Modifications` | Post-translational modifications. |
+    | `Positions in Master Proteins` | Position of peptide in the protein sequence. |
+    | `Abundance: <File ID>` | Intensity/abundance for each sample. One column per sample. |
+
 -   `Proteins file`: Excel table contain descriptive and accession information for proteins.
 
     | Column Name   | Description                                                |
-    | ------------- | ---------------------------------------------------------- |
+    |----------------|--------------------------------------------------------|
     | `Accession`   | Unique protein identifier, used to join with peptide file. |
     | `Description` | Descriptive string, e.g., from UniProt.                    |
 
 ##### File required for MaxQuant
+
 -   `Annotation file`: This file provides metadata for the samples analyzed. It must be an Excel file with the following required columns:
 
-    | Column Name | Description                                                                                  |
-    |----------------|--------------------------------------------------------|
-    | `Condition` | Experimental condition (e.g. Control, Treated). Used for group comparison.                   |
-    | `Sample`    | Sample identifier. Must match sample names in the peptide file.                              |
-    | `color`     | (Optional) Color associated with the condition. If not present, default colors are assigned. |
-    | `batch`     | (Optional) Batch ID for batch effect correction. Required if batch correction is enabled.    |
+    | Column Name | Description |
+    |------------------|------------------------------------------------------|
+    | `Condition` | Experimental condition (e.g. Control, Treated). Used for group comparison. |
+    | `Sample` | Sample identifier. Must match sample names in the peptide file. |
+    | `color` | (Optional) Color associated with the condition. If not present, default colors are assigned. |
+    | `batch` | (Optional) Batch ID for batch effect correction. Required if batch correction is enabled. |
+
 -   **Evidence pipeline**:
+
     -   `evidence.txt`: This is a TSV/CSV file containing peptide-level quantification data. **Required columns:**
 
-        | Column Name              | Description                                                                 |
-        |--------------------------|-----------------------------------------------------------------------------|
-        | `Sequence`               | Amino acid sequence of the peptide.                                          |
-        | `Modifications`          | PTMs of the peptide.             |
-        | `Gene names`             | Gene symbol associated with the peptide.     |
-        | `Protein names`          | Protein description. If missing, will be merged from annotation file.       |
-        | `Leading razor protein`  | UniProt accession. Used for annotation enrichment.                          |
-        | `Raw file`               | File/sample ID. Must match entries in the annotation file.                   |
-        | `Intensity`              | Peptide intensity value. Used for quantification.                            |
-        | `Leading proteins`       | Used for filtering out contaminants (e.g. "CON_").                          |
--   **Peptide and ProteinGroups pipeline**:
-    -   `peptides.txt`: Tab-delimited file with peptide-level quantification. **Required columns:**
-        
-        | Column Name              | Description                                                                 |
-        |--------------------------|-----------------------------------------------------------------------------|
-        | `Sequence`               | Amino acid sequence of the peptide.                                          |
-        | `Gene names`             | If missing, inferred from `Leading razor protein`.    |
-        | `Protein names`          | Protein description. If missing, will be merged from annotation file.       |
-        | `Leading razor protein`  | UniProt accession. Used for annotation enrichment.                          |
-        | `Intensity <Sample>`          | Intensity values for each sample (e.g. `Intensity Sample1`).            |
-    -   `proteinGroups.txt`: Tab-delimited file providing protein-level information. **Required columns:**
-    
-        | Column Name              | Description                                                                 |
-        |--------------------------|-----------------------------------------------------------------------------|
-        | `Majority protein IDs`   | Used to extract the `Leading razor protein`. |
-        | `Fasta headers`          | Used for protein description.            |
+        | Column Name | Description |
+        |-------------------|-----------------------------------------------------|
+        | `Sequence` | Amino acid sequence of the peptide. |
+        | `Modifications` | PTMs of the peptide. |
+        | `Gene names` | Gene symbol associated with the peptide. |
+        | `Protein names` | Protein description. If missing, will be merged from annotation file. |
+        | `Leading razor protein` | UniProt accession. Used for annotation enrichment. |
+        | `Raw file` | File/sample ID. Must match entries in the annotation file. |
+        | `Intensity` | Peptide intensity value. Used for quantification. |
+        | `Leading proteins` | Used for filtering out contaminants (e.g. "CON\_"). |
 
+-   **Peptide and ProteinGroups pipeline**:
+
+    -   `peptides.txt`: Tab-delimited file with peptide-level quantification. **Required columns:**
+
+        | Column Name | Description |
+        |-------------------|-----------------------------------------------------|
+        | `Sequence` | Amino acid sequence of the peptide. |
+        | `Gene names` | If missing, inferred from `Leading razor protein`. |
+        | `Protein names` | Protein description. If missing, will be merged from annotation file. |
+        | `Leading razor protein` | UniProt accession. Used for annotation enrichment. |
+        | `Intensity <Sample>` | Intensity values for each sample (e.g. `Intensity Sample1`). |
+
+    -   `proteinGroups.txt`: Tab-delimited file providing protein-level information. **Required columns:**
+
+        | Column Name            | Description                                  |
+        |------------------------|----------------------------------------------|
+        | `Majority protein IDs` | Used to extract the `Leading razor protein`. |
+        | `Fasta headers`        | Used for protein description.                |
 
 ##### File required for Spectronaut
+
 -   `Annotation file`: (Optional) If provided, this file should contain metadata for each sample. If not provided, the pipeline will extract sample annotations directly from the peptide file.
 
-    | Column Name     | Description                                                                 |
-    |----------------|-----------------------------------------------------------------------------|
-    | `Condition`     | Experimental group label. Used for comparison between conditions.           |
-    | `Sample`        | Sample identifier. Must match entries in the peptide file.                  |
-    | `color`         | (Optional) Color for visualization. Default colors will be assigned if missing. |
-    | `batch`         | (Optional) Batch ID for batch correction. Required if batch correction is enabled. |
+    | Column Name | Description |
+    |----------------|--------------------------------------------------------|
+    | `Condition` | Experimental group label. Used for comparison between conditions. |
+    | `Sample` | Sample identifier. Must match entries in the peptide file. |
+    | `color` | (Optional) Color for visualization. Default colors will be assigned if missing. |
+    | `batch` | (Optional) Batch ID for batch correction. Required if batch correction is enabled. |
+
 -   `Spectronaut report`: This is a TSV/CSV file containing peptide-level data. **Required columns:**
 
-    | Column Name              | Description                                                                 |
-    |--------------------------|-----------------------------------------------------------------------------|
-    | `PG.ProteinAccessions`   | Protein group accessions.                        |
-    | `PEP.StrippedSequence`   | Peptide sequence without modifications.                                     |
-    | `EG.ModifiedSequence`    | Peptide sequence with modifications.           |
-    | `PEP.Quantity`           | Peptide quantification value.                                               |
-    | `R.FileName`             | Sample identifier (column used is defined by `sample_col`).                 |
-    | `R.Condition`             | Condition identifier (column used if `annotation file` not provided).      |
+    | Column Name | Description |
+    |-------------------|-----------------------------------------------------|
+    | `PG.ProteinAccessions` | Protein group accessions. |
+    | `PEP.StrippedSequence` | Peptide sequence without modifications. |
+    | `EG.ModifiedSequence` | Peptide sequence with modifications. |
+    | `PEP.Quantity` | Peptide quantification value. |
+    | `R.FileName` | Sample identifier (column used is defined by `sample_col`). |
+    | `R.Condition` | Condition identifier (column used if `annotation file` not provided). |
 
 ##### File required for FragPipe
+
 -   `Annotation file`: This file provides metadata for the samples analyzed. It must be an Excel file with the following required columns:
 
-    | Column Name | Description                                                                                  |
-    |----------------|--------------------------------------------------------|
-    | `Condition` | Experimental condition (e.g. Control, Treated). Used for group comparison.                   |
-    | `Sample`    | Sample identifier. Must match sample names in the peptide file.                              |
-    | `color`     | (Optional) Color associated with the condition. If not present, default colors are assigned. |
-    | `batch`     | (Optional) Batch ID for batch effect correction. Required if batch correction is enabled.    |
+    | Column Name | Description |
+    |------------------|------------------------------------------------------|
+    | `Condition` | Experimental condition (e.g. Control, Treated). Used for group comparison. |
+    | `Sample` | Sample identifier. Must match sample names in the peptide file. |
+    | `color` | (Optional) Color associated with the condition. If not present, default colors are assigned. |
+    | `batch` | (Optional) Batch ID for batch effect correction. Required if batch correction is enabled. |
+
 -   `combined_modified_peptide.tsv`: The peptide quantification file must contain raw or normalized intensity values for each sample and peptide. **Required columns:**
 
-    | Column Name              | Description                                                                 |
-    |--------------------------|-----------------------------------------------------------------------------|
-    | `Protein ID`             | Protein accession or identifier.               |
-    | `Protein Description`    | Descriptive name of the protein.                 |
-    | `Gene`                   | Gene symbol.                                             |
-    | `Peptide Sequence`       | Amino acid sequence of the peptide.                                         |
-    | `Assigned Modifications` | Sequence with nuclotide modifications.                            |
-    | `Prev AA` | Used to determine tryptic condition.                            |
-    | `Next AA` | Used to determine tryptic condition.                            |
-    | `<Sample> Intensity`     | One column per sample named like `<Sample> Intensity`.                     |
-
+    | Column Name | Description |
+    |-------------------|-----------------------------------------------------|
+    | `Protein ID` | Protein accession or identifier. |
+    | `Protein Description` | Descriptive name of the protein. |
+    | `Gene` | Gene symbol. |
+    | `Peptide Sequence` | Amino acid sequence of the peptide. |
+    | `Assigned Modifications` | Sequence with nuclotide modifications. |
+    | `Prev AA` | Used to determine tryptic condition. |
+    | `Next AA` | Used to determine tryptic condition. |
+    | `<Sample> Intensity` | One column per sample named like `<Sample> Intensity`. |
 
 #### Normalization and imputation of the intensities
 
@@ -221,19 +245,14 @@ The intensities are log2 transformed and normalized with DEqMS (Zhu 2022). Two m
 
 At the protein level, this operation is executed by the function medianSweeping. It applies the same median normalization used for peptides, but also it summarizes the peptide intensities into protein relative abundance by the median sweeping method.
 
-Imputation: 
-- PhosR: Imputation is performed on peptide and protein abundances with the Bioconductor package PhosR. Round imputation is performed in absence of replicates. ProTN uses two functions of PhosR for the imputation: Imputes the missing values for a peptide across replicates within a single condition and Tail-based imputation approach as implemented in Perseus.
-- Gaussian Estimation: Imputation is performed on peptide and protein abundances using Gaussian estimation, where missing values are sampled from a normal distribution defined by the mean and standard deviation of observed intensities. This preserves data variance and reduces bias from missingness within conditions.
-- missForest: Imputation is performed on peptide and protein abundances using the missForest R package, which applies a non-parametric random forest algorithm to predict missing values. This approach captures nonlinear relationships between features, preserving complex data structures.
-- pcaMethods: Imputation is performed on peptide and protein abundances using the pcaMethods R package with the svdImpute function, which estimates missing values by reconstructing the data matrix from its leading singular vectors. This approach leverages global correlation structures to provide consistent estimates.
+Imputation: - PhosR: Imputation is performed on peptide and protein abundances with the Bioconductor package PhosR. Round imputation is performed in absence of replicates. ProTN uses two functions of PhosR for the imputation: Imputes the missing values for a peptide across replicates within a single condition and Tail-based imputation approach as implemented in Perseus. - Gaussian Estimation: Imputation is performed on peptide and protein abundances using Gaussian estimation, where missing values are sampled from a normal distribution defined by the mean and standard deviation of observed intensities. This preserves data variance and reduces bias from missingness within conditions. - missForest: Imputation is performed on peptide and protein abundances using the missForest R package, which applies a non-parametric random forest algorithm to predict missing values. This approach captures nonlinear relationships between features, preserving complex data structures. - pcaMethods: Imputation is performed on peptide and protein abundances using the pcaMethods R package with the svdImpute function, which estimates missing values by reconstructing the data matrix from its leading singular vectors. This approach leverages global correlation structures to provide consistent estimates.
 
 | Method | Package | Main Idea | Typical Use |
-|--------|---------|-----------|-------------|
+|-----------------|-----------------|------------------|---------------------|
 | **PhosR imputation** | [PhosR](https://www.sciencedirect.com/science/article/pii/S221112472100084X) (Bioconductor) | Designed for phosphoproteomics; implements *round-robin* (iterative imputation without replicates) and *paired tail-based imputation* (using replicate structure). | Phosphoproteomics with sparse coverage or missingness tied to peptide abundance. |
 | **Gaussian estimation imputation** |  | Draws values from a Gaussian distribution defined by low-intensity tail of observed data (shifted mean, reduced SD). | When MNAR (Missing Not At Random) is likely due to detection limit. |
 | **missForest** | [missForest](https://doi.org/10.32614/CRAN.package.missForest) (R) | Non-parametric iterative imputation using random forests. Predicts missing entries using nonlinear relationships between features. | General proteomics where missingness relates to multiple covariates, or when structure is complex. |
 | **pcaMethods `svdImpute`** | [pcaMethods](https://bioconductor.org/packages/release/bioc/html/pcaMethods.html) (Bioconductor) | Uses Singular Value Decomposition to reconstruct missing values from lower-rank structure in the data. | Well-replicated datasets with high correlation between samples. |
-
 
 In this step, two MDSs and two PCAs (proteins and peptides) are generated.
 
@@ -303,9 +322,9 @@ PhosProTN is an integrative pipeline for phosphoproteomic analysis of DDA experi
 
 *The phospho-workflow is similar to the one described previously, below are reported only the different steps.*
 
-#### Set settings for the execution and read the raw phospho data from loaded files
+#### Set settings for the execution and read the raw phospho data from loaded files {#set-settings-for-the-execution-and-read-the-raw-phospho-data-from-loaded-files}
 
-ProTN analyse the results of Proteome Discoverer and MaxQuant. The essential parameters and files to run ProTN are: (additional details on the input can be found in the ProTN info tab) 
+ProTN analyse the results of Proteome Discoverer and MaxQuant. The essential parameters and files to run ProTN are: (additional details on the input can be found in the ProTN info tab)
 
 -   **Software Analyzer**: determine with software was use to identify peptides and proteins.
 
@@ -316,59 +335,62 @@ ProTN analyse the results of Proteome Discoverer and MaxQuant. The essential par
 
 -   `Annotation file`: This file provides metadata for the samples analyzed. It must be an Excel file with the following required columns:
 
-    | Column Name | Description                                                               |
-    | ----------- | ------------------------------------------------------------------------- |
-    | `File ID`   | Identifier used in column headers of the peptide file. |
-    | `Condition` | Experimental group name. Used for comparisons.                            |
-    | `Sample`    | Clean sample name used downstream.                                        |
-    | `color`     | (Optional) Plot color. Defaults are applied if missing.                   |
-    | `batch`     | (Optional) Batch ID for batch effect correction.                          |
+    | Column Name | Description                                             |
+    |-------------|---------------------------------------------------------|
+    | `File ID`   | Identifier used in column headers of the peptide file.  |
+    | `Condition` | Experimental group name. Used for comparisons.          |
+    | `Sample`    | Clean sample name used downstream.                      |
+    | `color`     | (Optional) Plot color. Defaults are applied if missing. |
+    | `batch`     | (Optional) Batch ID for batch effect correction.        |
+
 -   `Peptides file`: Excel table with annotated peptides and abundance values.
 
-    | Column Name                    | Description                                                   |
-    | ------------------------------ | ------------------------------------------------------------- |
-    | `Master Protein Accessions`    | Maps peptide to protein; only first ID is kept.               |
-    | `Annotated Sequence`           | Amino acid sequence including PTM annotations.                |
-    | `Modifications`                | Post-translational modifications. |
-    | `Positions in Master Proteins` | Position of peptide in the protein sequence.                  |
-    | `Abundance: <File ID>`          | Intensity/abundance for each sample. One column per sample.   |
+    | Column Name | Description |
+    |------------------------|------------------------------------------------|
+    | `Master Protein Accessions` | Maps peptide to protein; only first ID is kept. |
+    | `Annotated Sequence` | Amino acid sequence including PTM annotations. |
+    | `Modifications` | Post-translational modifications. |
+    | `Positions in Master Proteins` | Position of peptide in the protein sequence. |
+    | `Abundance: <File ID>` | Intensity/abundance for each sample. One column per sample. |
+
 -   `Proteins file`: Excel table contain descriptive and accession information for proteins.
 
     | Column Name   | Description                                                |
-    | ------------- | ---------------------------------------------------------- |
+    |----------------|--------------------------------------------------------|
     | `Accession`   | Unique protein identifier, used to join with peptide file. |
     | `Description` | Descriptive string, e.g., from UniProt.                    |
 
 -   `PSM file`
 
-    | Column Name                      | Description                                     |
-    | -------------------------------- | ----------------------------------------------- |
-    | `ptmRS: Best Site Probabilities` | Used to resolve phosphosite ambiguity.          |
-    | `Precursor Abundance`            | Abundance value used to filter invalid entries. |
-    | `Master Protein Accessions`      | Matches protein IDs for mapping.                |
-    | `Annotated Sequence`             | Used to resolve conflicting PTM assignments.    |
+    | Column Name | Description |
+    |-----------------------------|------------------------------------------|
+    | `ptmRS: Best Site Probabilities` | Used to resolve phosphosite ambiguity. |
+    | `Precursor Abundance` | Abundance value used to filter invalid entries. |
+    | `Master Protein Accessions` | Matches protein IDs for mapping. |
+    | `Annotated Sequence` | Used to resolve conflicting PTM assignments. |
 
 ##### File required for MaxQuant
+
 -   `Annotation file`: This file provides metadata for the samples analyzed. It must be an Excel file with the following required columns:
 
-    | Column Name | Description                                                                                  |
-    |----------------|--------------------------------------------------------|
-    | `Condition` | Experimental condition (e.g. Control, Treated). Used for group comparison.                   |
-    | `Sample`    | Sample identifier. Must match sample names in the peptide file.                              |
-    | `color`     | (Optional) Color associated with the condition. If not present, default colors are assigned. |
-    | `batch`     | (Optional) Batch ID for batch effect correction. Required if batch correction is enabled.    |
+    | Column Name | Description |
+    |------------------|------------------------------------------------------|
+    | `Condition` | Experimental condition (e.g. Control, Treated). Used for group comparison. |
+    | `Sample` | Sample identifier. Must match sample names in the peptide file. |
+    | `color` | (Optional) Color associated with the condition. If not present, default colors are assigned. |
+    | `batch` | (Optional) Batch ID for batch effect correction. Required if batch correction is enabled. |
+
 -   `evidence.txt`: This is a TSV/CSV file containing peptide-level quantification data. **Required columns:**
 
-    | Column Name              | Description                                                                 |
-    |--------------------------|-----------------------------------------------------------------------------|
-    | `Modifications`          | PTMs of the peptide.             |
-    | `Gene names`             | Gene symbol associated with the peptide.     |
-    | `Protein names`          | Protein description. If missing, will be merged from annotation file.       |
-    | `Leading razor protein`  | UniProt accession. Used for annotation enrichment.                          |
-    | `Raw file`               | File/sample ID. Must match entries in the annotation file.                   |
-    | `Intensity`              | Peptide intensity value. Used for quantification.                            |
-    | `Phospho (STY) Probabilities` | Used to filter for confident phosphorylation.                          |
-
+    | Column Name | Description |
+    |-------------------|-----------------------------------------------------|
+    | `Modifications` | PTMs of the peptide. |
+    | `Gene names` | Gene symbol associated with the peptide. |
+    | `Protein names` | Protein description. If missing, will be merged from annotation file. |
+    | `Leading razor protein` | UniProt accession. Used for annotation enrichment. |
+    | `Raw file` | File/sample ID. Must match entries in the annotation file. |
+    | `Intensity` | Peptide intensity value. Used for quantification. |
+    | `Phospho (STY) Probabilities` | Used to filter for confident phosphorylation. |
 
 #### ADDITIONAL STEPS:
 
@@ -394,14 +416,11 @@ This workflow required both files for phosphoproteomic, as described in [previou
 
 ### InteracTN
 
-InteracTN is an integrated pipeline for the analysis of interactomics data derived from DDA mass spectrometry experiments. It supports input from multiple widely used proteomics platforms, including Proteome Discoverer (PD), MaxQuant (MQ), Spectronaut (SP), and FragPipe (FP).
-The pipeline also includes network reconstruction and visualization, helping users interpret protein–protein interactions in the context of biological pathways and complexes.
-Designed to be robust and user-friendly, InteracTN enables researchers to efficiently explore and interpret interactome data for a deeper understanding of cellular mechanisms and protein functions.
+InteracTN is an integrated pipeline for the analysis of interactomics data derived from DDA mass spectrometry experiments. It supports input from multiple widely used proteomics platforms, including Proteome Discoverer (PD), MaxQuant (MQ), Spectronaut (SP), and FragPipe (FP). The pipeline also includes network reconstruction and visualization, helping users interpret protein–protein interactions in the context of biological pathways and complexes. Designed to be robust and user-friendly, InteracTN enables researchers to efficiently explore and interpret interactome data for a deeper understanding of cellular mechanisms and protein functions.
 
 #### Set settings for the execution and read the raw data from loaded files
 
 This workflow required proteome files, as described [here](#set-settings-for-the-execution-and-read-the-raw-data-from-loaded-files).
-
 
 ## Getting help
 
