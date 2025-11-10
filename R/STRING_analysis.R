@@ -73,7 +73,7 @@ STRINGdb_network <- function(differential_results, species="Homo sapiens",
   
   if (!is.null(dirOutput_net)) {
     if(shiny){
-      stringdb_results <- process_string_network_shiny(g_sel_comp = res$g_sel_comp, deps_l_df, dirOutput_net, taxonomy_NCBI, score_thr)
+      stringdb_results <- process_string_network_shiny(g_sel_comp = res$g_sel_comp, deps_l_df, dirOutput_net, taxonomy_NCBI, algorithm, score_thr)
     } else{
       stringdb_results <- process_string_network(g_sel_comp = res$g_sel_comp, deps_l_df, dirOutput_net, taxonomy_NCBI, algorithm, score_thr)
     }
@@ -184,7 +184,7 @@ process_string_network <- function(g_sel_comp, deps_l_df, dirOutput_net, taxonom
 }
 
 # Function to process STRING network for each comparison in shiny
-process_string_network_shiny <- function(g_sel_comp, deps_l_df, dirOutput_net, taxonomy_NCBI, score_thr = 700) {
+process_string_network_shiny <- function(g_sel_comp, deps_l_df, dirOutput_net, taxonomy_NCBI, algorithm="fastgreedy", score_thr = 700) {
   string_folder <- system.file("extdata", package = "proTN")
   string_db <- STRINGdb$new(version="12", species=taxonomy_NCBI, score_threshold=score_thr, input_directory=string_folder)
   
