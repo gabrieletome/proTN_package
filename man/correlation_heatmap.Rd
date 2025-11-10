@@ -32,11 +32,11 @@ A list containing:
 \item{plot}{ggplot2 object representing the protein abundance plot for the selected proteins.}
 }
 \description{
-This function generates a ...
+This function generates a correlation heatmap for the selected proteins' abundance across different conditions. It creates an heatmap
 }
 \examples{
 \dontrun{
-result <- correlation_heatmap(proteome_data, list_protein = c("ProteinA", "ProteinB"))
+result <- correlation_heatmap(proteome_data, protein_list = c("ProteinA", "ProteinB"))
 print(result$plot)
 }
 

@@ -118,7 +118,7 @@ process_string_network <- function(g_sel_comp, deps_l_df, dirOutput_net, taxonom
         from_genename = string_mapped$gene_id[match(from, string_mapped$STRING_id)],
         to_genename = string_mapped$gene_id[match(to, string_mapped$STRING_id)]
       )]
-      string_gene_df <- unique(data.table(strindbID_1 = links_string$from, stringdbID_2 = links_string$to,
+      string_gene_df <- unique(data.table(stringdbID_1 = links_string$from, stringdbID_2 = links_string$to,
                                           genename_1 = links_string$from_genename, genename_2 = links_string$to_genename, 
                                           score = links_string$combined_score))
         
@@ -189,8 +189,8 @@ process_string_network_shiny <- function(g_sel_comp, deps_l_df, dirOutput_net, t
   string_db <- STRINGdb$new(version="12", species=taxonomy_NCBI, score_threshold=score_thr, input_directory=string_folder)
   
   stringdb_results <- list()
-  for (comp in names(g_sel_comp)) {
-    gene_name <- unique(g_sel_comp[[comp]])
+  for (comparison in names(g_sel_comp)) {
+    gene_name <- unique(g_sel_comp[[comparison]])
     setnames(gene_name, "id", "gene_id")
     string_mapped <- string_db$map(gene_name, "gene_id", removeUnmappedRows = TRUE)
     links_string <- as.data.table(string_db$get_interactions(string_mapped$STRING_id))
@@ -198,7 +198,7 @@ process_string_network_shiny <- function(g_sel_comp, deps_l_df, dirOutput_net, t
       from_genename = string_mapped$gene_id[match(from, string_mapped$STRING_id)],
       to_genename = string_mapped$gene_id[match(to, string_mapped$STRING_id)]
     )]
-    string_gene_df <- unique(data.table(strindbID_1 = links_string$from, stringdbID_2 = links_string$to,
+    string_gene_df <- unique(data.table(stringdbID_1 = links_string$from, stringdbID_2 = links_string$to,
                                         genename_1 = links_string$from_genename, genename_2 = links_string$to_genename, 
                                         score = links_string$combined_score))
     if (nrow(string_gene_df) > 0) {
@@ -222,7 +222,7 @@ process_string_network_shiny <- function(g_sel_comp, deps_l_df, dirOutput_net, t
       fwrite(nodes_dt, 
              file = paste0(dirOutput_net, "/", gsub(comparison, pattern = "\\/", replacement="vs"), "_nodes.tsv"), 
              sep = "\t")
-      stringdb_results[[comp]] <- unique(string_mapped$STRING_id)
+      stringdb_results[[comparison]] <- unique(string_mapped$STRING_id)
     } else {
       stop("No strong interaction detected between the proteins. Usually too few proteins.")
     }

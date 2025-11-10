@@ -148,7 +148,7 @@ generate_peptide_distribution_subplot <- function(proteome_data) {
 
 #' Complexity Plot
 #'
-#' This function generates a complecity plot of raw abundance. Provide the data before normalization and imputation
+#' This function generates a complexity plot of raw abundance. Provide the data before normalization and imputation
 #'
 #' @param proteome_data A list containing `c_anno` or `c_anno_phospho`, `psm_log_prot_df`, and `psm_log_pet_df`.
 #' @param phospho_with_proteome Logical. Whether to include phosphoproteome data alongside proteome data (default: `FALSE`).
@@ -649,7 +649,7 @@ heatmap_selected_proteins <- function(proteome_data, list_protein) {
 
 #' correlation Heatmap of Selected Proteins
 #'
-#' This function generates a ...
+#' This function generates a correlation heatmap for the selected proteins' abundance across different conditions. It creates an heatmap
 #'
 #' @param proteome_data A list containing proteome data, including gene intensity data and sample annotations.
 #' @param replicate Character. A Sample or a Condition to represent in the heatmap.
@@ -664,7 +664,7 @@ heatmap_selected_proteins <- function(proteome_data, list_protein) {
 #'
 #' @examples
 #' \dontrun{
-#' result <- correlation_heatmap(proteome_data, list_protein = c("ProteinA", "ProteinB"))
+#' result <- correlation_heatmap(proteome_data, protein_list = c("ProteinA", "ProteinB"))
 #' print(result$plot)
 #' }
 #'

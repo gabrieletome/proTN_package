@@ -1550,7 +1550,12 @@ read_FragPipe_files <- function(anno_filename, pep_filename,
   message("Reading files...")
   # Read annotation file
   input_files[["annotation"]] <- tryCatch({
-    as.data.table(read_xlsx(anno_filename))
+    if(grepl(".xlsx", anno_filename)){
+      as.data.table(read_xlsx(anno_filename))
+    } else{
+      fread(anno_filename)
+    }
+    
   }, error=function(cond){
     stop(paste0("Missing file. The file \'ANNOTATION\' is missing or not have the pattern in the filename or there are duplicates files."))
   })
@@ -1565,6 +1570,8 @@ read_FragPipe_files <- function(anno_filename, pep_filename,
   
   message("Starting preprocessing...")
   #Clean files and merge
+  condition_col <- str_to_lower(condition_col)
+  sample_col <- str_to_lower(sample_col)
   colToKeep<-intersect(colnames(input_files[["annotation"]]), c(condition_col, sample_col, color_col, batch_col))
   if(!(condition_col %in% colToKeep)){
     stop("\'Condition\' column  in \'ANNOTATION\' file.")

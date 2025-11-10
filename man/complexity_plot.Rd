@@ -25,7 +25,7 @@ A list containing:
 }
 }
 \description{
-This function generates a complecity plot of raw abundance. Provide the data before normalization and imputation
+This function generates a complexity plot of raw abundance. Provide the data before normalization and imputation
 }
 \examples{
 \dontrun{
