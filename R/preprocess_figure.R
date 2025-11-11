@@ -319,6 +319,78 @@ plot_abundance_distribution <- function(proteome_data, type) {
 }
 
 
+#' Plot raw Abundance Distribution
+#' 
+#' This function generates a violin and boxplot representation of raw abundance values for proteins or peptides
+#' @param proteome_data A list containing proteome data, including peptide annotation tables.
+#' @param type Character; specifies the type of data to plot. Options are "protein" or "peptide".
+#' 
+#' @return A list containing:
+#'  - `dt`: A data.table of raw abundance values with sample annotations
+#'  - `plot`: A ggplot2 object representing the abundance distribution as a violin and boxplot.
+#' @export
+#'  
+#' @import data.table
+#' @import ggplot2
+#'  
+#' @examples
+#' \dontrun{
+#' result <- plot_raw_abundance_distribution(proteome_data, type = "protein")
+#'  }
+plot_raw_abundance_distribution <- function(proteome_data, type) {
+  if(("c_anno" %in% names(proteome_data))){
+    phospho_with_proteome = FALSE
+  } else if(("c_anno_proteome" %in% names(proteome_data)) & ("c_anno_phospho" %in% names(proteome_data))){
+    phospho_with_proteome = TRUE
+  } else{
+    stop("Missing sample annotation!")
+  }
+  
+  if(type == "protein"){
+    dat <- copy(proteome_data$psm_log_prot_df)
+    if(phospho_with_proteome){
+      c_anno <- copy(proteome_data$c_anno_proteome)
+    } else{
+      c_anno <- copy(proteome_data$c_anno)
+    }
+    ordered_samples <- c_anno[order(condition), sample]
+    pg_long_df <- melt(dat, id.vars = "ID_peptide",
+                       variable.name = "sample", value.name = "Log2 raw abundance")
+    setcolorder(pg_long_df, c("ID_peptide", "sample", "Log2 raw abundance"))
+    
+  } else if(type == "peptide"){
+    dat <- copy(proteome_data$psm_log_pet_df)
+    if(phospho_with_proteome){
+      c_anno <- copy(proteome_data$c_anno_phospho)
+    } else{
+      c_anno <- copy(proteome_data$c_anno)
+    }
+    ordered_samples <- c_anno[order(condition), sample]
+    pg_long_df <- melt(dat, id.vars = "ID_peptide",
+                       variable.name = "sample", value.name = "Log2 raw abundance")
+    setcolorder(pg_long_df, c("ID_peptide", "sample", "Log2 raw abundance"))
+    
+  } else{
+    stop("Invalid type parameter. Must be \"protein\" or \"peptide\"")
+  }
+  
+  pg_long_df <- merge(pg_long_df, c_anno, by = "sample", all.x = TRUE)
+  
+  hs <- ggplot(data = pg_long_df, aes(x = factor(sample, levels = unique(pg_long_df$sample)), 
+                                      y = `Log2 raw abundance`, fill = sample, colour = sample)) +
+    coord_flip() +
+    geom_violin(alpha = 0.5, scale = "width", trim = FALSE) +
+    geom_boxplot(alpha = 1, fill = "white", width = 0.2, outlier.shape = NA, notch = FALSE) +
+    theme_bw(base_size = 16) +
+    theme(legend.position = "none", axis.title.y = element_blank()) +
+    scale_fill_manual(values = setNames(c_anno$color, c_anno$sample)) +
+    scale_colour_manual(values = setNames(c_anno$color, c_anno$sample)) +
+    theme(panel.grid.minor = element_blank(), panel.grid.major.y = element_blank())
+  
+  return(list("dt" = pg_long_df, "plot" = hs))
+}
+
+
 #' MDS Plot
 #'
 #' This function generates a Multi-Dimensional Scaling (MDS) plot for either protein or peptide data, based on a Euclidean distance matrix of sample similarities.
