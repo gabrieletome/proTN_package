@@ -137,6 +137,8 @@ generate_peptide_distribution_subplot <- function(proteome_data) {
     geom_bar(stat = "identity", width = 0.7, alpha = 0.8) +
     theme_bw(base_size = 16) +
     theme(legend.position = "none") +
+    scale_fill_gradient(low = "#D5EEFB", high = "#039be5") +
+    scale_color_gradient(low = "#D5EEFB", high = "#039be5") +
     labs(x = "# peptides per protein", y = "# proteins") +
     theme(panel.grid.minor = element_blank(),
           panel.grid.major.y = element_blank(),
@@ -152,7 +154,7 @@ generate_peptide_distribution_subplot <- function(proteome_data) {
 #'
 #' @param proteome_data A list containing `c_anno` or `c_anno_phospho`, `psm_log_prot_df`, and `psm_log_pet_df`.
 #' @param phospho_with_proteome Logical. Whether to include phosphoproteome data alongside proteome data (default: `FALSE`).
-#' @param col_vec Vector. Vector of 4 color. Default: "#008752", "#59C7A3", "#95F2D9", "#0078AE"
+#' @param col_vec Vector. Vector of 4 color. Default: "#008752", "#8FD4B8", "#7AC2E0", "#5BA4D0"
 #'
 #' @return A list containing:
 #'   - `dt`: Data table for abundance.
@@ -166,7 +168,7 @@ generate_peptide_distribution_subplot <- function(proteome_data) {
 #' \dontrun{
 #'   abundance_plot <- complexity_plot(proteome_data)
 #' }
-complexity_plot <- function(proteome_data, phospho_with_proteome=FALSE, col_vec=c("#008752", "#59C7A3", "#95F2D9", "#0078AE")) {
+complexity_plot <- function(proteome_data, phospho_with_proteome=FALSE, col_vec=c("#008752", "#8FD4B8", "#7AC2E0", "#5BA4D0")) {
   if(("c_anno" %in% names(proteome_data))){
     phospho_with_proteome = FALSE
   } else if(("c_anno_phospho" %in% names(proteome_data))){
@@ -208,10 +210,10 @@ complexity_subplot <- function(proteome_data, col_vec=NULL) {
   plot_dt[, peptide_rank := seq_len(.N)[order(cum_intensity)], by = sample]
 
   if(is.null(col_vec)){
-    col_vec = c("#008752", "#59C7A3", "#95F2D9", "#0078AE")
+    col_vec = c("#008752", "#8FD4B8", "#7AC2E0", "#5BA4D0")
   } else if(length(col_vec) < 4){
     warning("Minimum 4 colors required. Using default")
-    col_vec = c("#008752", "#59C7A3", "#95F2D9", "#0078AE")
+    col_vec = c("#008752", "#8FD4B8", "#7AC2E0", "#5BA4D0")
   }
   
   cat_counts <- plot_dt[, .N, by = .(sample, category)]
@@ -451,10 +453,10 @@ mds_plot <- function(proteome_data, type) {
   setnames(mds_cmdscale, c("V1", "V2"), c("MDS_1", "MDS_2"))
   mds_cmdscale <- merge(mds_cmdscale, c_anno, by = "sample", all.x = TRUE)
   
-  cc <- unique(mds_cmdscale$color)
-  names(cc) <- unique(mds_cmdscale$condition)
+  cc <- mds_cmdscale$color
+  names(cc) <- mds_cmdscale$sample
   
-  cmd <- ggplot(mds_cmdscale, aes(MDS_1, MDS_2, colour = condition)) +
+  cmd <- ggplot(mds_cmdscale, aes(MDS_1, MDS_2, colour = sample)) +
     geom_point(size = 2, alpha = .9) +
     geom_text_repel(aes(label = sample), size = 4, fontface = "bold", show.legend = FALSE) +
     scale_colour_manual(values = cc) +
@@ -526,10 +528,10 @@ pca_plot <- function(proteome_data, type) {
   ve <- (apca_prot$sdev^2) / sum(apca_prot$sdev^2)
   labs <- paste0(names(pc)[2:3], " (", round(ve[1:2] * 100, 2), "%)")
   
-  cc <- unique(pc$color)
-  names(cc) <- unique(pc$condition)
+  cc <- pc$color
+  names(cc) <- pc$sample
   
-  cmd <- ggplot(pc, aes(PC1, PC2, colour = condition)) +
+  cmd <- ggplot(pc, aes(PC1, PC2, colour = sample)) +
     geom_point(size = 2, alpha = .9) +
     geom_text_repel(aes(label = sample), size = 4, fontface = "bold", show.legend = FALSE) +
     scale_colour_manual(values = cc) +
@@ -603,8 +605,9 @@ plot_selected_proteins <- function(proteome_data, list_protein) {
     prot_avg_se_long <- prot_intensity_long[, .(avg = mean(Intensity),
                                                 se = sd(Intensity)/sqrt(.N)), by = c("GeneName", "condition")]
     
-    cc <- unique(prot_intensity_long$color)
-    names(cc) <- unique(prot_intensity_long$condition)
+    cc_dt <- unique(prot_intensity_long[, c("condition","color")])[, .SD[1], by = condition]
+    cc <- cc_dt$color
+    names(cc) <- cc_dt$condition
     
     bs = 16
     g<-ggplot(prot_avg_se_long,aes(condition,avg,fill=condition,colour=condition))+
@@ -695,9 +698,11 @@ heatmap_selected_proteins <- function(proteome_data, list_protein) {
     }
     mat_plot <- as.data.frame(mat[,-1], row.names = mat$GeneName)
     annotation <- as.data.frame(c_anno[,c("condition")], row.names = c_anno$sample)
-
-    cc <- unique(c_anno$color)
-    names(cc) <- unique(c_anno$condition)
+    
+    cc_dt <- unique(c_anno[, c("condition","color")])[, .SD[1], by = condition]
+    cc <- cc_dt$color
+    names(cc) <- cc_dt$condition
+    
     cc <- list(condition = cc)
     
     breaks <- sort(c(-(max(abs(mat_plot))-((max(abs(mat_plot))*(1/50))*(0:49))), 
@@ -800,8 +805,9 @@ correlation_heatmap <- function(proteome_data, replicate, mode="correlation", co
     
     mat_plot <- as.data.frame(cov_res_filt[,-1], row.names = cov_res_filt$GeneName)
 
-    cc <- unique(c_anno$color)
-    names(cc) <- unique(c_anno$condition)
+    cc_dt <- unique(c_anno[, c("condition","color")])[, .SD[1], by = condition]
+    cc <- cc_dt$color
+    names(cc) <- cc_dt$condition
     cc <- list(condition = cc)
     
     breaks <- sort(c(-(max(abs(mat_plot))-((max(abs(mat_plot))*(1/50))*(0:49))), 
@@ -836,9 +842,10 @@ correlation_heatmap <- function(proteome_data, replicate, mode="correlation", co
       cov_res_filt <- cov_res_filt[GeneName %in% prot_find, ..cols]
       
       mat_plot <- as.data.frame(cov_res_filt[,-1], row.names = cov_res_filt$GeneName)
-
-      cc <- unique(c_anno$color)
-      names(cc) <- unique(c_anno$condition)
+      
+      cc_dt <- unique(c_anno[, c("condition","color")])[, .SD[1], by = condition]
+      cc <- cc_dt$color
+      names(cc) <- cc_dt$condition
       cc <- list(condition = cc)
       
       breaks <- sort(c(-(max(abs(mat_plot))-((max(abs(mat_plot))*(1/50))*(0:49))), 

@@ -8,13 +8,19 @@
 ################################################################################
 
 ### Shared variables to load ----
-colour_vec<-c("dodgerblue2", "#E31A1C", "green4", "#6A3D9A","#FF7F00",
-              "black", "gold1", "skyblue2", "#FB9A99", "palegreen2","#CAB2D6", "#FDBF6F",
-              "#9af7c9","#c0a0e6","#f5939a","#5fefee","#e8d388","#8abdff","#e3bf7a","#48c0f6","#ccb86f","#fafeaf",
-              "#04bfe4","#ea92a8","#25cfe9","#ffbb97","#62e8ff","#ffd29b","#8fcbff","#aec87f","#b2c6ff","#aedf9b",
-              "#ffb3c8","#81b97c","#ffcef0","#54bcae","#ffcab3","#7dd7ff","#ffe4ad","#81b0da","#ebffc5","#a7a8d5",
-              "#bdffd0","#d6d2ff","#9fb282","#a5d8ff","#c9a395","#9bfff7","#ffcbce","#70b6ca","#faffdd","#88b3bc",
-              "#d6ffdf","#a3e5ff","#b1ac8f","#ccffff","#b4bb9f","#7eb7a5","#c5dbc3","#a8b9ff","#74dfbc","#f2ace7")
+colour_vec <- c(
+  "#008752", "#5BA4D0", "#CC6677", "#DDCC77", "#117733", "#332288", "#AA4499",
+  "#44AA99", "#999933", "#882255", "#661100", "#6699CC", "#888888",
+  "#A8D5BA", "#E8B4D4", "#B8D4E8", "#F4D7A8", "#D4B8E8", "#B8E8D4",
+  "#E8D4B8", "#D4E8B8", "#B8B8E8", "#E8B8D4", "#D4B8B8", "#B8E8B8",
+  "#C8E0D8", "#E0C8D8", "#D8E0C8", "#C8D8E0", "#E0D8C8", "#D8C8E0",
+  "#B0D8C8", "#D8B0C8", "#C8D8B0", "#B0C8D8", "#D8C8B0", "#C8B0D8",
+  "#A8C8D8", "#D8A8C8", "#C8D8A8", "#A8D8C8", "#D8C8A8", "#C8A8D8",
+  "#98C8D8", "#D898C8", "#C8D898", "#98D8C8", "#D8C898", "#C898D8",
+  "#B8D8E0", "#E0B8D8", "#D8E0B8", "#B8E0D8", "#E0D8B8", "#D8B8E0",
+  "#A0D0E0", "#E0A0D0", "#D0E0A0", "#A0E0D0", "#E0D0A0", "#D0A0E0",
+  "#90C0D0", "#D090C0", "#C0D090", "#90D0C0", "#D0C090", "#C090D0"
+)
 
 
 ### The function enrichment_test performs enrichment analysis starting from 3 vectors of gene names: input, annotation and background (the background is intended as the universe and, by default, is also used to filter gene names in the input and annotation) ----  

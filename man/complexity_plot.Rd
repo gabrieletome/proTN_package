@@ -7,7 +7,7 @@
 complexity_plot(
   proteome_data,
   phospho_with_proteome = FALSE,
-  col_vec = c("#008752", "#59C7A3", "#95F2D9", "#0078AE")
+  col_vec = c("#008752", "#8FD4B8", "#7AC2E0", "#5BA4D0")
 )
 }
 \arguments{
@@ -15,7 +15,7 @@ complexity_plot(
 
 \item{phospho_with_proteome}{Logical. Whether to include phosphoproteome data alongside proteome data (default: \code{FALSE}).}
 
-\item{col_vec}{Vector. Vector of 4 color. Default: "#008752", "#59C7A3", "#95F2D9", "#0078AE"}
+\item{col_vec}{Vector. Vector of 4 color. Default: "#008752", "#8FD4B8", "#7AC2E0", "#5BA4D0"}
 }
 \value{
 A list containing:

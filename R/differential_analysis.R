@@ -140,7 +140,19 @@ differential_analysis <- function(proteome_data, formule_contrast,
     deps_pep_l_df <- deps_pep_df$degs_l_df
     deps_pep_w_df <- deps_pep_df$degs_w_df
     
-    return(list(peptide_results_long = deps_pep_l_df, peptide_results_wide = deps_pep_w_df))
+    
+    cond_col <- list()
+    for (i in seq_along(formule_contrast)) {
+      cond_col[[i]] <- stri_remove_empty(str_remove_all(str_extract_all(formule_contrast[i], "\\w+")[[1]], "^\\d+$"))[[1]]
+    }
+    cond_col_dt <- data.table("condition" = unlist(cond_col), "comparison" =  names(formule_contrast))
+    cond_col_dt_anno <- merge.data.table(unique(c_anno[, c("condition","color")]), cond_col_dt, by = "condition", all.y = TRUE)
+    cond_col_dt_anno <- cond_col_dt_anno[, .SD[1], by = c("comparison")]
+    
+    color_vec <- cond_col_dt_anno$color
+    names(color_vec) <- cond_col_dt_anno$comparison
+    
+    return(list(peptide_results_long = deps_pep_l_df, peptide_results_wide = deps_pep_w_df, color_contrast = color_vec))
   } else{
     # Differential analysis proteomic or phospho without proteome
     c_anno <- copy(proteome_data$c_anno)
@@ -230,11 +242,34 @@ differential_analysis <- function(proteome_data, formule_contrast,
       deps_pep_l_df <- deps_pep_df$degs_l_df
       deps_pep_w_df <- deps_pep_df$degs_w_df
       
+      cond_col <- list()
+      for (i in seq_along(formule_contrast)) {
+        cond_col[[i]] <- stri_remove_empty(str_remove_all(str_extract_all(formule_contrast[i], "\\w+")[[1]], "^\\d+$"))[[1]]
+      }
+      cond_col_dt <- data.table("condition" = unlist(cond_col), "comparison" =  names(formule_contrast))
+      cond_col_dt_anno <- merge.data.table(unique(c_anno[, c("condition","color")]), cond_col_dt, by = "condition", all.y = TRUE)
+      cond_col_dt_anno <- cond_col_dt_anno[, .SD[1], by = c("comparison")]
+      
+      color_vec <- cond_col_dt_anno$color
+      names(color_vec) <- cond_col_dt_anno$comparison
+      
       return(list(protein_results_long = deps_l_df, protein_results_wide = deps_w_df, 
-                  peptide_results_long = deps_pep_l_df, peptide_results_wide = deps_pep_w_df))
+                  peptide_results_long = deps_pep_l_df, peptide_results_wide = deps_pep_w_df, color_contrast = color_vec))
     }
     
-    return(list(protein_results_long = deps_l_df, protein_results_wide = deps_w_df))
+    cond_col <- list()
+    for (i in seq_along(formule_contrast)) {
+      cond_col[[i]] <- stri_remove_empty(str_remove_all(str_extract_all(formule_contrast[i], "\\w+")[[1]], "^\\d+$"))[[1]]
+    }
+    cond_col_dt <- data.table("condition" = unlist(cond_col), "comparison" =  names(formule_contrast))
+    cond_col_dt_anno <- merge.data.table(unique(c_anno[, c("condition","color")]), cond_col_dt, by = "condition", all.y = TRUE)
+    cond_col_dt_anno <- cond_col_dt_anno[, .SD[1], by = c("comparison")]
+    
+    color_vec <- cond_col_dt_anno$color
+    names(color_vec) <- cond_col_dt_anno$comparison
+    
+    return(list(protein_results_long = deps_l_df, protein_results_wide = deps_w_df, color_contrast = color_vec))
+    
   }
   return(NULL)
 }

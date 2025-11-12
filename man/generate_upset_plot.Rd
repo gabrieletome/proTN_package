@@ -14,14 +14,14 @@ generate_upset_plot(
   order.set.by = "size",
   relative_height = 3,
   relative_width = 0.3,
-  top.bar.color = "#0078AEAA",
+  top.bar.color = "#7AC2E0DD",
   top.bar.y.label = NULL,
   top.bar.show.numbers = TRUE,
   top.bar.numbers.size = 3,
   sets.bar.color = "#7f7f7fAA",
   sets.bar.show.numbers = FALSE,
   sets.bar.x.label = "Set Size",
-  intersection.matrix.color = "#0078AEAA",
+  intersection.matrix.color = "#7AC2E0DD",
   specific = TRUE,
   ...
 )

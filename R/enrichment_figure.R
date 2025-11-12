@@ -121,18 +121,23 @@ generate_plotlist <- function(enr_sele_df, category, category_db, color_contrast
   plotlist <- list()
   
   if(is.null(color_contrast)){
-    color_contrast=if(length(category)==1){ c("#664069") } else{ c("#664069","#8A628D") }
-    col_vec <- rep(as.vector(t(color_contrast)), uniqueN(enr_sele_df$input_name))
+    # color_contrast=if(length(category)==1){ c("#664069") } else{ c("#664069","#8A628D") }
+    # col_vec <- rep(as.vector(t(color_contrast)), uniqueN(enr_sele_df$input_name))
+    col_vec_dt <- unique(enr_sele_df[, c("input_name","color")])
+    col_vec <- col_vec_dt$color
+    names(col_vec) <- col_vec_dt$input_name
     message("Set default colors.")
   } else{
     col_vec <- as.vector(t(color_contrast))
   }
   
-  tryCatch({
-    names(col_vec) <- (unique(enr_sele_df$input_name))
-  }, error = function(cond){
-    stop("Color must be a vector of the same length of the number of comparison.")
-  })
+  if(!is.null(color_contrast)){
+    tryCatch({
+      names(col_vec) <- (unique(enr_sele_df$input_name))
+    }, error = function(cond){
+      stop("Color must be a vector of the same length of the number of comparison.")
+    })
+  }
   
   for (db in names(category_db)) {
     if (nrow(category_db[[db]]) > 0) {

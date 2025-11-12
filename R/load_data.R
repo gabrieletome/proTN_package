@@ -2931,7 +2931,7 @@ read_spatial_MQ_prot_peptide_files <- function(anno_filename, pep_filename, prot
   if(!("color" %in% colnames(c_anno))){
     message("Color column not found! Setting default color")
     c_anno<-merge.data.table(c_anno,
-                             data.table("color"="#0078AEAA",
+                             data.table("color"="#7AC2E0DD",
                                         "sample"=unique(c_anno$sample)),
                              by = "sample")
   }

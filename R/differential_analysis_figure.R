@@ -63,8 +63,11 @@ generate_differential_barplots <- function(differential_results, data_type="prot
     lolli_df$id <- paste(lolli_df$comp, lolli_df$class, sep = "_")
     
     if(is.null(color_contrast)){
-      color_contrast=data.table("class"=c("+","-"), "color"=c("#664069","#8A628D"))
-      col_dt <- merge.data.table(lolli_df[,c("comp","class","id")], color_contrast, by = "class")
+      color_contrast = data.table("comp" = names(differential_results$color_contrast),
+                                  "color" = differential_results$color_contrast)
+      
+      # color_contrast=data.table("class"=c("+","-"), "color"=c("#664069","#8A628D"))
+      col_dt <- merge.data.table(lolli_df[,c("comp","class","id")], color_contrast, by = "comp")
       col_vec <- col_dt$color
       names(col_vec) <- col_dt$id
       message("Set default colors.")
@@ -170,7 +173,9 @@ generate_volcano_plots <- function(differential_results, data_type=NULL,
     input_df[, (col) := round(-log10(get(col)), 2)]
     
     if(is.null(color_contrast)){
-      color_contrast=c("#664069","#8A628D")
+      color_contrast <- c(differential_results$color_contrast[comparison],
+                          adjustcolor(differential_results$color_contrast[comparison], alpha.f = 1, red.f = 1.5, green.f = 1.5, blue.f = 1.5))
+      # color_contrast=c("#664069","#8A628D")
       col_vec <- rep(as.vector(t(color_contrast)), uniqueN(input_df$comp))
       message("Set default colors.")
     } else{
@@ -184,7 +189,7 @@ generate_volcano_plots <- function(differential_results, data_type=NULL,
           col_plus <- color_contrast[paste0(comparison,"_+")]
           message(paste0("Detected color for '",paste0(comparison,"_+"),"' ",data_type,": ",col_plus))
         } else{
-          col_plus <- "#664069"
+          col_plus <- differential_results$color_contrast[comparison]
           warning(paste0("No valid named corresponding to comparison. Setting default color for '",paste0(comparison,"_+"),"'"))
         }
         if(!interactomics){
@@ -195,7 +200,7 @@ generate_volcano_plots <- function(differential_results, data_type=NULL,
             col_minus <- color_contrast[paste0(comparison,"_-")]
             message(paste0("Detected color for '",paste0(comparison,"_-"),"' ",data_type,": ",col_minus))
           } else{
-            col_minus <- "#8A628D"
+            col_minus <- adjustcolor(differential_results$color_contrast[comparison], alpha.f = 1, red.f = 1.5, green.f = 1.5, blue.f = 1.5)
             warning(paste0("No valid named corresponding to comparison. Setting default color for '",paste0(comparison,"_-"),"'"))
           }
         } else{
@@ -272,10 +277,10 @@ generate_volcano_plots <- function(differential_results, data_type=NULL,
 #' @export
 generate_upset_plot <- function(differential_results, type="protein", DE_class = "all", nintersects = 20, remove_zero = TRUE,
                                 order.intersect.by = "size", order.set.by = "size", 
-                                relative_height = 3, relative_width = 0.3, top.bar.color = "#0078AEAA", 
+                                relative_height = 3, relative_width = 0.3, top.bar.color = "#7AC2E0DD", 
                                 top.bar.y.label = NULL, top.bar.show.numbers = TRUE, top.bar.numbers.size = 3, 
                                 sets.bar.color = "#7f7f7fAA", sets.bar.show.numbers = FALSE, 
-                                sets.bar.x.label = "Set Size", intersection.matrix.color = "#0078AEAA", 
+                                sets.bar.x.label = "Set Size", intersection.matrix.color = "#7AC2E0DD", 
                                 specific = TRUE, ...) {
   if(type == "peptide" & !("peptide_results_long" %in% names(differential_results))){
     stop("Working directly on proteins. The figure is not available")
@@ -442,10 +447,10 @@ ma_plot <- function(differential_results, proteome_data, type, condition, compar
   ymax = (max(abs(plot_dt$Abundance))*1.1)
   
   if(is.null(col_vec)){
-    col_vec = c("-" = "#008752", "=" = "#CCCCCC", "+" = "#0078AE")
+    col_vec = c("-" = "#008752", "=" = "#CCCCCC", "+" = "#7AC2E0")
   } else if(length(col_vec) < 3){
     warning("Required 3 colors required. Using default")
-    col_vec = c("-" = "#008752", "=" = "#CCCCCC", "+" = "#0078AE")
+    col_vec = c("-" = "#008752", "=" = "#CCCCCC", "+" = "#7AC2E0")
   }
   
   # TODO se condition == NULL, media di tutte le condizioni

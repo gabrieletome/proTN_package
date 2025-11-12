@@ -145,11 +145,11 @@ h1, h2, h3, h4, h5, h6 {
   font-family: el messiri;
   font-weight: bold;
   margin: 2.3733333333rem 0 0 0;
-  color: rgb(0, 120, 174);
+  color: #5BA4D0;
 }
 
 code {
-  color: rgb(0, 120, 174);
+  color: #5BA4D0;
 }
 
 .collapsible-header{
@@ -181,12 +181,12 @@ code {
 #plus_elem{
   padding-top: 2.5rem;
   padding-left: 2rem;
-  color: rgb(0, 120, 174);
+  color: #5BA4D0;
 }
 
 #linesubtitle{
   border-top: 3px solid;
-  color: rgb(0, 120, 174);
+  color: #5BA4D0;
   margin-top: 0;
 }
 
@@ -464,7 +464,7 @@ div.modal-footer button.btn {
 }
 
 #preview_output_ProTN, #case_study_ProTN, #report_phos, #case_study_phos{
-    background-color: rgb(0, 120, 174);
+    background-color: #5BA4D0;
     font-weight: bold;
     min-height: 50px;
 }

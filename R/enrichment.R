@@ -90,9 +90,19 @@ perform_enrichment_analysis <- function(differential_results, dirOutput="results
     # Perform enriched analysis with EnrichR
     enr_df <- suppressMessages(enrichRfnc(in_df = diff_dt, pval_fdr_enrich, pval_enrich_thr, overlap_size_enrich_thr, dbs, with_background))
     enr_df <- as.data.table(enr_df)
+    
+    #Add colors
+    enr_df[, comp := stri_replace_all(input_name, regex = "_all|_up|_down", replacement = "")]
+    
+    color_contrast = data.table("comp" = names(differential_results$color_contrast),
+                                "color" = differential_results$color_contrast)
+    enr_df <- merge(enr_df, color_contrast, by = "comp", all.x = TRUE)
+    enr_df[, comp := NULL]
+    
     # Save in RData for possible further analysis
     enrich_df <- enr_df[overlap_size >= overlap_size_enrich_thr, .SD, .SDcols = 1:13]
-    save(enrich_df, file = paste0(dirOutput, "/", subfold_Dat, "/", "enrichment.RData"))
+    enrich_df_rdata <- merge.data.table(enrich_df, unique(enr_df[, c("input_name", "color")]), by = "input_name", all.x = TRUE)
+    save(enrich_df_rdata, file = paste0(dirOutput, "/", subfold_Dat, "/", "enrichment.RData"))
     
     # Prepare the README
     readme_sheet <- data.table(INFO = c(
