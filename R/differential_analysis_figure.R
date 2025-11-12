@@ -497,7 +497,7 @@ ma_plot <- function(differential_results, proteome_data, type, condition, compar
 #' @export
 mds_differential_analysis_plot <- function(differential_analysis, proteome_data, type){
   
-  if(type == "peptide" & !("peptide_results_long" %in% names(differential_results))){
+  if(type == "peptide" & !("peptide_results_long" %in% names(differential_analysis))){
     stop("Working directly on proteins. The figure is not available")
   }
   
@@ -561,7 +561,7 @@ mds_differential_analysis_plot <- function(differential_analysis, proteome_data,
 #' @export
 pca_differential_analysis_plot <- function(differential_analysis, proteome_data, type){
   
-  if(type == "peptide" & !("peptide_results_long" %in% names(differential_results))){
+  if(type == "peptide" & !("peptide_results_long" %in% names(differential_analysis))){
     stop("Working directly on proteins. The figure is not available")
   }
   
