@@ -67,7 +67,8 @@ generate_abundance_subplot <- function(proteome_data) {
     theme(axis.title.y = element_blank()) +
     scale_fill_manual(values = c("Available"="#b0b0b0", "Missing"="darkred")) +
     scale_colour_manual(values = c("Available"="#b0b0b0", "Missing"="darkred")) +
-    theme(panel.grid.minor = element_blank(), panel.grid.major.y = element_blank()) +
+    theme(panel.grid.minor = element_blank(), panel.grid.major.y = element_blank(), legend.title = element_blank()) +
+    ylab("% of peptides") +
     ylim(0, 100)
   
   return(list("dt" = numeric_df, "plot" = plot))
