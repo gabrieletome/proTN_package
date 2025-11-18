@@ -174,7 +174,7 @@ generate_volcano_plots <- function(differential_results, data_type=NULL,
     
     if(is.null(color_contrast)){
       color_contrast <- c(differential_results$color_contrast[comparison],
-                          adjustcolor(differential_results$color_contrast[comparison], alpha.f = 1, red.f = 1.5, green.f = 1.5, blue.f = 1.5))
+                          adjustcolor(differential_results$color_contrast[comparison], alpha.f = 1, red.f = 1.2, green.f = 1.2, blue.f = 1.2))
       # color_contrast=c("#664069","#8A628D")
       col_vec <- rep(as.vector(t(color_contrast)), uniqueN(input_df$comp))
       message("Set default colors.")
@@ -439,7 +439,8 @@ ma_plot <- function(differential_results, proteome_data, type, condition, compar
   }
   
   plot_dt <- merge.data.table(abundance_dt_plot_filt_mean, deps_l_df_filt, by.x = "id", by.y = "id")
-  plot_dt[, class := factor(class, levels = c("+","-","="))]
+  plot_dt[, class := factor(class, levels = c("=","+","-"))]
+  plot_dt <- plot_dt[ order(class)]
   
   xmin = -(max(abs(plot_dt$log2_FC))*1.1)
   xmax = (max(abs(plot_dt$log2_FC))*1.1)
@@ -447,14 +448,13 @@ ma_plot <- function(differential_results, proteome_data, type, condition, compar
   ymax = (max(abs(plot_dt$Abundance))*1.1)
   
   if(is.null(col_vec)){
-    col_vec = c("-" = "#008752", "=" = "#CCCCCC", "+" = "#7AC2E0")
+    col_vec = c("-" = "#008752", "+" = "#7AC2E0", "=" = "#CCCCCC")
   } else if(length(col_vec) < 3){
     warning("Required 3 colors required. Using default")
-    col_vec = c("-" = "#008752", "=" = "#CCCCCC", "+" = "#7AC2E0")
+    col_vec = c("-" = "#008752", "+" = "#7AC2E0", "=" = "#CCCCCC")
   }
   
-  # TODO se condition == NULL, media di tutte le condizioni
-  
+
   gg <- ggplot(plot_dt, aes(x = log2_FC, y = Abundance, fill = class, color = class, text = paste('</br>Gene: ', id,'</br>Log2_FC: ', log2_FC, '</br>Abundance: ', Abundance))) +
     geom_point_rast(alpha = 0.75, shape = 16, size = 4) +
     theme_bw(base_size = 14) +
