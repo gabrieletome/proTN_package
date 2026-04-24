@@ -17,6 +17,9 @@ knitr::opts_chunk$set(
 ```
 
 ## Load ProTN and extract example
+
+The case study reported is a dataset investigating Parkinson's disease, specifically the kinase LRRK2. The dataset has 4 wild-type samples and 4 sample with A2016T mutation. [Steger M.. et al., eLife, 2016](https://doi.org/10.7554/eLife.12813)
+
 ```{r setup}
 library(proTN)
 extract_example(path_proteome = tempdir())
@@ -69,7 +72,7 @@ imputed_data <- impute_intensity(proteome_data = proteome_data)
 
 **Normalization:**
 
-**Peptide** abundances are normalized with the equalMedianNormalization function from the Bioconductor package [DEqMS](https://www.bioconductor.org/packages/release/bioc/html/DEqMS.html) (equal medians in all samples). 
+**Peptide** abundances are normalized with the equalMedianNormalization function from the Bioconductor package [DEqMS](https://www.bioconductor.org/packages/release/bioc/html/DEqMS.html) (equal medians in all samples).
 
 **Protein** normalized abundances are calculated with the medianSweeping function from the Bioconductor package [DEqMS](https://www.bioconductor.org/packages/release/bioc/html/DEqMS.html).
 
@@ -80,7 +83,7 @@ normalized_data <- normalization_ProTN(proteome_data = imputed_data)
 #### Export normalized data to an Excel file
 
 ```{r exporter, eval=FALSE}
-save_abundance_tables(proteome_data = normalized_data, 
+save_abundance_tables(proteome_data = normalized_data,
                       dirOutput=outputdir)
 ```
 
@@ -135,7 +138,7 @@ prot_pca$plot
 ```
 
 #### PCA based on peptide normalized data
-Principal component analysis (PCA) is performed on normalized protein and peptide abundances. 
+Principal component analysis (PCA) is performed on normalized protein and peptide abundances.
 
 ```{r pca_normalized_2, fig.height=5, fig.width=7}
 # Abundance per Peptide
@@ -255,7 +258,7 @@ pca_diff_pep$plot
 ```
 
 ## Enrichment analysis with EnrichR
-Annotation enrichment analysis is performed using the web-based application [EnrichR](https://maayanlab.cloud/Enrichr/), against an updated collection of 98 databases covering Transcription, Pathways, Ontologies, Diseases, Drugs, Cell Types, and Experimental Datasets. 
+Annotation enrichment analysis is performed using the web-based application [EnrichR](https://maayanlab.cloud/Enrichr/), against an updated collection of 98 databases covering Transcription, Pathways, Ontologies, Diseases, Drugs, Cell Types, and Experimental Datasets.
 For each comparison, enrichment is calculated for up-regulated proteins (UP), down-regulated proteins (DOWN), and their union (ALL).
 
 ```{r enrichment, eval=FALSE}
@@ -286,14 +289,14 @@ plots_terms <- enrichment_figure(enr_df = enrichemnt_results,
                                  enrich_filter_term = c("cell","pathways"))
 ```
 
-## Protein-protein interaction network analysis of differentially expressed proteins 
+## Protein-protein interaction network analysis of differentially expressed proteins
 Protein-protein interactions (PPIs) are crucial for understanding cell physiology. PPI analysis of differentially expressed proteins is based on the [STRING](https://string-db.org/) database. Communities within the network are identified with the Clauset-Newman-Moore (CNM) algorithm.
 
 ```{r string network, eval=FALSE}
 
 strindb_res <- STRINGdb_network(differential_results = differential_results,
-                                species="Homo sapiens", 
+                                species="Homo sapiens",
                                 dirOutput=outputdir)
-strindb_res  
+strindb_res
 
 ```

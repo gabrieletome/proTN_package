@@ -44,7 +44,7 @@ NOTE: If during installation an error about missing dependencies occurs, install
 ``` r
 if (!require("BiocManager", quietly = TRUE))
   install.packages("BiocManager")
-  
+
 BiocManager::install("SummarizedExperiment")
 BiocManager::install("STRINGdb")
 BiocManager::install("DEqMS")
@@ -59,7 +59,7 @@ devtools::install_github("PYangLab/PhosR", dependencies = T)
 
 The example used for the vignettes can be opened with the `extract_example` function:
 
-**Note**: The case study reported is a comparison of polysome-associated proteins with total proteins in human MCF7 cells. (PRIDE: PXD009417) (Clamer M, Tebaldi T, Lauria F, et al. Active Ribosome Profiling with RiboLace. Cell Rep. 2018;25(4):1097-1108.e5.)
+**Note**: The case study reported is a dataset investigating Parkinson's disease, specifically the kinase LRRK2. The dataset has 4 wild-type samples and 4 sample with A2016T mutation. [Steger M.. et al., eLife, 2016](https://doi.org/10.7554/eLife.12813)
 
 #### Proteomic dataset
 
@@ -76,7 +76,7 @@ extract_example(path_phospho = "path_to_save")
 #### Phospho-proteomic dataset with proteome input
 
 ``` r
-extract_example(path_proteome = "path_to_save", 
+extract_example(path_proteome = "path_to_save",
                 path_phospho = "path_to_save")
 ```
 
@@ -156,7 +156,7 @@ ProTN analyzes the results of Proteome Discoverer and MaxQuant. The essential pa
         | `Leading proteins`       | Used for filtering out contaminants (e.g., "CON_").                          |
     -   **Peptide and ProteinGroups pipeline**:
     -   `peptides.txt`: Tab-delimited file with peptide-level quantification. **Required columns:**
-        
+
         | Column Name              | Description                                                                 |
         |--------------------------|-----------------------------------------------------------------------------|
         | `Sequence`               | Amino acid sequence of the peptide.                                          |
@@ -165,7 +165,7 @@ ProTN analyzes the results of Proteome Discoverer and MaxQuant. The essential pa
         | `Leading razor protein`  | UniProt accession. Used for annotation enrichment.                          |
         | `Intensity <Sample>`          | Intensity values for each sample (e.g., `Intensity Sample1`).            |
     -   `proteinGroups.txt`: Tab-delimited file providing protein-level information. **Required columns:**
-    
+
         | Column Name              | Description                                                                 |
         |--------------------------|-----------------------------------------------------------------------------|
         | `Majority protein IDs`   | Used to extract the `Leading razor protein`. |
@@ -221,7 +221,7 @@ The intensities are log2-transformed and normalized with DEqMS (Zhu 2022). Two m
 
 At the protein level, this operation is executed using the medianSweeping function. It applies the same median normalization used for peptides and also summarizes peptide intensities into protein relative abundance using the median sweeping method.
 
-Imputation: 
+Imputation:
 - **PhosR**: Imputation is performed on peptide and protein abundances using the Bioconductor package PhosR. Round imputation is performed in the absence of replicates. ProTN uses two functions from PhosR for imputation: it imputes missing values for a peptide across replicates within a single condition and applies a tail-based imputation approach as implemented in Perseus.
 - **Gaussian Estimation**: Imputation is performed on peptide and protein abundances using Gaussian estimation, where missing values are sampled from a normal distribution defined by the mean and standard deviation of observed intensities. This preserves data variance and reduces bias from missingness within conditions.
 - **missForest**: Imputation is performed on peptide and protein abundances using the missForest R package, which applies a non-parametric random forest algorithm to predict missing values. This approach captures nonlinear relationships between features, preserving complex data structures.

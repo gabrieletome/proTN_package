@@ -17,6 +17,9 @@ knitr::opts_chunk$set(
 ```
 
 ## Load ProTN and extract example
+
+The case study reported is a dataset investigating Parkinson's disease, specifically the kinase LRRK2. The dataset has 4 wild-type samples and 4 sample with A2016T mutation. [Steger M.. et al., eLife, 2016](https://doi.org/10.7554/eLife.12813)
+
 ```{r setup}
 library(proTN)
 extract_example(path_phospho = tempdir(), path_proteome = tempdir())
@@ -34,11 +37,11 @@ Initial filtering removes the following peptides:
 After filtering, raw abundances are log2 transformed.
 
 ```{r read_proteomics_MQ}
-proteome_data <- read_phospho_proteome_proteomics(software = "MQ", 
+proteome_data <- read_phospho_proteome_proteomics(software = "MQ",
                                                   folder_proteome = paste0(tempdir(),"/case_study_proteomics/"),
                                                   folder_phospho = paste0(tempdir(),"/case_study_phospho/"),
-                                                  peptide_proteome_filename = "evidence", 
-                                                  peptide_phospho_filename = "evidence", 
+                                                  peptide_proteome_filename = "evidence",
+                                                  peptide_phospho_filename = "evidence",
                                                   phospho_thr = 0.75)
 ```
 
@@ -69,7 +72,7 @@ generate_peptide_distribution$phospho_plot
 The following graph represents the percentage of phosphosites located on Serine (S), Threonine (T), and Tyrosine (Y).
 
 ```{r preprocess_figure_3, fig.height=3, fig.width=7}
-create_phosphosite_fig <- create_phosphosite_plot(proteome_data = proteome_data, 
+create_phosphosite_fig <- create_phosphosite_plot(proteome_data = proteome_data,
                                                   software = "MQ")
 create_phosphosite_fig$plot
 ```
@@ -86,7 +89,7 @@ imputed_data <- impute_intensity(proteome_data = proteome_data)
 
 **Normalization:**
 
-**Peptide** abundances are normalized with the equalMedianNormalization function from the Bioconductor package [DEqMS](https://www.bioconductor.org/packages/release/bioc/html/DEqMS.html) (equal medians in all samples). 
+**Peptide** abundances are normalized with the equalMedianNormalization function from the Bioconductor package [DEqMS](https://www.bioconductor.org/packages/release/bioc/html/DEqMS.html) (equal medians in all samples).
 
 **Protein** normalized abundances are calculated with the medianSweeping function from the Bioconductor package [DEqMS](https://www.bioconductor.org/packages/release/bioc/html/DEqMS.html).
 
@@ -97,7 +100,7 @@ normalized_data <- normalization_ProTN(proteome_data = imputed_data)
 #### Export normalized data to an Excel file
 
 ```{r exporter, eval=FALSE}
-save_abundance_tables(proteome_data = normalized_data, 
+save_abundance_tables(proteome_data = normalized_data,
                       dirOutput=outputdir)
 ```
 
@@ -152,7 +155,7 @@ prot_pca$plot
 ```
 
 #### PCA based on peptide normalized data
-Principal component analysis (PCA) is performed on normalized protein and peptide abundances. 
+Principal component analysis (PCA) is performed on normalized protein and peptide abundances.
 
 ```{r pca_normalized_2, fig.height=5, fig.width=7}
 # Abundance per Peptide
@@ -195,8 +198,8 @@ differential_results <- differential_analysis(proteome_data = normalized_data,
 #### Number of differentially expressed proteins for each comparison
 
 ```{r differentiated_protein, fig.height=3, fig.width=7}
-ploft_diff_number_ctrl <- generate_differential_barplots(differential_results, 
-                                                         data_type="protein", 
+ploft_diff_number_ctrl <- generate_differential_barplots(differential_results,
+                                                         data_type="protein",
                                                          phospho_ctrl = T)
 ploft_diff_number_ctrl$plot
 ```
@@ -253,7 +256,7 @@ pca_diff_pep$plot
 ```
 
 ## Enrichment analysis with EnrichR
-Annotation enrichment analysis is performed using the web-based application [EnrichR](https://maayanlab.cloud/Enrichr/), against an updated collection of 98 databases covering Transcription, Pathways, Ontologies, Diseases, Drugs, Cell Types, and Experimental Datasets. 
+Annotation enrichment analysis is performed using the web-based application [EnrichR](https://maayanlab.cloud/Enrichr/), against an updated collection of 98 databases covering Transcription, Pathways, Ontologies, Diseases, Drugs, Cell Types, and Experimental Datasets.
 For each comparison, enrichment is calculated for up-regulated proteins (UP), down-regulated proteins (DOWN), and their union (ALL).
 
 ```{r enrichment, eval=FALSE}
@@ -274,7 +277,7 @@ plots_all <- enrichment_figure(enr_df = enrichemnt_results,
                                category = c("all"),
                                save=F)
 
-plots_down <- enrichment_figure(enr_df = enrichemnt_results, category = c("down","up"), 
+plots_down <- enrichment_figure(enr_df = enrichemnt_results, category = c("down","up"),
                                 save=F, color_contrast = c("grey40","grey60"))
 
 plots_terms <- enrichment_figure(enr_df = enrichemnt_results,
@@ -283,15 +286,15 @@ plots_terms <- enrichment_figure(enr_df = enrichemnt_results,
                                  enrich_filter_term = c("cell","pathways"))
 ```
 
-## Protein-protein interaction network analysis of differentially expressed proteins 
+## Protein-protein interaction network analysis of differentially expressed proteins
 Protein-protein interactions (PPIs) are crucial for understanding cell physiology. PPI analysis of differentially expressed proteins is based on the [STRING](https://string-db.org/) database. Communities within the network are identified with the Clauset-Newman-Moore (CNM) algorithm.
 
 ```{r string network, eval=FALSE}
 
 strindb_res <- STRINGdb_network(differential_results = differential_results,
-                                species="Homo sapiens", 
+                                species="Homo sapiens",
                                 dirOutput=outputdir)
-strindb_res  
+strindb_res
 
 ```
 
@@ -301,9 +304,9 @@ In addition, graphical kinase trees are generated using an adapted version of th
 "DISCLAIMER CORAL: The kinome tree plots generated by CORAL use data generated by: "Manning et al., Science, 2002", and are based on a figure generated by "Cell Signaling Technology": "https://www.cellsignal.com/contents/science/protein-kinases-introduction/kinases"
 
 ```{r kinase_tree, eval=FALSE}
-kinase_res <- kinase_tree(proteome_data = normalized_data, 
-                          differential_results = differential_results, 
-                          formule_CORAL = formule_contrast, 
+kinase_res <- kinase_tree(proteome_data = normalized_data,
+                          differential_results = differential_results,
+                          formule_CORAL = formule_contrast,
                           dirOutput = outputdir)
 kinase_res
 ```
