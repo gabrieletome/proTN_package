@@ -20,8 +20,8 @@ jobs:
     strategy:
        matrix:
         config:
-          - {os: ubuntu-latest, r: '4.3.3'}
-          - {os: windows-latest, r: '4.3.3'}
+          - {os: ubuntu-latest, r: '4.5.3'}
+          - {os: windows-latest, r: '4.5.3'}
     
     steps:
       - uses: actions/checkout@v4
@@ -38,7 +38,7 @@ jobs:
         
       - name: install latex
         if: runner.os == 'Linux'
-        run: sudo apt-get install texlive-latex-base libcurl4-openssl-dev librsvg2-dev libfontconfig1-dev libharfbuzz-dev libfribidi-dev
+        run: sudo apt-get install texlive-latex-base libuv1-dev libcurl4-openssl-dev librsvg2-dev libfontconfig1-dev libharfbuzz-dev libfribidi-dev
        
       - name: check R
         if: runner.os == 'Linux'
