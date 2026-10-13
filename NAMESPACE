@@ -71,68 +71,84 @@ import(tidyverse)
 import(utils)
 import(writexl)
 importFrom(GGally,ggnet2)
-importFrom(SummarizedExperiment,SummarizedExperiment)
-importFrom(SummarizedExperiment,assay)
-importFrom(SummarizedExperiment,colData)
-importFrom(SummarizedExperiment,rowData)
+importFrom(SummarizedExperiment,
+  SummarizedExperiment,
+  assay,
+  colData,
+  rowData
+)
 importFrom(curl,has_internet)
 importFrom(doParallel,registerDoParallel)
-importFrom(dplyr,"%>%")
-importFrom(dplyr,arrange)
-importFrom(dplyr,count)
-importFrom(dplyr,filter)
-importFrom(dplyr,group_by)
-importFrom(dplyr,inner_join)
-importFrom(dplyr,left_join)
-importFrom(dplyr,mutate)
-importFrom(dplyr,n)
-importFrom(dplyr,pull)
-importFrom(dplyr,rename)
-importFrom(dplyr,select)
-importFrom(dplyr,summarise)
-importFrom(dplyr,summarize_all)
-importFrom(dplyr,ungroup)
+importFrom(dplyr,
+  "%>%",
+  arrange,
+  count,
+  filter,
+  group_by,
+  inner_join,
+  left_join,
+  mutate,
+  n,
+  pull,
+  rename,
+  select,
+  summarise,
+  summarize_all,
+  ungroup
+)
 importFrom(e1071,svm)
-importFrom(grDevices,cairo_pdf)
-importFrom(grDevices,colorRampPalette)
-importFrom(grDevices,dev.off)
-importFrom(grDevices,pdf)
-importFrom(graphics,barplot)
-importFrom(graphics,par)
-importFrom(graphics,title)
-importFrom(httr,GET)
-importFrom(httr,POST)
-importFrom(httr,config)
-importFrom(httr,http_status)
-importFrom(httr,status_code)
-importFrom(httr,use_proxy)
+importFrom(grDevices,
+  cairo_pdf,
+  colorRampPalette,
+  dev.off,
+  pdf
+)
+importFrom(graphics,
+  barplot,
+  par,
+  title
+)
+importFrom(httr,
+  GET,
+  POST,
+  config,
+  http_status,
+  status_code,
+  use_proxy
+)
 importFrom(igraph,graph_from_adjacency_matrix)
 importFrom(methods,is)
 importFrom(network,network)
 importFrom(plotly,ggplotly)
-importFrom(plyr,ldply)
-importFrom(plyr,round_any)
+importFrom(plyr,
+  ldply,
+  round_any
+)
 importFrom(preprocessCore,normalize.quantiles)
 importFrom(readr,read_tsv)
 importFrom(rjson,fromJSON)
 importFrom(rlang,.data)
 importFrom(ruv,RUVIII)
-importFrom(stats,cmdscale)
-importFrom(stats,cor)
-importFrom(stats,cutree)
-importFrom(stats,dist)
-importFrom(stats,fisher.test)
-importFrom(stats,hclust)
-importFrom(stats,median)
-importFrom(stats,model.matrix)
-importFrom(stats,na.omit)
-importFrom(stats,p.adjust)
-importFrom(stats,pchisq)
-importFrom(stats,prcomp)
-importFrom(stats,predict)
-importFrom(stats,rnorm)
-importFrom(stats,sd)
-importFrom(stats,setNames)
-importFrom(tidyr,pivot_wider)
-importFrom(tidyr,separate_rows)
-importFrom(tidyr,spread)
+importFrom(stats,
+  cmdscale,
+  cor,
+  cutree,
+  dist,
+  fisher.test,
+  hclust,
+  median,
+  model.matrix,
+  na.omit,
+  p.adjust,
+  pchisq,
+  prcomp,
+  predict,
+  rnorm,
+  sd,
+  setNames
+)
+importFrom(tidyr,
+  pivot_wider,
+  separate_rows,
+  spread
+)

@@ -29,3 +29,4 @@ protn_package_tester.Rmd
 inst/extdata/9606.protein.links.v12.0.txt.gz
 inst/extdata/9606.protein.info.v12.0.txt.gz
 inst/extdata/9606.protein.aliases.v12.0.txt.gz
+data/uniprot_reviewed.xlsx.gz

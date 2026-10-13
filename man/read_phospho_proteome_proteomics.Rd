@@ -85,8 +85,8 @@ filtering absent values, and keeping only phospho-modified peptides above a spec
 }
 \examples{
 \dontrun{
-phospho_proteome_data <- read_phospho_proteome_proteomics(software = "MQ", 
-                                                        folder_proteome = "proteome_folder", 
+phospho_proteome_data <- read_phospho_proteome_proteomics(software = "MQ",
+                                                        folder_proteome = "proteome_folder",
                                                         folder_phospho = "phospho_folder")
 }
 
